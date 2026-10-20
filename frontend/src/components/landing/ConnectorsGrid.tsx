@@ -2,45 +2,25 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ArrowRight } from "lucide-react";
+import {
+  AwsLogo,
+  GcpCloudLogo,
+  AzureBlockLogo,
+  KubernetesWheelLogo,
+  OpenAiRosetteLogo,
+  AnthropicAiLogo,
+  VertexAiLogo,
+  BedrockGlyphLogo,
+  NvidiaEyeLogo,
+} from "@/components/ui/BrandLogos";
 
 export function ConnectorsGrid() {
-  const connectors = [
-    {
-      name: "AWS CUR 2.0 & CloudWatch",
-      category: "Cloud Infrastructure",
-      desc: "Hourly S3 billing export ingestion normalized to FOCUS 1.0 schema with resource-level attribution.",
-      badge: "5-min IAM role",
-      linkText: "Configure AWS",
-    },
-    {
-      name: "Google Cloud & GKE",
-      category: "Kubernetes & BigQuery",
-      desc: "Automated BigQuery export streaming with namespace-level container cost attribution via OpenCost.",
-      badge: "Service Account",
-      linkText: "Configure GCP",
-    },
-    {
-      name: "OpenAI Foundation Models",
-      category: "LLM Telemetry",
-      desc: "Token-level telemetry for GPT-4o, o1, and embeddings attributed down to customer tenant and team.",
-      badge: "Admin API Key",
-      linkText: "Configure OpenAI",
-    },
-    {
-      name: "Anthropic Claude Admin",
-      category: "LLM Telemetry",
-      desc: "Organization token telemetry, prompt caching rates, and model cost allocation for Claude 3.5 Sonnet.",
-      badge: "Admin Usage Key",
-      linkText: "Configure Anthropic",
-    },
-  ];
-
   return (
     <section id="connectors" className="w-full bg-[#ffffff] text-[#1d1d1f] py-24 px-4 sm:px-6">
-      <div className="max-w-[1024px] mx-auto">
+      <div className="max-w-[1024px] mx-auto text-center">
         {/* Apple Section Header */}
-        <div className="text-center max-w-2xl mx-auto mb-16">
+        <div className="max-w-2xl mx-auto mb-14">
           <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#1d1d1f] leading-[1.10]">
             Connect your infrastructure.
           </h2>
@@ -49,39 +29,118 @@ export function ConnectorsGrid() {
           </p>
         </div>
 
-        {/* 4-Column Apple Utility Card Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {connectors.map((item, i) => (
-            <div
-              key={i}
-              className="rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-6 flex flex-col justify-between hover:border-[#cccccc] transition-colors"
-            >
-              <div>
-                <span className="text-[12px] font-medium text-[#7a7a7a] block mb-1">
-                  {item.category}
-                </span>
-                <h3 className="text-[17px] font-semibold text-[#1d1d1f] leading-[1.24]">
-                  {item.name}
-                </h3>
-                <p className="mt-3 text-[14px] text-[#7a7a7a] leading-[1.43] tracking-[-0.015em]">
-                  {item.desc}
-                </p>
-              </div>
+        {/* Modular Connector Architecture Cards (Cloud + AI Providers) */}
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-6 max-w-[940px] mx-auto">
+          {/* Card 1: Cloud Infrastructure */}
+          <div
+            className="w-full lg:w-1/2 rounded-[22px] border border-[#e0e0e0] bg-[#fafafc] p-6 sm:p-7 text-left apple-product-shadow"
+            style={{ boxShadow: "rgba(0, 0, 0, 0.08) 0 4px 20px 0" }}
+          >
+            <div className="text-[12px] font-bold tracking-wider text-[#1d1d1f] uppercase mb-4">
+              Cloud Infrastructure
+            </div>
 
-              <div className="mt-8 pt-4 border-t border-[#f0f0f0] flex items-center justify-between">
-                <span className="text-[11px] font-medium text-[#1d1d1f] bg-[#f5f5f7] px-2.5 py-1 rounded-full">
-                  {item.badge}
+            <div className="grid grid-cols-4 gap-3 sm:gap-3.5">
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <AwsLogo className="w-9 h-9 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  AWS
                 </span>
-                <Link
-                  href="/dashboard"
-                  className="text-[14px] font-normal text-[#0066cc] hover:underline flex items-center gap-0.5"
-                >
-                  <span>{item.linkText}</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </Link>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <GcpCloudLogo className="w-7 h-7 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Google Cloud
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <AzureBlockLogo className="w-7 h-7 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Microsoft Azure
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <KubernetesWheelLogo className="w-7 h-7 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Kubernetes
+                </span>
               </div>
             </div>
-          ))}
+
+            <p className="mt-4 text-[12px] text-[#7a7a7a] tracking-tight text-center sm:text-left">
+              AWS CUR 2.0 • Google Cloud • Microsoft Azure • Kubernetes
+            </p>
+          </div>
+
+          {/* Pipeline Arrow Indicator */}
+          <div className="hidden lg:flex items-center justify-center text-[#999999] px-1">
+            <ArrowRight className="w-6 h-6 stroke-[1.75]" />
+          </div>
+
+          {/* Card 2: AI Providers + Compute */}
+          <div
+            className="w-full lg:w-1/2 rounded-[22px] border border-[#e0e0e0] bg-[#fafafc] p-6 sm:p-7 text-left apple-product-shadow"
+            style={{ boxShadow: "rgba(0, 0, 0, 0.08) 0 4px 20px 0" }}
+          >
+            <div className="text-[12px] font-bold tracking-wider text-[#1d1d1f] uppercase mb-4">
+              AI Providers + Compute
+            </div>
+
+            <div className="grid grid-cols-5 gap-2 sm:gap-2.5">
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <OpenAiRosetteLogo className="w-6 h-6 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  OpenAI
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <AnthropicAiLogo className="w-7 h-7 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Anthropic
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <VertexAiLogo className="w-6 h-6 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Vertex AI
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <BedrockGlyphLogo className="w-6 h-6 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  Bedrock
+                </span>
+              </div>
+              <div
+                className="relative h-16 rounded-xl border border-[#e0e0e0] bg-[#ffffff] shadow-sm flex items-center justify-center text-[#1d1d1f] hover:border-[#0066cc] hover:shadow-md transition-all group cursor-pointer"
+              >
+                <NvidiaEyeLogo className="w-6 h-6 group-hover:scale-105 transition-transform" />
+                <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-200 z-30 whitespace-nowrap bg-[#1d1d1f] text-[#ffffff] text-[10px] font-medium px-2 py-0.5 rounded-full shadow-lg border border-white/10">
+                  NVIDIA
+                </span>
+              </div>
+            </div>
+
+            <p className="mt-4 text-[12px] text-[#7a7a7a] tracking-tight text-center sm:text-left">
+              OpenAI • Anthropic • Vertex AI • Bedrock • GPUs
+            </p>
+          </div>
         </div>
 
         {/* Bottom Link */}

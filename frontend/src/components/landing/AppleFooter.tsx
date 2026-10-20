@@ -169,8 +169,9 @@ export function AppleFooter() {
 
         {/* Legal Row */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-[#7a7a7a]">
-          <div>
-            Copyright &copy; {new Date().getFullYear()} Cirra Technologies Inc. All rights reserved.
+          <div className="flex items-center gap-2.5">
+            <img src="/cirra-logo.png" alt="Cirra" className="h-5 w-5 rounded-full object-contain" />
+            <span>Copyright &copy; {new Date().getFullYear()} Cirra Technologies Inc. All rights reserved.</span>
           </div>
           <div className="flex flex-wrap items-center gap-4 text-[#7a7a7a]">
             <span className="hover:text-[#1d1d1f] cursor-pointer">Privacy Policy</span>

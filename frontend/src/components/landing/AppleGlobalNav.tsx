@@ -13,12 +13,14 @@ export function AppleGlobalNav() {
         {/* Apple-style Logo mark */}
         <Link
           href="/"
-          className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity"
+          className="flex items-center gap-2 opacity-90 hover:opacity-100 transition-opacity"
           title="Cirra"
         >
-          <div className="w-4 h-4 rounded bg-[#ffffff] text-[#000000] flex items-center justify-center font-bold text-[10px]">
-            C
-          </div>
+          <img
+            src="/cirra-logo.png"
+            alt="Cirra"
+            className="w-5 h-5 rounded-full object-cover shadow-sm"
+          />
           <span className="font-semibold tracking-tight text-[13px] text-[#ffffff]">Cirra</span>
         </Link>
 

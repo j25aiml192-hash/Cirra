@@ -18,6 +18,11 @@ export default function OnboardingPage() {
     <div className="flex min-h-screen flex-col items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
       <div className="w-full max-w-xl">
         <div className="mb-8 text-center">
+          <img
+            src="/cirra-logo.png"
+            alt="Cirra"
+            className="mx-auto mb-4 h-12 w-12 rounded-xl object-contain shadow-sm"
+          />
           <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
             Connect your first provider
           </h1>

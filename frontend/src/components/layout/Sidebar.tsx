@@ -116,9 +116,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             title="Go to Cirra landing page"
             className="flex items-center gap-2.5 group cursor-pointer hover:opacity-85 transition-all"
           >
-            <div className="w-9 h-9 rounded-[10px] bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
-              <span className="text-white font-bold text-sm tracking-tight">C</span>
-            </div>
+            <img
+              src="/cirra-logo.png"
+              alt="Cirra"
+              className="w-9 h-9 rounded-[10px] object-cover flex-shrink-0 shadow-md group-hover:scale-105 transition-transform"
+            />
             {!collapsed && (
               <div className="flex flex-col">
                 <span className="font-semibold text-slate-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
