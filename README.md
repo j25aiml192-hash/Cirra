@@ -1,6 +1,4 @@
 # Cirra
-
-[![Build](https://github.com/cirra-io/cirra/actions/workflows/ci.yml/badge.svg)](https://github.com/cirra-io/cirra/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9.0.0-orange.svg)](https://pnpm.io/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-green.svg)](https://nodejs.org/)
@@ -10,26 +8,6 @@
 [![Powered by Turborepo](https://img.shields.io/badge/turborepo-powered-rgb(249,115,22).svg)](https://turborepo.com)
 
 > **See it. Guard it. Act on it. Prove it.**
-
----
-
-## Table of Contents
-
-1. [What is Cirra?](#3-what-is-cirra)
-2. [System Architecture Diagram](#4-system-architecture-diagram)
-3. [Monorepo Structure](#5-monorepo-structure)
-4. [Key Design Principles](#6-key-design-principles)
-5. [MVP Roadmap](#7-mvp-roadmap)
-6. [Prerequisites](#8-prerequisites)
-7. [Local Development Setup](#9-local-development-setup)
-8. [API Documentation](#10-api-documentation)
-9. [Data Model](#11-data-model)
-10. [Sample Dataset](#12-sample-dataset)
-11. [Testing](#13-testing)
-12. [Deployment](#14-deployment)
-13. [Environment Variables Reference](#15-environment-variables-reference)
-14. [Contributing](#16-contributing)
-15. [License](#17-license)
 
 ---
 
