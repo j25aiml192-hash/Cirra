@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand Palette - Indigo / Violet Scale */
+    --color-brand-50: #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    /* Light Theme Surfaces & Text */
+    --color-surface: #ffffff;
+    --color-surface-raised: #f8fafc;
+    --color-border: #e2e8f0;
+    --color-text-primary: #0f172a;
+    --color-text-muted: #64748b;
+
+    /* Semantic */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+    --color-info: #06b6d4;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Dark Theme Surfaces & Text */
+    --color-surface: #090d16;
+    --color-surface-raised: #111827;
+    --color-border: #1f293d;
+    --color-text-primary: #f8fafc;
+    --color-text-muted: #94a3b8;
+
+    /* Brand tweaks for dark mode contrast */
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+  }
+
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+}

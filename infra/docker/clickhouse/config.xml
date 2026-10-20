@@ -1,0 +1,35 @@
+<clickhouse>
+    <logger>
+        <level>information</level>
+        <console>1</console>
+    </logger>
+
+    <!-- Enable HTTP and Native interfaces -->
+    <http_port>8123</http_port>
+    <tcp_port>9000</tcp_port>
+
+    <!-- Listen on all network interfaces in docker container -->
+    <listen_host>::</listen_host>
+
+    <users>
+        <default>
+            <!-- No password for dev container -->
+            <password></password>
+            <networks>
+                <ip>::/0</ip>
+            </networks>
+            <profile>default</profile>
+            <quota>default</quota>
+            <access_management>1</access_management>
+        </default>
+    </users>
+
+    <profiles>
+        <default>
+            <readonly>0</readonly>
+        </default>
+        <readonly_user>
+            <readonly>1</readonly>
+        </readonly_user>
+    </profiles>
+</clickhouse>

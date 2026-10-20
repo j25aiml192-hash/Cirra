@@ -1,0 +1,21 @@
+# Welcome to Cirra
+
+Cirra is a unified B2B SaaS cloud and AI cost control plane. It aligns multi-cloud billing (AWS, GCP, Azure) and LLM inference telemetry (OpenAI, Anthropic, Bedrock) into the **FinOps Open Cost and Usage Specification (FOCUS 1.0)**.
+
+## Core Capabilities
+
+- **FOCUS Normalization Engine**: Ingest raw billing data and convert it into unified `CostFact` and `AiUsageFact` datasets.
+- **Sentinel Anomaly Detector**: Unsupervised statistical time-series anomaly detection using ARIMA baselines and Median Absolute Deviation (MAD).
+- **Ask Cirra**: AI-assisted natural language to SQL translation strictly querying ClickHouse read-only replicas without hallucinations.
+- **Action Engine**: Temporal-powered automated remediation workflows with human-in-the-loop approvals.
+
+## Architecture
+
+```
+Cloud / AI Providers ---> Ingest Connectors ---> ClickHouse (FOCUS)
+                                                    ^
+                                                    |
+PostgreSQL (Metadata & RLS) <---> FastAPI Core <----+---> Sentinel & Investigator
+                                      |
+                               Next.js App / Expo Mobile
+```

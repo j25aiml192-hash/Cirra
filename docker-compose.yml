@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cirra-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cirra
+      POSTGRES_PASSWORD: cirrapassword
+      POSTGRES_DB: cirra
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infra/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cirra -d cirra"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: cirra-clickhouse
+    restart: unless-stopped
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./infra/docker/clickhouse/config.xml:/etc/clickhouse-server/config.d/dev-config.xml:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8123/ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cirra-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  clickhouse_data:
+    driver: local
+  redis_data:
+    driver: local

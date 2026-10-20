@@ -1,0 +1,65 @@
+version: "1.0"
+semantic_models:
+  - name: cost_facts
+    description: "Normalized multi-cloud billing line items adhering to FinOps FOCUS 1.0 specification"
+    dimensions:
+      - name: tenant_id
+        type: string
+        description: "Mandatory tenant isolation UUID"
+      - name: provider
+        type: string
+        description: "Cloud or AI provider: aws, gcp, azure, openai, anthropic"
+      - name: service_name
+        type: string
+        description: "Canonical service name, e.g., AmazonEC2, Google Cloud Kubernetes"
+      - name: resource_id
+        type: string
+        description: "Unique provider resource identifier or ARN"
+      - name: sku_id
+        type: string
+        description: "Standard SKU or instance type"
+      - name: allocated_team
+        type: string
+        description: "Team attributed by allocation rule engine"
+      - name: allocated_customer
+        type: string
+        description: "Customer or tenant attributed for COGS unit economics"
+    measures:
+      - name: billed_cost
+        agg: sum
+        description: "Total invoice billed cost in USD"
+      - name: effective_cost
+        agg: sum
+        description: "Amortized cost after commitment discounts (RI/SP/CUD)"
+
+  - name: ai_usage_facts
+    description: "Granular inference telemetry from OpenAI, Anthropic, Bedrock, and self-hosted models"
+    dimensions:
+      - name: tenant_id
+        type: string
+      - name: model
+        type: string
+        description: "Model identifier e.g. gpt-4o, claude-3-5-sonnet"
+      - name: api_key_id
+        type: string
+      - name: team_tag
+        type: string
+      - name: customer_tag
+        type: string
+      - name: feature_tag
+        type: string
+    measures:
+      - name: input_tokens
+        agg: sum
+      - name: output_tokens
+        agg: sum
+      - name: cost_usd
+        agg: sum
+
+metrics:
+  - name: ai_cost_by_key
+    sql: "SELECT api_key_id, model, sum(cost_usd) AS cost FROM ai_usage_facts WHERE tenant_id = %(tenant_id)s GROUP BY api_key_id, model"
+  - name: cloud_cost_by_service
+    sql: "SELECT service_name, provider, sum(billed_cost) AS cost FROM cost_facts WHERE tenant_id = %(tenant_id)s GROUP BY service_name, provider"
+  - name: daily_trend
+    sql: "SELECT toStartOfDay(charge_period_start) AS day, sum(effective_cost) AS cost FROM cost_facts WHERE tenant_id = %(tenant_id)s GROUP BY day ORDER BY day ASC"

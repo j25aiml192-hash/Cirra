@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Cirra",
+    "slug": "cirra",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "cirra",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#090d16"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cirra.controlplane"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#090d16"
+      },
+      "package": "com.cirra.controlplane"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-local-authentication"
+    ]
+  }
+}

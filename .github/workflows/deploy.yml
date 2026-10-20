@@ -1,0 +1,59 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy-web:
+    name: Deploy Web App to Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+      - name: Deploy Project Artifacts to Vercel Production
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        working-directory: apps/web
+
+  deploy-services:
+    name: Deploy Backend Services to Railway
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [api, ingest, sentinel, investigator]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: npm install -g @railway/cli
+
+      - name: Deploy Service to Railway
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          railway up --service cirra-${{ matrix.service }} --detach
+        working-directory: services/${{ matrix.service }}

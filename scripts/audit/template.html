@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cirra Infrastructure & AI Cost Audit Report</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      background: #f8fafc;
+      margin: 0;
+      padding: 40px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 36px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 9999px;
+      background: #e0e7ff;
+      color: #4338ca;
+      text-transform: uppercase;
+    }
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .metric-card {
+      background: #f1f5f9;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .metric-card .title {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .metric-card .value {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1e1b4b;
+      margin-top: 4px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    th {
+      background: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+    }
+    .disclaimer {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 28px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 16px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1 style="margin: 0; font-size: 24px; color: #1e1b4b;">Cirra Audit Report</h1>
+        <p style="margin: 4px 0 0 0; color: #64748b; font-size: 13px;">Generated on {{ audit_date }}</p>
+      </div>
+      <div class="badge">FOCUS 1.0 Aligned</div>
+    </div>
+
+    <!-- High Level Metrics -->
+    <div class="metric-grid">
+      <div class="metric-card">
+        <div class="title">Untagged Cloud Spend</div>
+        <div class="value">{{ untagged_spend_pct }}%</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Total Audited AI Spend</div>
+        <div class="value">${{ "%.2f"|format(total_ai_spend) }}</div>
+      </div>
+      <div class="metric-card">
+        <div class="title">Estimated Savings Range</div>
+        <div class="value" style="color: #16a34a;">${{ "%.0f"|format(est_savings_min) }} - ${{ "%.0f"|format(est_savings_max) }}/mo*</div>
+      </div>
+    </div>
+
+    <!-- Top 10 Waste Items -->
+    <h3 style="color: #0f172a; margin-top: 24px;">Top 10 Infrastructure Waste Items</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Resource / Service</th>
+          <th>Provider</th>
+          <th>Detected Issue</th>
+          <th>Current Cost</th>
+          <th>Est. Savings</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in top_waste_items %}
+        <tr>
+          <td><strong>{{ item.resource }}</strong></td>
+          <td>{{ item.provider|upper }}</td>
+          <td>{{ item.issue }}</td>
+          <td>${{ "%.2f"|format(item.cost) }}</td>
+          <td style="color: #16a34a; font-weight: 600;">${{ "%.2f"|format(item.savings) }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- AI Spend by Key -->
+    <h3 style="color: #0f172a; margin-top: 32px;">AI Inference Spend by API Key</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>API Key ID</th>
+          <th>Primary Model</th>
+          <th>Total Tokens</th>
+          <th>Billed Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in ai_spend_by_key %}
+        <tr>
+          <td><code>{{ row.api_key_id }}</code></td>
+          <td>{{ row.model }}</td>
+          <td>{{ row.tokens }}</td>
+          <td><strong>${{ "%.2f"|format(row.cost) }}</strong></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="disclaimer">
+      * All estimated savings ranges are labeled <strong>illustrative</strong> and based on heuristics. Cirra never applies destructive remediation without human approval.
+    </div>
+  </div>
+</body>
+</html>
