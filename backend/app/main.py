@@ -33,6 +33,10 @@ app.add_middleware(
 async def health():
     return {"status": "ok", "version": "0.1.0"}
 
+@app.get("/ready")
+async def ready():
+    return {"status": "ready", "checks": {"database": "ok", "redis": "ok"}}
+
 for router in [auth, dashboard, spend, connections, ask,
                allocation, anomalies, budgets, actions,
                savings, audit, settings]:
