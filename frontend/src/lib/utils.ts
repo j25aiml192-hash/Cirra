@@ -14,6 +14,13 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+export function formatNumber(val: number): string {
+  if (isNaN(val) || val === null || val === undefined) return "0";
+  return Math.round(val)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 export function formatTokens(tokens: number): string {
   if (tokens >= 1_000_000_000) {
     return `${(tokens / 1_000_000_000).toFixed(1)}B`;
@@ -24,5 +31,6 @@ export function formatTokens(tokens: number): string {
   if (tokens >= 1_000) {
     return `${(tokens / 1_000).toFixed(1)}K`;
   }
-  return tokens.toLocaleString();
+  return formatNumber(tokens);
 }
+

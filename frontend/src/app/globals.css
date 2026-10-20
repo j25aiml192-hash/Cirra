@@ -2,54 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
 :root {
-  --bg-page:        #F8F7F4;
-  --bg-surface:     #FFFFFF;
-  --brand:          #4F46E5;
-  --brand-light:    #EEF2FF;
-  --brand-gradient: linear-gradient(135deg, #4338CA, #6D28D9);
+  --bg-page:        #f5f5f7;
+  --bg-surface:     #ffffff;
+  --brand:          #0066cc;
+  --brand-focus:    #0071e3;
+  --brand-on-dark:  #2997ff;
 
-  --text-primary:   #0F172A;
-  --text-secondary: #475569;
-  --text-muted:     #94A3B8;
+  --ink:            #1d1d1f;
+  --ink-muted-80:   #333333;
+  --ink-muted-48:   #7a7a7a;
+  --body-muted:     #cccccc;
 
-  --pastel-blue-bg:   #EFF6FF;
-  --pastel-blue-acc:  #3B82F6;
-  --pastel-green-bg:  #F0FDF4;
-  --pastel-green-acc: #10B981;
-  --pastel-red-bg:    #FFF1F2;
-  --pastel-red-acc:   #EF4444;
-  --pastel-amber-bg:  #FFFBEB;
-  --pastel-amber-acc: #F59E0B;
-  --pastel-violet-bg: #F5F3FF;
-  --pastel-violet-acc:#7C3AED;
+  --surface-tile-1: #272729;
+  --surface-tile-2: #2a2a2c;
+  --surface-tile-3: #252527;
+  --surface-black:  #000000;
+  --canvas-parchment: #f5f5f7;
 
-  --radius-card:   16px;
-  --radius-btn:    10px;
-  --radius-input:  10px;
-  --shadow-card:   0 2px 12px rgba(0,0,0,0.06);
-  --shadow-glass:  0 8px 32px rgba(0,0,0,0.08);
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  --hairline:       #e0e0e0;
 }
 
 body {
-  background: var(--bg-page);
-  font-family: 'Inter', sans-serif;
-  color: var(--text-primary);
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
+  color: #1d1d1f;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apple Single System Drop Shadow (reserved for product imagery) */
+.apple-product-shadow {
+  box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+}
+
+/* Apple Tight Letter Spacing */
+.tracking-apple-tight {
+  letter-spacing: -0.022em;
+}
+
+.tracking-apple-body {
+  letter-spacing: -0.015em;
+}
+
+/* Apple Button Active Scale */
+.apple-btn-active:active {
+  transform: scale(0.95);
+}
+
+/* Subtle frosted backdrop filter */
+.apple-frosted {
+  background: rgba(245, 245, 247, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+.apple-frosted-dark {
+  background: rgba(29, 29, 31, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
 }

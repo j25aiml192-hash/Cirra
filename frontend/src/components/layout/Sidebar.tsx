@@ -111,17 +111,23 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             collapsed ? "justify-center" : "justify-between px-2"
           )}
         >
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-[10px] bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20">
+          <Link
+            href="/"
+            title="Go to Cirra landing page"
+            className="flex items-center gap-2.5 group cursor-pointer hover:opacity-85 transition-all"
+          >
+            <div className="w-9 h-9 rounded-[10px] bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
               <span className="text-white font-bold text-sm tracking-tight">C</span>
             </div>
             {!collapsed && (
               <div className="flex flex-col">
-                <span className="font-semibold text-slate-900 text-sm leading-tight">Cirra</span>
+                <span className="font-semibold text-slate-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
+                  Cirra
+                </span>
                 <span className="text-[10px] text-slate-400 font-medium">Cost Control</span>
               </div>
             )}
-          </div>
+          </Link>
 
           <button
             type="button"
