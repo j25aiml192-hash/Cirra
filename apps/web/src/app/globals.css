@@ -1,8 +1,0 @@
-@import "@cirra/ui/styles.css";
-
-/* Inter font and smoothing */
-body {
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-}

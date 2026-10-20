@@ -1,56 +1,11 @@
-# Dependencies
 node_modules/
-.pnpm-store/
-
-# Next.js & Turborepo
 .next/
-dist/
-out/
-.turbo/
-*.tsbuildinfo
-
-# Environment files
 .env
-.env.*
-!.env.example
-
-# Python
+.env.local
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-build/
-develop-eggs/
-eggs/
-.installed.cfg
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Testing & Coverage
+*.pyc
 .pytest_cache/
-coverage/
-htmlcov/
-.coverage
-.coverage.*
-
-# IDE & OS
+dist/
+.turbo/
 .DS_Store
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# Mobile
-.expo/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-*.orig.*
-web-build/
+*.log
