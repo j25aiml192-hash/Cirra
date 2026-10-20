@@ -1,13 +1,8 @@
-import type { Provider, AllocationMethod } from "./focus";
+import type { AllocationMethod, Provider } from "./focus";
 
 export type UserRole = "owner" | "admin" | "viewer";
 
-export type ConnectionStatus =
-  | "connected"
-  | "disconnected"
-  | "pending"
-  | "error"
-  | "syncing";
+export type ConnectionStatus = "connected" | "disconnected" | "pending" | "error" | "syncing";
 
 export interface DashboardSummary {
   tenantId: string;
@@ -162,7 +157,14 @@ export interface Anomaly {
   rootCauseCandidate?: string | null;
 }
 
-export type ActionStatus = "proposed" | "pending_approval" | "approved" | "executing" | "completed" | "failed" | "rolled_back";
+export type ActionStatus =
+  | "proposed"
+  | "pending_approval"
+  | "approved"
+  | "executing"
+  | "completed"
+  | "failed"
+  | "rolled_back";
 
 export interface Action {
   id: string;

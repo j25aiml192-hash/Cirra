@@ -1,27 +1,27 @@
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Badge,
-  Button,
-} from "@cirra/ui";
-import { formatCurrency, formatPct } from "@cirra/utils";
 import type { DashboardSummary } from "@cirra/types";
 import {
-  ArrowUpRight,
-  ArrowDownRight,
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@cirra/ui";
+import { formatCurrency, formatPct } from "@cirra/utils";
+import {
   AlertTriangle,
-  Sparkles,
+  ArrowDownRight,
+  ArrowUpRight,
   Cloud,
   Cpu,
-  TrendingUp,
   ShieldAlert,
+  Sparkles,
+  TrendingUp,
 } from "lucide-react";
+import * as React from "react";
 
 const mockSummary: DashboardSummary = {
   tenantId: "demo-tenant-1",
@@ -68,7 +68,9 @@ export default function DashboardPage() {
             variant="outline"
             size="sm"
             className="gap-2 border-slate-300 dark:border-slate-800"
-            onClick={() => (window.location.href = "/ask")}
+            onClick={() => {
+              window.location.href = "/ask";
+            }}
           >
             <Sparkles className="h-4 w-4 text-indigo-500" />
             Ask Cirra
@@ -113,9 +115,7 @@ export default function DashboardPage() {
                 {formatCurrency(mockSummary.cloudSpendMonthToDate)}
               </span>
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              77.3% of total monthly infrastructure
-            </p>
+            <p className="mt-1 text-xs text-slate-400">77.3% of total monthly infrastructure</p>
           </CardContent>
         </Card>
 
@@ -134,9 +134,7 @@ export default function DashboardPage() {
                 +28.4%
               </Badge>
             </div>
-            <p className="mt-1 text-xs text-slate-400">
-              Across OpenAI, Anthropic, Bedrock
-            </p>
+            <p className="mt-1 text-xs text-slate-400">Across OpenAI, Anthropic, Bedrock</p>
           </CardContent>
         </Card>
 
@@ -167,9 +165,7 @@ export default function DashboardPage() {
         <Card className="lg:col-span-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <CardHeader>
             <CardTitle className="text-base">Top Spend Drivers by Service</CardTitle>
-            <CardDescription>
-              Ranked by billed cost according to FOCUS normalizer
-            </CardDescription>
+            <CardDescription>Ranked by billed cost according to FOCUS normalizer</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {mockSummary.topServices.map((svc) => (
@@ -207,9 +203,7 @@ export default function DashboardPage() {
                 ARIMA + MAD
               </Badge>
             </div>
-            <CardDescription>
-              Unsupervised statistical anomaly engine
-            </CardDescription>
+            <CardDescription>Unsupervised statistical anomaly engine</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="p-3 rounded-lg border border-red-200 dark:border-red-950/60 bg-red-50/50 dark:bg-red-950/20 space-y-1">
@@ -240,7 +234,9 @@ export default function DashboardPage() {
               variant="outline"
               size="sm"
               className="w-full text-xs mt-2"
-              onClick={() => (window.location.href = "/spend/cloud")}
+              onClick={() => {
+                window.location.href = "/spend/cloud";
+              }}
             >
               View All Detections
             </Button>

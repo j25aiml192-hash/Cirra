@@ -1,24 +1,24 @@
 "use client";
 
-import * as React from "react";
+import type { AllocationCoverage, AllocationRule } from "@cirra/types";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@cirra/ui";
 import { formatCurrency, formatPct } from "@cirra/utils";
-import type { AllocationRule, AllocationCoverage } from "@cirra/types";
-import { PieChart, Plus, Layers, ShieldCheck } from "lucide-react";
+import { Layers, PieChart, Plus, ShieldCheck } from "lucide-react";
+import * as React from "react";
 
 const mockCoverage: AllocationCoverage = {
   tenantId: "demo-tenant-1",
@@ -117,9 +117,7 @@ export default function AllocationPage() {
             <div className="text-2xl font-bold text-slate-900 dark:text-white mt-1">
               {formatCurrency(mockCoverage.unallocatedSpend)}
             </div>
-            <p className="text-xs text-slate-400 mt-2">
-              Shared networks, untagged S3 buckets
-            </p>
+            <p className="text-xs text-slate-400 mt-2">Shared networks, untagged S3 buckets</p>
           </CardContent>
         </Card>
       </div>

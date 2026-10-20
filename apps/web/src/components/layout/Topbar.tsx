@@ -1,8 +1,8 @@
 "use client";
 
+import { Avatar, Badge, Button } from "@cirra/ui";
+import { Bell, Building2, LogOut, ShieldCheck } from "lucide-react";
 import * as React from "react";
-import { LogOut, Bell, Building2, ShieldCheck } from "lucide-react";
-import { Avatar, Button, Badge } from "@cirra/ui";
 
 export function Topbar() {
   const tenantName = "Acme Corp";

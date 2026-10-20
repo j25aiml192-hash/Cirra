@@ -7,20 +7,14 @@ export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   fallback?: string;
 }
 
-export function Avatar({
-  className,
-  src,
-  alt = "",
-  fallback = "CR",
-  ...props
-}: AvatarProps) {
+export function Avatar({ className, src, alt = "", fallback = "CR", ...props }: AvatarProps) {
   const [hasError, setHasError] = React.useState(!src);
 
   return (
     <div
       className={cn(
         "relative flex h-9 w-9 shrink-0 overflow-hidden rounded-full border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 items-center justify-center font-medium text-xs text-slate-700 dark:text-slate-300",
-        className
+        className,
       )}
       {...props}
     >

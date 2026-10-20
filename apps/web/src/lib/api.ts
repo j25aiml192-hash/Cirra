@@ -4,7 +4,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export class ApiClientError extends Error {
   public status: number;
-  public details?: Record<string, unknown>;
+  public details?: Record<string, unknown> | undefined;
 
   constructor(status: number, errorData: ApiError) {
     super(errorData.message);
@@ -15,14 +15,11 @@ export class ApiClientError extends Error {
 }
 
 export interface RequestOptions extends RequestInit {
-  token?: string;
-  params?: Record<string, string | number | boolean | undefined>;
+  token?: string | undefined;
+  params?: Record<string, string | number | boolean | undefined> | undefined;
 }
 
-export async function apiFetch<T>(
-  path: string,
-  options: RequestOptions = {}
-): Promise<T> {
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { token, params, headers, ...restOptions } = options;
 
   let url = `${API_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;

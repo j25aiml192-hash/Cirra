@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 interface MobileAlert {
   id: string;
@@ -42,9 +42,7 @@ export default function MobileAlertsScreen() {
               <Text
                 style={[
                   styles.severityTag,
-                  item.severity === "critical"
-                    ? styles.criticalTag
-                    : styles.warningTag,
+                  item.severity === "critical" ? styles.criticalTag : styles.warningTag,
                 ]}
               >
                 {item.severity.toUpperCase()}

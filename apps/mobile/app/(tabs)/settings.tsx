@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from "react-native";
+import { StyleSheet, Switch, Text, TouchableOpacity, View } from "react-native";
 
 export default function MobileSettingsScreen() {
   const [biometricsEnabled, setBiometricsEnabled] = React.useState(true);

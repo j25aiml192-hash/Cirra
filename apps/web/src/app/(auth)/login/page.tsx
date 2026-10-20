@@ -1,9 +1,17 @@
 "use client";
 
-import * as React from "react";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@cirra/ui";
+import { ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@cirra/ui";
-import { Sparkles, ArrowRight } from "lucide-react";
+import * as React from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = React.useState("");
@@ -21,9 +29,7 @@ export default function LoginPage() {
           <div className="inline-flex h-12 w-12 rounded-2xl bg-indigo-600 items-center justify-center text-white font-bold text-2xl shadow-lg shadow-indigo-500/30">
             C
           </div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Welcome back to Cirra
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Welcome back to Cirra</h1>
           <p className="text-sm text-slate-400">
             Sign in to access your cloud & AI cost control plane
           </p>
@@ -67,7 +73,10 @@ export default function LoginPage() {
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 gap-2 font-semibold">
+              <Button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 gap-2 font-semibold"
+              >
                 Sign In
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -77,7 +86,9 @@ export default function LoginPage() {
                   <div className="w-full border-t border-slate-800" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-slate-900 px-2 text-slate-500 font-medium">Or continue with</span>
+                  <span className="bg-slate-900 px-2 text-slate-500 font-medium">
+                    Or continue with
+                  </span>
                 </div>
               </div>
 

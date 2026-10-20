@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function MobileHomeScreen() {
   return (
@@ -11,9 +11,7 @@ export default function MobileHomeScreen() {
         <View style={styles.badge}>
           <Text style={styles.badgeText}>+14.2% vs last month</Text>
         </View>
-        <Text style={styles.subtext}>
-          Projected $61,400 at month-end based on active burn rate
-        </Text>
+        <Text style={styles.subtext}>Projected $61,400 at month-end based on active burn rate</Text>
       </View>
 
       {/* Cloud vs AI Split */}

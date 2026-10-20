@@ -1,23 +1,23 @@
 "use client";
 
-import * as React from "react";
+import type { Connection } from "@cirra/types";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@cirra/ui";
-import { PlugZap, Plus, CheckCircle2, RefreshCw, AlertCircle } from "lucide-react";
-import type { Connection } from "@cirra/types";
+import { AlertCircle, CheckCircle2, PlugZap, Plus, RefreshCw } from "lucide-react";
+import * as React from "react";
 
 const mockConnections: Connection[] = [
   {

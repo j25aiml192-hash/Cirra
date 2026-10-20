@@ -1,9 +1,17 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { Button, Input, Card, CardHeader, CardTitle, CardDescription, CardContent } from "@cirra/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+} from "@cirra/ui";
 import { ArrowRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import * as React from "react";
 
 export default function SignupPage() {
   const [orgName, setOrgName] = React.useState("");
@@ -80,7 +88,10 @@ export default function SignupPage() {
                 <span>Multi-tenant RLS isolation + AES-256 encrypted credentials</span>
               </div>
 
-              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-500 gap-2 font-semibold">
+              <Button
+                type="submit"
+                className="w-full bg-indigo-600 hover:bg-indigo-500 gap-2 font-semibold"
+              >
                 Continue to Onboarding
                 <ArrowRight className="h-4 w-4" />
               </Button>

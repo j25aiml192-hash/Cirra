@@ -1,23 +1,23 @@
 "use client";
 
-import * as React from "react";
+import type { AskResponse } from "@cirra/types";
 import {
+  Badge,
+  Button,
   Card,
+  CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  Button,
   Input,
-  Badge,
 } from "@cirra/ui";
-import { Sparkles, Send, Terminal, ShieldCheck, Database } from "lucide-react";
-import type { AskResponse } from "@cirra/types";
+import { Database, Send, ShieldCheck, Sparkles, Terminal } from "lucide-react";
+import * as React from "react";
 
 export default function AskCirraPage() {
   const [question, setQuestion] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
-  const [result, setResult] = React.useState<AskResponse | null>({
+  const [result, _setResult] = React.useState<AskResponse | null>({
     answer:
       "Across your organization, OpenAI GPT-4o usage accounted for $6,850.00 this month, representing a 28% increase over the previous period. The highest spend was driven by key `key_prod_copilot_912` used by the Search & Recs team.",
     sql: "SELECT model, sum(cost_usd) as total_cost, sum(input_tokens + output_tokens) as total_tokens FROM ai_usage_facts WHERE tenant_id = 'demo-tenant-1' AND ts >= now() - INTERVAL 30 DAY GROUP BY model ORDER BY total_cost DESC LIMIT 10",

@@ -1,24 +1,24 @@
 "use client";
 
-import * as React from "react";
+import type { AiSpendRow } from "@cirra/types";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@cirra/ui";
 import { formatCurrency, formatTokens } from "@cirra/utils";
-import type { AiSpendRow } from "@cirra/types";
-import { Cpu, KeyRound, Sparkles, AlertCircle } from "lucide-react";
+import { AlertCircle, Cpu, KeyRound, Sparkles } from "lucide-react";
+import * as React from "react";
 
 const mockAiRows: AiSpendRow[] = [
   {
@@ -97,7 +97,10 @@ export default function AiSpendPage() {
                 Real-time usage facts mapped to tenant API keys and features
               </CardDescription>
             </div>
-            <Badge variant="outline" className="text-violet-600 dark:text-violet-400 border-violet-500/30">
+            <Badge
+              variant="outline"
+              className="text-violet-600 dark:text-violet-400 border-violet-500/30"
+            >
               Live Ingestion
             </Badge>
           </div>
@@ -118,25 +121,19 @@ export default function AiSpendPage() {
               {mockAiRows.map((row) => (
                 <TableRow key={`${row.provider}-${row.model}-${row.apiKeyId}`}>
                   <TableCell>
-                    <div className="font-semibold text-slate-900 dark:text-white">
-                      {row.model}
-                    </div>
+                    <div className="font-semibold text-slate-900 dark:text-white">{row.model}</div>
                     <Badge variant="outline" className="text-[10px] uppercase font-mono mt-0.5">
                       {row.provider}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <span className="font-mono text-xs text-slate-500">
-                      {row.apiKeyId}
-                    </span>
+                    <span className="font-mono text-xs text-slate-500">{row.apiKeyId}</span>
                   </TableCell>
                   <TableCell>
                     <div className="text-xs font-medium text-slate-800 dark:text-slate-200">
                       {row.teamTag}
                     </div>
-                    <div className="text-[11px] text-slate-400">
-                      {row.featureTag}
-                    </div>
+                    <div className="text-[11px] text-slate-400">{row.featureTag}</div>
                   </TableCell>
                   <TableCell className="font-mono text-xs">
                     {formatTokens(row.inputTokens)}

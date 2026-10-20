@@ -1,27 +1,32 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { cn } from "@cirra/ui";
 import {
-  LayoutDashboard,
+  ChevronDown,
   Cloud,
   Cpu,
+  Layers,
+  LayoutDashboard,
   MessageSquareCode,
   PieChart,
+  PlugZap,
   Settings,
   Users,
-  PlugZap,
-  ChevronDown,
-  Layers,
+  type LucideIcon,
 } from "lucide-react";
-import { cn } from "@cirra/ui";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import type * as React from "react";
 
 interface NavItem {
   title: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  children?: Array<{ title: string; href: string; icon: React.ComponentType<{ className?: string }> }>;
+  icon: LucideIcon;
+  children?: Array<{
+    title: string;
+    href: string;
+    icon: LucideIcon;
+  }> | undefined;
 }
 
 const navItems: NavItem[] = [
@@ -100,8 +105,7 @@ export function Sidebar() {
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {navItems.map((item) => {
           const isActive =
-            pathname === item.href ||
-            (item.children && item.children.some((child) => pathname === child.href));
+            pathname === item.href || item.children?.some((child) => pathname === child.href);
 
           if (item.children) {
             return (
@@ -122,7 +126,7 @@ export function Sidebar() {
                           "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150",
                           isChildActive
                             ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold"
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200",
                         )}
                       >
                         <ChildIcon
@@ -130,7 +134,7 @@ export function Sidebar() {
                             "h-4 w-4",
                             isChildActive
                               ? "text-indigo-600 dark:text-indigo-400"
-                              : "text-slate-400 group-hover:text-slate-600"
+                              : "text-slate-400 group-hover:text-slate-600",
                           )}
                         />
                         <span>{child.title}</span>
@@ -151,15 +155,13 @@ export function Sidebar() {
                 "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
                 isActive
                   ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 font-semibold"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200"
+                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200",
               )}
             >
               <ItemIcon
                 className={cn(
                   "h-4 w-4",
-                  isActive
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-slate-400"
+                  isActive ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400",
                 )}
               />
               <span>{item.title}</span>

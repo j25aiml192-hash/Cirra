@@ -1,4 +1,4 @@
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "../lib/utils";
 
 export interface SpinnerProps extends React.SVGAttributes<SVGSVGElement> {
@@ -20,14 +20,7 @@ export function Spinner({ className, size = "md", ...props }: SpinnerProps) {
       viewBox="0 0 24 24"
       {...props}
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"

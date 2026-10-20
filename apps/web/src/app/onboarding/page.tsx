@@ -1,18 +1,18 @@
 "use client";
 
-import * as React from "react";
 import {
+  Badge,
+  Button,
   Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  Button,
   Input,
-  Badge,
 } from "@cirra/ui";
-import { Check, ArrowRight, ShieldCheck, Cloud, Cpu } from "lucide-react";
+import { ArrowRight, Check, Cloud, Cpu, ShieldCheck } from "lucide-react";
+import * as React from "react";
 
 export default function OnboardingPage() {
   const [step, setStep] = React.useState(1);
@@ -31,16 +31,12 @@ export default function OnboardingPage() {
             <div key={s.num} className="flex items-center gap-2">
               <div
                 className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
-                  step >= s.num
-                    ? "bg-indigo-600 text-white"
-                    : "bg-slate-800 text-slate-500"
+                  step >= s.num ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-500"
                 }`}
               >
                 {step > s.num ? <Check className="h-4 w-4" /> : s.num}
               </div>
-              <span className="text-xs font-medium text-slate-300 hidden sm:inline">
-                {s.label}
-              </span>
+              <span className="text-xs font-medium text-slate-300 hidden sm:inline">{s.label}</span>
             </div>
           ))}
         </div>
@@ -111,18 +107,14 @@ export default function OnboardingPage() {
               {selectedProvider === "aws" ? (
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-slate-300">
-                      Target Role ARN
-                    </label>
+                    <label className="text-xs font-medium text-slate-300">Target Role ARN</label>
                     <Input
                       placeholder="arn:aws:iam::123456789012:role/CirraCostDelegationRole"
                       className="bg-slate-800 border-slate-700 text-white font-mono text-xs"
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-300">
-                      External ID
-                    </label>
+                    <label className="text-xs font-medium text-slate-300">External ID</label>
                     <Input
                       readOnly
                       value="cirra-tenant-external-id-prod"

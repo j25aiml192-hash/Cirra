@@ -1,24 +1,24 @@
 "use client";
 
-import * as React from "react";
+import type { UserRole } from "@cirra/types";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
+  Avatar,
   Badge,
   Button,
-  Avatar,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@cirra/ui";
-import { Users, UserPlus, Shield } from "lucide-react";
-import type { UserRole } from "@cirra/types";
+import { Shield, UserPlus, Users } from "lucide-react";
+import * as React from "react";
 
 interface Member {
   id: string;
@@ -64,7 +64,8 @@ export default function TeamSettingsPage() {
             </h1>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Manage organization members, assign roles (Owner, Admin, Viewer), and enforce tenant isolation
+            Manage organization members, assign roles (Owner, Admin, Viewer), and enforce tenant
+            isolation
           </p>
         </div>
         <Button size="sm" className="bg-indigo-600 hover:bg-indigo-500 gap-1.5">
@@ -109,8 +110,8 @@ export default function TeamSettingsPage() {
                         member.role === "owner"
                           ? "default"
                           : member.role === "admin"
-                          ? "secondary"
-                          : "outline"
+                            ? "secondary"
+                            : "outline"
                       }
                       className="capitalize"
                     >
@@ -118,9 +119,7 @@ export default function TeamSettingsPage() {
                       {member.role}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-slate-500">
-                    {member.joinedAt}
-                  </TableCell>
+                  <TableCell className="text-sm text-slate-500">{member.joinedAt}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="sm" className="text-xs">
                       Edit Role

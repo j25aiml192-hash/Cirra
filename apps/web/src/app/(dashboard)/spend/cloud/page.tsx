@@ -1,25 +1,25 @@
 "use client";
 
-import * as React from "react";
+import type { CostFact } from "@cirra/types";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
   Select,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@cirra/ui";
 import { formatCurrency } from "@cirra/utils";
-import type { CostFact } from "@cirra/types";
-import { Cloud, Filter, Download } from "lucide-react";
+import { Cloud, Download, Filter } from "lucide-react";
+import * as React from "react";
 
 const mockCostFacts: CostFact[] = [
   {
@@ -141,9 +141,7 @@ export default function CloudSpendPage() {
             />
           </div>
           <div className="flex items-end">
-            <Button className="w-full bg-indigo-600 hover:bg-indigo-500">
-              Apply Query
-            </Button>
+            <Button className="w-full bg-indigo-600 hover:bg-indigo-500">Apply Query</Button>
           </div>
         </div>
       </Card>

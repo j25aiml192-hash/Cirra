@@ -23,9 +23,6 @@
       },
       "package": "com.cirra.controlplane"
     },
-    "plugins": [
-      "expo-router",
-      "expo-local-authentication"
-    ]
+    "plugins": ["expo-router", "expo-local-authentication"]
   }
 }

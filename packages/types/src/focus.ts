@@ -20,7 +20,7 @@ export type AllocationMethod =
 export interface CostFact {
   tenantId: string;
   chargePeriodStart: string; // ISO 8601 string
-  chargePeriodEnd: string;   // ISO 8601 string
+  chargePeriodEnd: string; // ISO 8601 string
   provider: Provider;
   serviceName: string;
   resourceId: string;
@@ -33,12 +33,12 @@ export interface CostFact {
   allocatedCustomer?: string | null;
   allocatedFeature?: string | null;
   allocationMethod: AllocationMethod;
-  insertedAt: string;        // ISO 8601 string
+  insertedAt: string; // ISO 8601 string
 }
 
 export interface AiUsageFact {
   tenantId: string;
-  ts: string;                // ISO 8601 string
+  ts: string; // ISO 8601 string
   provider: Provider;
   model: string;
   apiKeyId: string;
@@ -48,5 +48,5 @@ export interface AiUsageFact {
   teamTag?: string | null;
   customerTag?: string | null;
   featureTag?: string | null;
-  insertedAt: string;        // ISO 8601 string
+  insertedAt: string; // ISO 8601 string
 }
