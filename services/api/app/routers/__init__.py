@@ -1,3 +1,3 @@
-from . import auth, connections, team, health
+from . import auth, connections, team, health, dashboard, spend, allocation
 
-__all__ = ["auth", "connections", "team", "health"]
+__all__ = ["auth", "connections", "team", "health", "dashboard", "spend", "allocation"]

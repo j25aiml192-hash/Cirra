@@ -9,7 +9,8 @@ from tasks import ingest_cost_explorer, ingest_openai_usage
 @patch("tasks.clickhouse.insert_cost_facts")
 @patch("tasks.get_connection_by_id")
 @patch("tasks.update_connection_status")
-def test_mock_mode_aws_end_to_end_sync(mock_update, mock_get_conn, mock_insert):
+@patch("tasks.get_tenant_rules", return_value=[])
+def test_mock_mode_aws_end_to_end_sync(mock_rules, mock_update, mock_get_conn, mock_insert):
     """
     Integration test:
     Verify that in mock mode, ingest_cost_explorer runs without cloud credentials,

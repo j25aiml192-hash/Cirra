@@ -13,6 +13,7 @@ from connectors.aws import AWSCostExplorerConnector
 from connectors.openai_connector import OpenAIConnector
 from connectors.anthropic_connector import AnthropicConnector
 from db import get_connection_by_id, update_connection_status, get_all_active_connections, sanitize_error_message
+from allocator import get_tenant_rules, allocate_facts_inline, allocate_fact
 
 logger = logging.getLogger("cirra.ingest.tasks")
 
@@ -110,6 +111,10 @@ def ingest_cost_explorer(self, connection_id: str) -> Dict[str, Any]:
 
         # Normalize to FOCUS CostFact models
         facts = normalize_aws_cost_explorer(raw=raw_response, tenant_id=tenant_id)
+
+        # Apply allocation rules inline
+        rules = run_async(get_tenant_rules(tenant_id))
+        allocate_facts_inline(facts, rules)
 
         # Batch insert into ClickHouse
         rows_inserted = clickhouse.insert_cost_facts(facts)
@@ -282,3 +287,54 @@ def sync_all_ai_connections() -> Dict[str, int]:
             dispatched += 1
     logger.info(f"Beat scheduled {dispatched} AI usage sync tasks")
     return {"dispatched": dispatched}
+
+
+@celery_app.task(bind=True, base=BaseIngestTask, max_retries=2)
+def reallocate_tenant(self, tenant_id: str, since: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Reallocate tenant spend facts when allocation rules change.
+    - ClickHouse is append-only: writes new versions with higher version numbers.
+    - Manual allocations (allocation_method == 'manual') are NEVER overwritten.
+    - Idempotent and supersedes old rows via ReplacingMergeTree(version).
+    """
+    logger.info(f"Starting reallocate_tenant for tenant {tenant_id} (since={since})")
+    rules = run_async(get_tenant_rules(tenant_id))
+
+    since_dt = datetime.fromisoformat(since.replace("Z", "+00:00")) if since else (datetime.now(timezone.utc) - timedelta(days=90))
+
+    # Query unallocated or non-manual rows using FINAL
+    ch_client = clickhouse.get_client()
+    query = """
+    SELECT
+        tenant_id, charge_period_start, charge_period_end,
+        billed_cost, effective_cost, currency, provider,
+        service_name, service_category, region, resource_id,
+        sku_id, tags, allocation_method, row_hash, version
+    FROM cost_facts FINAL
+    WHERE tenant_id = %(tenant_id)s
+      AND charge_period_start >= %(since_dt)s
+      AND allocation_method != 'manual'
+    """
+    res = ch_client.query(query, parameters={"tenant_id": tenant_id, "since_dt": since_dt})
+    cols = res.column_names
+
+    reallocated_batch = []
+    for row in res.result_rows:
+        fact = dict(zip(cols, row))
+        old_method = fact["allocation_method"]
+        old_tags = dict(fact["tags"] or {})
+
+        allocate_fact(fact, rules)
+
+        # If allocation method or tags changed, increment version and stage for append-only insert
+        if fact["allocation_method"] != old_method or fact["tags"] != old_tags:
+            fact["version"] = int(fact.get("version", 1)) + 1
+            fact["ingested_at"] = datetime.now(timezone.utc)
+            reallocated_batch.append(fact)
+
+    inserted = 0
+    if reallocated_batch:
+        inserted = clickhouse.insert_cost_facts(reallocated_batch)
+        logger.info(f"Reallocated {inserted} rows for tenant {tenant_id} with incremented versions.")
+
+    return {"status": "success", "tenant_id": tenant_id, "rows_reallocated": inserted}

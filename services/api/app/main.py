@@ -12,7 +12,7 @@ from app.middleware.error_handler import (
     validation_exception_handler,
     unhandled_exception_handler,
 )
-from app.routers import auth, connections, team, health
+from app.routers import auth, connections, team, health, dashboard, spend, allocation
 
 
 @asynccontextmanager
@@ -54,3 +54,6 @@ app.include_router(health.router)
 app.include_router(auth.router, prefix=settings.API_V1_PREFIX)
 app.include_router(connections.router, prefix=settings.API_V1_PREFIX)
 app.include_router(team.router, prefix=settings.API_V1_PREFIX)
+app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
+app.include_router(spend.router, prefix=settings.API_V1_PREFIX)
+app.include_router(allocation.router, prefix=settings.API_V1_PREFIX)

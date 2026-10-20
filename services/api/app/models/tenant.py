@@ -17,3 +17,4 @@ class Tenant(Base):
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
     api_keys = relationship("ApiKey", back_populates="tenant", cascade="all, delete-orphan")
     connections = relationship("Connection", back_populates="tenant", cascade="all, delete-orphan")
+    allocation_rules = relationship("AllocationRule", back_populates="tenant", cascade="all, delete-orphan")

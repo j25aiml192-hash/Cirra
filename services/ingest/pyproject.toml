@@ -25,3 +25,6 @@ build-backend = "setuptools.build_meta"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = [
+    "integration: marks tests as requiring real services (docker-compose postgres/clickhouse/redis)",
+]
