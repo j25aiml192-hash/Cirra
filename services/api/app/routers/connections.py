@@ -14,6 +14,7 @@ from app.schemas.connection import (
 from app.core.encryption import encrypt_credentials, decrypt_credentials
 from app.middleware.audit import log_audit_event
 from app.services.tester import ProviderTester
+from app.services.ingest_dispatcher import dispatch_initial_sync
 
 router = APIRouter(prefix="/connections", tags=["connections"])
 
@@ -110,6 +111,17 @@ async def create_connection(
         credentials_encrypted=encrypted_creds,
         status="pending",
     )
+    
+    # Test connection credentials immediately
+    test_result = await ProviderTester.test(new_conn.provider, payload.credentials)
+    if test_result["ok"]:
+        new_conn.status = "syncing"
+        new_conn.last_error = None
+        dispatch_initial_sync(str(new_conn.id), new_conn.provider)
+    else:
+        new_conn.status = "error"
+        new_conn.last_error = test_result.get("error")
+
     db.add(new_conn)
     await db.flush()
 
@@ -120,7 +132,7 @@ async def create_connection(
         user_id=claims["user_id"],
         resource_type="connection",
         resource_id=str(new_conn.id),
-        metadata={"name": new_conn.name, "provider": new_conn.provider},
+        metadata={"name": new_conn.name, "provider": new_conn.provider, "status": new_conn.status},
     )
 
     return ConnectionResponse(
@@ -142,7 +154,7 @@ async def test_connection(
     claims: Dict[str, Any] = Depends(require_role("admin")),
     _: None = Depends(check_rate_limit),
 ):
-    """Test connection credentials and update status."""
+    """Test connection credentials, update status, and dispatch sync if passed."""
     try:
         conn_uuid = uuid.UUID(connection_id)
         tenant_id = uuid.UUID(claims["tenant_id"])
@@ -171,8 +183,9 @@ async def test_connection(
 
     conn.last_synced_at = datetime.now(timezone.utc)
     if test_result["ok"]:
-        conn.status = "connected"
+        conn.status = "syncing"
         conn.last_error = None
+        dispatch_initial_sync(str(conn.id), conn.provider)
     else:
         conn.status = "error"
         conn.last_error = test_result.get("error")

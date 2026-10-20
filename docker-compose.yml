@@ -13,6 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-roles.sql:/docker-entrypoint-initdb.d/init-roles.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d cirra"]
       interval: 5s
@@ -33,6 +34,25 @@ services:
       timeout: 5s
       retries: 5
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.3-alpine
+    container_name: cirra-clickhouse
+    restart: always
+    environment:
+      CLICKHOUSE_DB: cirra
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   api:
     build:
       context: ./services/api
@@ -40,8 +60,13 @@ services:
     container_name: cirra-api
     restart: always
     environment:
-      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/cirra
+      DATABASE_URL: postgresql+asyncpg://cirra_app:cirrapassword@postgres:5432/cirra
       REDIS_URL: redis://redis:6379/0
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: cirra_reader
+      CLICKHOUSE_PASSWORD: reader_secure_password
+      CLICKHOUSE_DATABASE: cirra
       ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
       CIRRA_JWT_SECRET: cirra-super-secret-jwt-key-2026-very-secure
       SUPABASE_JWT_SECRET: your-supabase-jwt-secret
@@ -55,7 +80,58 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  ingest-worker:
+    build:
+      context: ./services/ingest
+      dockerfile: Dockerfile
+    container_name: cirra-ingest-worker
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/cirra
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: cirra_ingest
+      CLICKHOUSE_PASSWORD: ingest_secure_password
+      CLICKHOUSE_DATABASE: cirra
+      ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      INGEST_MOCK: "false"
+      ENVIRONMENT: development
+    command: ["celery", "-A", "worker.celery_app", "worker", "--loglevel=info"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+
+  celery-beat:
+    build:
+      context: ./services/ingest
+      dockerfile: Dockerfile
+    container_name: cirra-celery-beat
+    restart: always
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgrespassword@postgres:5432/cirra
+      REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/1
+      CELERY_RESULT_BACKEND: redis://redis:6379/2
+      ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      ENVIRONMENT: development
+    command: ["celery", "-A", "worker.celery_app", "beat", "--loglevel=info"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
 volumes:
   postgres_data:
   redis_data:
+  clickhouse_data:

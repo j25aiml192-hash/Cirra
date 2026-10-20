@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
-from app.core.database import engine
+from app.core.database import engine, verify_non_superuser_role
 from app.core.redis import close_redis
 from app.middleware.error_handler import (
     http_exception_handler,
@@ -17,7 +17,8 @@ from app.routers import auth, connections, team, health
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup tasks
+    # Startup tasks: verify non-superuser role so RLS is strictly enforced
+    await verify_non_superuser_role()
     yield
     # Shutdown tasks
     await close_redis()
