@@ -6,146 +6,237 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Cloud,
-  Bot,
-  MessageSquare,
-  PieChart,
+  Cpu,
+  Sparkles,
+  GitBranch,
   AlertTriangle,
-  PiggyBank,
-  PlugZap,
+  TrendingDown,
+  Plug,
   Users,
-  User,
-  Layers,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  {
-    name: "Spend Intelligence",
-    children: [
-      { name: "Cloud Spend", href: "/spend/cloud", icon: Cloud },
-      { name: "AI & LLM Spend", href: "/spend/ai", icon: Bot },
-    ],
-  },
-  { name: "Ask Cirra", href: "/ask", icon: MessageSquare },
-  { name: "Unit Economics", href: "/allocation", icon: PieChart },
-  { name: "Anomalies", href: "/anomalies", icon: AlertTriangle, badge: "3" },
-  { name: "Guaranteed Savings", href: "/savings", icon: PiggyBank },
-];
+export interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
 
-const settingsNav = [
-  { name: "Connections", href: "/settings/connections", icon: PlugZap },
-  { name: "Team & RBAC", href: "/settings/team", icon: Users },
-  { name: "Profile", href: "/settings/profile", icon: User },
-];
+interface NavItemProps {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  badge?: string;
+  badgeColor?: "amber" | "rose" | "indigo";
+  collapsed: boolean;
+}
 
-export function Sidebar() {
+function NavItem({ href, icon, label, badge, badgeColor = "amber", collapsed }: NavItemProps) {
   const pathname = usePathname();
+  const isActive = pathname === href;
+
+  const badgeBg =
+    badgeColor === "amber" ? "bg-amber-100 text-amber-800" :
+    badgeColor === "rose" ? "bg-rose-100 text-rose-800" : "bg-indigo-100 text-indigo-800";
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-      {/* Brand Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-zinc-200 px-6 dark:border-zinc-800">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white font-bold shadow-md shadow-brand-500/20">
-          <Layers className="h-5 w-5" />
+    <Link
+      href={href}
+      title={collapsed ? label : undefined}
+      className={cn(
+        "relative flex items-center h-10 px-2.5 rounded-[10px] transition-colors group",
+        isActive
+          ? "bg-indigo-50 text-indigo-600 font-semibold"
+          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+      )}
+      style={{
+        justifyContent: collapsed ? "center" : "flex-start",
+      }}
+    >
+      <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+        {icon}
+        {badge && collapsed && (
+          <span
+            className={cn(
+              "absolute -top-1 -right-1 w-2 h-2 rounded-full",
+              badgeColor === "amber" ? "bg-amber-500" : "bg-rose-500"
+            )}
+          />
+        )}
+      </div>
+
+      {!collapsed && (
+        <div className="flex flex-1 items-center justify-between ml-2.5 overflow-hidden">
+          <span className="text-sm truncate">{label}</span>
+          {badge && (
+            <span
+              className={cn(
+                "ml-auto text-[11px] font-semibold px-1.5 py-0.2 rounded-full",
+                badgeBg
+              )}
+            >
+              {badge}
+            </span>
+          )}
         </div>
-        <div>
-          <span className="text-base font-bold tracking-tight text-zinc-900 dark:text-white">Cirra</span>
-          <span className="ml-1.5 rounded bg-brand-50 px-1.5 py-0.5 text-[10px] font-semibold text-brand-700 dark:bg-brand-900/40 dark:text-brand-300">
-            PRO
-          </span>
+      )}
+    </Link>
+  );
+}
+
+export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  return (
+    <nav
+      className="fixed left-4 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 flex flex-col justify-between"
+      style={{
+        width: collapsed ? 68 : 240,
+        height: "calc(100vh - 32px)",
+        maxHeight: 740,
+        background: "rgba(255, 255, 255, 0.85)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        border: "1px solid rgba(255, 255, 255, 0.6)",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+        borderRadius: 20,
+        padding: "16px 10px",
+      }}
+    >
+      {/* Top: Logo + Toggle */}
+      <div>
+        <div
+          className={cn(
+            "flex items-center pb-3 border-b border-black/5",
+            collapsed ? "justify-center" : "justify-between px-2"
+          )}
+        >
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-[10px] bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20">
+              <span className="text-white font-bold text-sm tracking-tight">C</span>
+            </div>
+            {!collapsed && (
+              <div className="flex flex-col">
+                <span className="font-semibold text-slate-900 text-sm leading-tight">Cirra</span>
+                <span className="text-[10px] text-slate-400 font-medium">Cost Control</span>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={onToggle}
+            className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100/50 transition-colors"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Navigation Items */}
+        <div className="mt-3 space-y-1">
+          {!collapsed && (
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1">
+              OVERVIEW
+            </div>
+          )}
+          <NavItem
+            href="/dashboard"
+            icon={<LayoutDashboard className="w-4 h-4" />}
+            label="Dashboard"
+            collapsed={collapsed}
+          />
+
+          {!collapsed && (
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1 mt-2.5">
+              SPEND
+            </div>
+          )}
+          <NavItem
+            href="/spend/cloud"
+            icon={<Cloud className="w-4 h-4" />}
+            label="Cloud"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/spend/ai"
+            icon={<Cpu className="w-4 h-4" />}
+            label="AI Models"
+            collapsed={collapsed}
+          />
+
+          {!collapsed && (
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1 mt-2.5">
+              OPTIMIZE
+            </div>
+          )}
+          <NavItem
+            href="/ask"
+            icon={<Sparkles className="w-4 h-4" />}
+            label="Ask Cirra"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/allocation"
+            icon={<GitBranch className="w-4 h-4" />}
+            label="Allocation"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/anomalies"
+            icon={<AlertTriangle className="w-4 h-4" />}
+            label="Anomalies"
+            badge="3"
+            badgeColor="amber"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/savings"
+            icon={<TrendingDown className="w-4 h-4" />}
+            label="Savings"
+            collapsed={collapsed}
+          />
         </div>
       </div>
 
-      {/* Navigation links */}
-      <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
-        <div className="space-y-1">
-          {navigation.map((item) => {
-            if (item.children) {
-              return (
-                <div key={item.name} className="pt-3">
-                  <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-                    {item.name}
-                  </div>
-                  <div className="space-y-1">
-                    {item.children.map((child) => {
-                      const isActive = pathname === child.href;
-                      const Icon = child.icon;
-                      return (
-                        <Link
-                          key={child.href}
-                          href={child.href}
-                          className={cn(
-                            "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                            isActive
-                              ? "bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400"
-                              : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                          )}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span>{child.name}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            }
+      {/* Bottom: Settings & Avatar */}
+      <div className="pt-2 border-t border-black/5 space-y-1">
+        <NavItem
+          href="/settings/connections"
+          icon={<Plug className="w-4 h-4" />}
+          label="Connections"
+          collapsed={collapsed}
+        />
+        <NavItem
+          href="/settings/team"
+          icon={<Users className="w-4 h-4" />}
+          label="Team"
+          collapsed={collapsed}
+        />
+        <NavItem
+          href="/settings/profile"
+          icon={<Settings className="w-4 h-4" />}
+          label="Settings"
+          collapsed={collapsed}
+        />
 
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400"
-                    : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
-                </div>
-                {item.badge && (
-                  <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-950/50 dark:text-rose-400">
-                    {item.badge}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
-        </div>
-
-        <div className="mt-auto pt-6">
-          <div className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 dark:text-zinc-500">
-            Settings
+        <div
+          className={cn(
+            "flex items-center pt-2 px-1 mt-1",
+            collapsed ? "justify-center" : "gap-2.5 px-2"
+          )}
+        >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0">
+            HK
           </div>
-          <div className="space-y-1">
-            {settingsNav.map((item) => {
-              const isActive = pathname === item.href;
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-brand-50 text-brand-600 dark:bg-brand-950/50 dark:text-brand-400"
-                      : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
-          </div>
+          {!collapsed && (
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-xs font-semibold text-slate-800 truncate">Hiten K.</span>
+              <span className="text-[10px] text-slate-400 truncate">Acme Inc. (Admin)</span>
+            </div>
+          )}
         </div>
       </div>
-    </aside>
+    </nav>
   );
 }

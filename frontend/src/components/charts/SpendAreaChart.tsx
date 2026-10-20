@@ -6,69 +6,86 @@ import {
   Area,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
 
-interface SpendAreaChartProps {
-  data: Array<{ date: string; cloud: number; ai: number }>;
+export interface SpendAreaChartProps {
+  data: Array<{ date: string; amount: number }>;
+  loading?: boolean;
 }
 
-export function SpendAreaChart({ data }: SpendAreaChartProps) {
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: Array<{
+    value: number;
+  }>;
+  label?: string;
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  if (active && payload && payload.length) {
+    const val = payload[0]?.value ?? 0;
+    return (
+      <div
+        style={{
+          background: "#FFFFFF",
+          borderRadius: 10,
+          padding: "8px 12px",
+          border: "1px solid #F1F5F9",
+          boxShadow: "0 4px 16px rgba(0,0,0,0.06)",
+        }}
+      >
+        <div style={{ fontSize: 11, color: "#94A3B8" }}>{label}</div>
+        <div style={{ fontSize: 14, fontWeight: 700, color: "#4F46E5" }}>
+          ${val.toLocaleString()}
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
+export function SpendAreaChart({ data, loading = false }: SpendAreaChartProps) {
+  if (loading) {
+    return (
+      <div className="w-full h-[260px] flex items-center justify-center p-4">
+        <div className="animate-shimmer w-full h-full rounded-xl" />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-72 w-full">
+    <div style={{ height: 260, width: "100%" }}>
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <defs>
-            <linearGradient id="cloudGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#6366F1" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#6366F1" stopOpacity={0.0} />
-            </linearGradient>
-            <linearGradient id="aiGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#A855F7" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#A855F7" stopOpacity={0.0} />
+            <linearGradient id="spendVelocityGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#4F46E5" stopOpacity={0.3} />
+              <stop offset="100%" stopColor="#4F46E5" stopOpacity={0.0} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e4e4e7" />
           <XAxis
             dataKey="date"
-            stroke="#71717a"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
+            tickLine={false}
+            tick={{ fontSize: 11, fill: "#94A3B8" }}
           />
           <YAxis
-            stroke="#71717a"
-            fontSize={12}
-            tickLine={false}
             axisLine={false}
-            tickFormatter={(val) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+            tickLine={false}
+            tick={{ fontSize: 11, fill: "#94A3B8" }}
+            tickFormatter={(val) => `$${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}`}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "#18181b",
-              borderRadius: "8px",
-              border: "none",
-              color: "#fff",
-              fontSize: "12px",
-            }}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
-            dataKey="cloud"
-            stroke="#6366F1"
-            fillOpacity={1}
-            fill="url(#cloudGrad)"
-            strokeWidth={2}
-          />
-          <Area
-            type="monotone"
-            dataKey="ai"
-            stroke="#A855F7"
-            fillOpacity={1}
-            fill="url(#aiGrad)"
-            strokeWidth={2}
+            dataKey="amount"
+            stroke="#4F46E5"
+            strokeWidth={2.5}
+            fill="url(#spendVelocityGradient)"
+            dot={false}
+            activeDot={{ r: 5, fill: "#4F46E5", stroke: "#FFFFFF", strokeWidth: 2 }}
           />
         </AreaChart>
       </ResponsiveContainer>

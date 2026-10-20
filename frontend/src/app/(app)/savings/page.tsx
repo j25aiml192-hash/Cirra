@@ -1,154 +1,232 @@
 "use client";
 
-import * as React from "react";
-import { PiggyBank, ShieldCheck, Check } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
-import { Button } from "@/components/ui/Button";
+import React, { useState } from "react";
+import { TrendingDown, Sparkles, Check, ArrowRight, ShieldCheck } from "lucide-react";
+import { Topbar } from "@/components/layout/Topbar";
+import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
-import { formatCurrency } from "@/lib/utils";
-import type { SavingsEntry } from "@/types/api";
+import type { SavingsEntry } from "@/types";
 
-const mockSavings: SavingsEntry[] = [
+const mockSavingsEntries: SavingsEntry[] = [
   {
-    id: "s1",
-    method: "ec2_downsizing",
-    baseline_cost: 2400.0,
-    realized_cost: 1150.0,
-    monthly_savings: 1250.0,
-    confidence: 0.95,
+    id: "sav-1",
+    action_type: "EC2 Instance Downsizing (m6i.4xlarge → m6i.2xlarge)",
+    method: "Right-sizing idle compute",
+    baseline_cost: 8400,
+    realized_cost: 4200,
+    savings_amount: 4200,
+    confidence_badge: "99% Confidence",
     status: "realized",
+    date: "Oct 12, 2026",
   },
   {
-    id: "s2",
-    method: "prompt_compression_caching",
-    baseline_cost: 5000.0,
-    realized_cost: 2100.0,
-    monthly_savings: 2900.0,
-    confidence: 0.88,
+    id: "sav-2",
+    action_type: "OpenAI Prompt Cache Integration (Copilot v2)",
+    method: "Prefix Caching Optimization",
+    baseline_cost: 16500,
+    realized_cost: 8100,
+    savings_amount: 8400,
+    confidence_badge: "95% Confidence",
     status: "realized",
+    date: "Oct 15, 2026",
   },
   {
-    id: "s3",
-    method: "idle_rds_snapshot_and_terminate",
-    baseline_cost: 1800.0,
-    realized_cost: 0.0,
-    monthly_savings: 1800.0,
-    confidence: 0.99,
+    id: "sav-3",
+    action_type: "Idle RDS Multi-AZ Snapshot & Terminate",
+    method: "Orphaned test database deletion",
+    baseline_cost: 3800,
+    realized_cost: 200,
+    savings_amount: 3600,
+    confidence_badge: "98% Confidence",
     status: "pending_approval",
+    date: "Oct 19, 2026",
+  },
+  {
+    id: "sav-4",
+    action_type: "S3 Infrequent Access Lifecycle Policy",
+    method: "Storage tiering automation",
+    baseline_cost: 6500,
+    realized_cost: 2300,
+    savings_amount: 4200,
+    confidence_badge: "92% Confidence",
+    status: "approved",
+    date: "Oct 20, 2026",
+  },
+  {
+    id: "sav-5",
+    action_type: "GKE Preemptible Node Pool Conversion",
+    method: "Batch workload spot utilization",
+    baseline_cost: 18000,
+    realized_cost: 4200,
+    savings_amount: 13800,
+    confidence_badge: "90% Confidence",
+    status: "identified",
+    date: "Oct 20, 2026",
   },
 ];
 
 export default function SavingsPage() {
-  const [entries, setEntries] = React.useState(mockSavings);
+  const [entries, setEntries] = useState<SavingsEntry[]>(mockSavingsEntries);
+
+  const totalIdentified = entries.reduce((acc, curr) => acc + curr.savings_amount, 0);
 
   const handleApprove = (id: string) => {
-    setEntries(
-      entries.map((e) => (e.id === id ? { ...e, status: "approved" } : e))
+    setEntries((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, status: "approved" } : e))
     );
   };
 
-  const columns = [
+  const columns: Column<SavingsEntry>[] = [
     {
-      key: "method",
-      header: "Optimization Strategy",
-      render: (row: SavingsEntry) => (
-        <div className="font-semibold text-zinc-900 dark:text-zinc-100">{row.method}</div>
+      key: "action_type",
+      header: "Action Type / Strategy",
+      render: (val, row) => (
+        <div>
+          <div className="font-semibold text-slate-900">{String(val)}</div>
+          <div className="text-[11px] text-slate-400">{row.method}</div>
+        </div>
       ),
     },
     {
-      key: "baseline",
-      header: "Baseline Spend",
-      render: (row: SavingsEntry) => (
-        <span className="font-mono text-xs">{formatCurrency(row.baseline_cost)}</span>
-      ),
-    },
-    {
-      key: "savings",
-      header: "Monthly Realized Savings",
-      render: (row: SavingsEntry) => (
-        <span className="font-mono text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-          +{formatCurrency(row.monthly_savings)}/mo
+      key: "baseline_cost",
+      header: "Baseline Cost",
+      render: (val) => (
+        <span className="font-mono text-xs text-slate-500">
+          ${Number(val).toLocaleString()}
         </span>
       ),
     },
     {
-      key: "confidence",
-      header: "Confidence Score",
-      render: (row: SavingsEntry) => (
-        <span className="text-xs font-mono">{(row.confidence * 100).toFixed(0)}%</span>
+      key: "realized_cost",
+      header: "Realized Cost",
+      render: (val) => (
+        <span className="font-mono text-xs text-slate-700">
+          ${Number(val).toLocaleString()}
+        </span>
+      ),
+    },
+    {
+      key: "savings_amount",
+      header: "Monthly Savings",
+      render: (val) => (
+        <span className="font-mono text-sm font-bold text-emerald-600">
+          +${Number(val).toLocaleString()}/mo
+        </span>
+      ),
+    },
+    {
+      key: "confidence_badge",
+      header: "Confidence",
+      render: (val) => (
+        <Badge variant="indigo">{String(val)}</Badge>
       ),
     },
     {
       key: "status",
-      header: "Status / Safety Gate",
-      render: (row: SavingsEntry) => (
-        <div>
-          {row.status === "realized" && <Badge variant="success">Realized</Badge>}
-          {row.status === "approved" && <Badge variant="default">Approved</Badge>}
-          {row.status === "pending_approval" && (
+      header: "Status",
+      render: (val, row) => {
+        if (row.status === "realized") {
+          return <Badge variant="success">Realized</Badge>;
+        }
+        if (row.status === "approved") {
+          return <Badge variant="info">Approved</Badge>;
+        }
+        if (row.status === "pending_approval") {
+          return (
             <div className="flex items-center gap-2">
-              <Badge variant="destructive">Approval Required</Badge>
-              <Button size="sm" onClick={() => handleApprove(row.id)} className="h-7 px-2 text-xs">
-                <Check className="h-3 w-3 mr-1" /> Approve
-              </Button>
+              <Badge variant="warning">Requires Gate</Badge>
+              <button
+                type="button"
+                onClick={() => handleApprove(row.id)}
+                className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+              >
+                Approve
+              </button>
             </div>
-          )}
-        </div>
+          );
+        }
+        return <Badge variant="neutral">Identified</Badge>;
+      },
+    },
+    {
+      key: "date",
+      header: "Date",
+      render: (val) => (
+        <span className="text-xs text-slate-400">{String(val)}</span>
       ),
     },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="p-8 space-y-6">
+      <Topbar title="Guaranteed Savings & Autonomous Actions" subtitle="Audit-proven cloud optimizations and mandatory human-in-the-loop safety gates" />
+
+      {/* Hero Stat: Total identified savings $34,200 in green gradient banner */}
+      <div
+        style={{
+          borderRadius: 20,
+          padding: "24px 32px",
+          background: "linear-gradient(135deg, #065F46 0%, #059669 50%, #10B981 100%)",
+          color: "white",
+          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.25)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 16,
+        }}
+      >
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Guaranteed Savings & Autonomous Actions
-          </h1>
-          <p className="text-sm text-zinc-500">
-            Automated recommendations with cryptographic audit trails and mandatory human-in-the-loop gates.
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "rgba(255,255,255,0.15)",
+              backdropFilter: "blur(8px)",
+              padding: "4px 12px",
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 600,
+              marginBottom: 8,
+            }}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Deterministic ROI Guarantee</span>
+          </div>
+          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em" }}>
+            ${totalIdentified.toLocaleString()}
+            <span style={{ fontSize: 16, fontWeight: 500, opacity: 0.85, marginLeft: 6 }}>/ month</span>
+          </div>
+          <p style={{ fontSize: 13, opacity: 0.9, marginTop: 4, maxWidth: 520 }}>
+            Identified recurring savings verified through pre-action baseline diffs and dry-run telemetry.
           </p>
+        </div>
+
+        <div style={{ display: "flex", gap: 12 }}>
+          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 18px", textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>$12,600</div>
+            <div style={{ fontSize: 11, opacity: 0.8 }}>Already Realized</div>
+          </div>
+          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 18px", textAlign: "center" }}>
+            <div style={{ fontSize: 18, fontWeight: 700 }}>$21,600</div>
+            <div style={{ fontSize: 11, opacity: 0.8 }}>Pipeline Opportunities</div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <Card className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Total Monthly Realized Savings
-          </p>
-          <div className="mt-2 text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">
-            {formatCurrency(4150.0)}/mo
-          </div>
-          <p className="mt-1 text-xs text-zinc-400">Verified through historical billing diffs</p>
-        </Card>
-
-        <Card className="p-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-            Pipeline Opportunity
-          </p>
-          <div className="mt-2 text-3xl font-extrabold text-brand-600 dark:text-brand-400">
-            {formatCurrency(14350.0)}/mo
-          </div>
-          <p className="mt-1 text-xs text-zinc-400">Awaiting engineering safety approvals</p>
-        </Card>
+      {/* Savings Table */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="font-semibold text-slate-900 text-base">Savings Ledger & Remediation Log</h3>
+          <span className="text-xs text-slate-400">{entries.length} actions registered</span>
+        </div>
+        <DataTable
+          columns={columns}
+          data={entries}
+          emptyText="No savings opportunities recorded"
+        />
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Action Registry & Proof of Savings</CardTitle>
-          <CardDescription>
-            Deterministic attribution comparing pre-action baseline with post-action telemetry
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={entries}
-            keyExtractor={(row) => row.id}
-          />
-        </CardContent>
-      </Card>
     </div>
   );
 }

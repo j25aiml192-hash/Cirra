@@ -2,19 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 :root {
-  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --bg-page:        #F8F7F4;
+  --bg-surface:     #FFFFFF;
+  --brand:          #4F46E5;
+  --brand-light:    #EEF2FF;
+  --brand-gradient: linear-gradient(135deg, #4338CA, #6D28D9);
+
+  --text-primary:   #0F172A;
+  --text-secondary: #475569;
+  --text-muted:     #94A3B8;
+
+  --pastel-blue-bg:   #EFF6FF;
+  --pastel-blue-acc:  #3B82F6;
+  --pastel-green-bg:  #F0FDF4;
+  --pastel-green-acc: #10B981;
+  --pastel-red-bg:    #FFF1F2;
+  --pastel-red-acc:   #EF4444;
+  --pastel-amber-bg:  #FFFBEB;
+  --pastel-amber-acc: #F59E0B;
+  --pastel-violet-bg: #F5F3FF;
+  --pastel-violet-acc:#7C3AED;
+
+  --radius-card:   16px;
+  --radius-btn:    10px;
+  --radius-input:  10px;
+  --shadow-card:   0 2px 12px rgba(0,0,0,0.06);
+  --shadow-glass:  0 8px 32px rgba(0,0,0,0.08);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 body {
-  font-family: var(--font-inter);
-  background-color: #fafafa;
-  color: #09090b;
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    background-color: #09090b;
-    color: #fafafa;
-  }
+  background: var(--bg-page);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-primary);
 }

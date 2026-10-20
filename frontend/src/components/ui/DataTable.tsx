@@ -1,56 +1,104 @@
 import * as React from "react";
-import { cn } from "@/lib/utils";
 
-interface Column<T> {
-  key: string;
+export interface Column<T> {
+  key: keyof T;
   header: string;
-  render?: (row: T) => React.ReactNode;
-  className?: string;
+  width?: string;
+  render?: (value: T[keyof T], row: T) => React.ReactNode;
 }
 
-interface DataTableProps<T> {
-  columns: Column<T>[];
+export interface DataTableProps<T> {
+  columns: Array<Column<T>>;
   data: T[];
-  keyExtractor: (row: T) => string;
-  emptyMessage?: string;
-  className?: string;
+  loading?: boolean;
+  emptyText?: string;
 }
 
 export function DataTable<T>({
   columns,
   data,
-  keyExtractor,
-  emptyMessage = "No data available",
-  className,
+  loading = false,
+  emptyText = "No data found",
 }: DataTableProps<T>) {
+  if (loading) {
+    return (
+      <div className="w-full overflow-hidden rounded-xl border border-slate-100 bg-white">
+        <div style={{ background: "#F8FAFC", padding: "12px 16px", borderBottom: "1px solid #F1F5F9" }}>
+          <div className="grid grid-cols-4 gap-4">
+            {columns.slice(0, 4).map((_, i) => (
+              <div key={i} className="animate-shimmer h-3 rounded" />
+            ))}
+          </div>
+        </div>
+        <div className="divide-y divide-slate-50 p-2">
+          {[1, 2, 3, 4, 5].map((idx) => (
+            <div key={idx} className="grid grid-cols-4 gap-4 py-3 px-3">
+              <div className="animate-shimmer h-4 rounded w-3/4" />
+              <div className="animate-shimmer h-4 rounded w-1/2" />
+              <div className="animate-shimmer h-4 rounded w-2/3" />
+              <div className="animate-shimmer h-4 rounded w-1/3" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   if (data.length === 0) {
     return (
-      <div className="py-12 text-center text-sm text-zinc-500">
-        {emptyMessage}
+      <div className="w-full rounded-xl border border-slate-100 bg-white py-12 text-center text-xs text-slate-400">
+        {emptyText}
       </div>
     );
   }
 
   return (
-    <div className={cn("w-full overflow-x-auto", className)}>
-      <table className="w-full text-left text-sm">
-        <thead className="border-b border-zinc-200 text-xs uppercase tracking-wider text-zinc-500 dark:border-zinc-800 dark:text-zinc-400">
-          <tr>
-            {columns.map((col) => (
-              <th key={col.key} className={cn("pb-3 pt-2 font-medium px-4", col.className)}>
+    <div className="w-full overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+      <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
+        <thead>
+          <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #F1F5F9" }}>
+            {columns.map((col, index) => (
+              <th
+                key={String(col.key) + index}
+                style={{
+                  fontSize: 11,
+                  fontWeight: 600,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "#94A3B8",
+                  padding: "10px 16px",
+                  width: col.width,
+                }}
+              >
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
-          {data.map((row) => (
-            <tr key={keyExtractor(row)} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-900/50 transition-colors">
-              {columns.map((col) => (
-                <td key={col.key} className={cn("py-3 px-4 text-zinc-800 dark:text-zinc-200", col.className)}>
-                  {col.render ? col.render(row) : (row as Record<string, unknown>)[col.key] as React.ReactNode}
-                </td>
-              ))}
+        <tbody>
+          {data.map((row, rIndex) => (
+            <tr
+              key={rIndex}
+              className="hover:bg-slate-50/70 transition-colors"
+              style={{
+                borderBottom: "1px solid #F1F5F9",
+                fontSize: 13,
+              }}
+            >
+              {columns.map((col, cIndex) => {
+                const val = row[col.key];
+                return (
+                  <td
+                    key={String(col.key) + cIndex}
+                    style={{
+                      padding: "12px 16px",
+                      color: "#1E293B",
+                    }}
+                  >
+                    {col.render ? col.render(val, row) : (val as React.ReactNode)}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>

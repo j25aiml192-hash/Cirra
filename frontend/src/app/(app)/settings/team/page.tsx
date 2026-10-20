@@ -1,90 +1,225 @@
 "use client";
 
-import * as React from "react";
-import { Users, UserPlus } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
-import { DataTable } from "@/components/ui/DataTable";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/Badge";
-import type { TeamMember } from "@/types/api";
+import React, { useState } from "react";
+import { UserPlus, Trash2, Mail, Shield, Check, X } from "lucide-react";
+import { Topbar } from "@/components/layout/Topbar";
+import type { TeamMember } from "@/types";
 
-const mockMembers: TeamMember[] = [
+const initialMembers: TeamMember[] = [
   {
-    id: "u1",
-    email: "admin@cirra.dev",
+    id: "mem-1",
+    name: "Hiten Kumar",
+    email: "hiten@cirra.dev",
     role: "owner",
     status: "active",
+    avatarInitials: "HK",
   },
   {
-    id: "u2",
-    email: "devops-lead@cirra.dev",
+    id: "mem-2",
+    name: "Alex Vance",
+    email: "alex@cirra.dev",
     role: "admin",
     status: "active",
+    avatarInitials: "AV",
   },
   {
-    id: "u3",
-    email: "finance-analyst@cirra.dev",
+    id: "mem-3",
+    name: "Sarah Chen",
+    email: "sarah@cirra.dev",
     role: "viewer",
     status: "invited",
+    avatarInitials: "SC",
   },
 ];
 
 export default function TeamSettingsPage() {
-  const columns = [
-    {
-      key: "email",
-      header: "Member Email",
-      render: (row: TeamMember) => (
-        <span className="font-medium text-zinc-900 dark:text-zinc-100">{row.email}</span>
-      ),
-    },
-    {
-      key: "role",
-      header: "Access Role",
-      render: (row: TeamMember) => (
-        <Badge variant={row.role === "owner" ? "default" : "secondary"} className="capitalize">
-          {row.role}
-        </Badge>
-      ),
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (row: TeamMember) => (
-        <span className="text-xs capitalize text-zinc-500">{row.status}</span>
-      ),
-    },
-  ];
+  const [members, setMembers] = useState<TeamMember[]>(initialMembers);
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<TeamMember["role"]>("viewer");
+
+  const handleSendInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail) return;
+
+    const initials = (inviteName || inviteEmail)
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+
+    const newMember: TeamMember = {
+      id: `mem-${Date.now()}`,
+      name: (inviteName || inviteEmail.split("@")[0]) || "Member",
+      email: inviteEmail,
+      role: inviteRole,
+      status: "invited",
+      avatarInitials: initials,
+    };
+
+    setMembers((prev) => [...prev, newMember]);
+    setInviteName("");
+    setInviteEmail("");
+    setShowInviteForm(false);
+  };
+
+  const handleRoleChange = (id: string, newRole: TeamMember["role"]) => {
+    setMembers((prev) =>
+      prev.map((m) => (m.id === id ? { ...m, role: newRole } : m))
+    );
+  };
+
+  const handleRemoveMember = (id: string) => {
+    setMembers((prev) => prev.filter((m) => m.id !== id));
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="p-8 space-y-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Team & Role-Based Access Control
-          </h1>
-          <p className="text-sm text-zinc-500">
-            Postgres RLS ensures team members can only access authorized tenant budgets.
-          </p>
-        </div>
-        <Button className="gap-2">
-          <UserPlus className="h-4 w-4" /> Invite Member
-        </Button>
+        <Topbar title="Team & Access Control" subtitle="Manage organization access, role assignments, and tenant boundaries" />
+        <button
+          type="button"
+          onClick={() => setShowInviteForm((prev) => !prev)}
+          className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium text-xs flex items-center gap-2 hover:bg-indigo-700 shadow-sm transition-all"
+        >
+          <UserPlus className="w-4 h-4" /> Invite Member
+        </button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Team Directory</CardTitle>
-          <CardDescription>Manage organization membership and permissions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <DataTable
-            columns={columns}
-            data={mockMembers}
-            keyExtractor={(row) => row.id}
-          />
-        </CardContent>
-      </Card>
+      {/* Invite Form (inline row form, glass-tinted, dashed border, indigo-50 bg) */}
+      {showInviteForm && (
+        <form
+          onSubmit={handleSendInvite}
+          className="p-5 rounded-2xl bg-indigo-50/70 border-2 border-dashed border-indigo-200 backdrop-blur-sm flex flex-wrap items-center gap-4 transition-all"
+        >
+          <div className="flex-1 min-w-[180px]">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-indigo-900 block mb-1">
+              Full Name
+            </label>
+            <input
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+              placeholder="e.g. Rachel Zane"
+              className="w-full h-9 px-3 text-xs rounded-lg border border-indigo-200 bg-white text-slate-800 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="flex-1 min-w-[220px]">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-indigo-900 block mb-1">
+              Work Email
+            </label>
+            <input
+              type="email"
+              required
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="rachel@company.com"
+              className="w-full h-9 px-3 text-xs rounded-lg border border-indigo-200 bg-white text-slate-800 focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div className="w-36">
+            <label className="text-[11px] font-semibold uppercase tracking-wider text-indigo-900 block mb-1">
+              Role
+            </label>
+            <select
+              value={inviteRole}
+              onChange={(e) => setInviteRole(e.target.value as TeamMember["role"])}
+              className="w-full h-9 px-2 text-xs rounded-lg border border-indigo-200 bg-white text-slate-700 focus:outline-none focus:border-indigo-500 font-medium"
+            >
+              <option value="viewer">Viewer</option>
+              <option value="admin">Admin</option>
+              <option value="owner">Owner</option>
+            </select>
+          </div>
+
+          <div className="flex items-center gap-2 self-end mt-4 sm:mt-0">
+            <button
+              type="submit"
+              className="h-9 px-4 rounded-lg bg-indigo-600 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-indigo-700 shadow-sm"
+            >
+              <Check className="w-3.5 h-3.5" /> Send Invite
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowInviteForm(false)}
+              className="h-9 px-3 rounded-lg border border-slate-200 bg-white text-slate-600 text-xs font-medium hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Members List */}
+      <div className="bg-white rounded-2xl shadow-sm border border-black/5 overflow-hidden">
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+          <h3 className="font-semibold text-slate-900 text-base">Active Organization Members</h3>
+          <span className="text-xs text-slate-400">{members.length} seats utilized</span>
+        </div>
+
+        <div className="divide-y divide-slate-100">
+          {members.map((member) => (
+            <div
+              key={member.id}
+              className="p-4 px-6 flex items-center justify-between hover:bg-slate-50/60 transition-colors group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs shadow-sm flex-shrink-0">
+                  {member.avatarInitials}
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-900 text-sm">{member.name}</span>
+                    {member.status === "invited" && (
+                      <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.2 rounded-full font-medium">
+                        Pending Invite
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
+                    <Mail className="w-3 h-3 text-slate-300" />
+                    <span>{member.email}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {/* Role Pill Select */}
+                <select
+                  value={member.role}
+                  onChange={(e) =>
+                    handleRoleChange(member.id, e.target.value as TeamMember["role"])
+                  }
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border cursor-pointer focus:outline-none transition-colors ${
+                    member.role === "owner"
+                      ? "bg-purple-50 text-purple-700 border-purple-200"
+                      : member.role === "admin"
+                      ? "bg-indigo-50 text-indigo-700 border-indigo-200"
+                      : "bg-slate-100 text-slate-600 border-slate-200"
+                  }`}
+                >
+                  <option value="owner">Owner</option>
+                  <option value="admin">Admin</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+
+                {/* Remove button on hover */}
+                <button
+                  type="button"
+                  onClick={() => handleRemoveMember(member.id)}
+                  title="Remove member"
+                  className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

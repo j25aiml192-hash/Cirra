@@ -1,21 +1,22 @@
-import * as React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
-import { Topbar } from "./Topbar";
+import { AiChatWidget } from "@/components/ui/AiChatWidget";
 
-interface AppShellProps {
-  children: React.ReactNode;
-}
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const [collapsed, setCollapsed] = useState(true);
 
-export function AppShell({ children }: AppShellProps) {
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 flex">
-      <Sidebar />
-      <div className="flex flex-1 flex-col pl-64">
-        <Topbar />
-        <main className="flex-1 p-8">
-          <div className="mx-auto max-w-7xl">{children}</div>
-        </main>
+    <div className="min-h-screen bg-[#F8F7F4]">
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
+      <div
+        className="transition-all duration-200"
+        style={{ marginLeft: collapsed ? 84 : 256 }}
+      >
+        {children}
       </div>
+      <AiChatWidget />
     </div>
   );
 }
