@@ -21,7 +21,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
+    <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <img
@@ -35,7 +35,7 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Work Email</label>
+              <label className="text-xs font-medium text-[#334155]">Work Email</label>
               <Input
                 type="email"
                 placeholder="name@company.com"
@@ -45,7 +45,7 @@ export default function LoginPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Password</label>
+              <label className="text-xs font-medium text-[#334155]">Password</label>
               <Input
                 type="password"
                 placeholder="••••••••"
@@ -59,7 +59,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-zinc-500">
+          <div className="mt-6 text-center text-xs text-[#64748B]">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-brand-600 hover:underline">
               Create an account

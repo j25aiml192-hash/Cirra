@@ -18,7 +18,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
+    <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <img
@@ -32,7 +32,7 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Company Name</label>
+              <label className="text-xs font-medium text-[#334155]">Company Name</label>
               <Input
                 type="text"
                 placeholder="Acme Technologies"
@@ -42,7 +42,7 @@ export default function SignupPage() {
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Work Email</label>
+              <label className="text-xs font-medium text-[#334155]">Work Email</label>
               <Input
                 type="email"
                 placeholder="alex@acme.com"
@@ -56,7 +56,7 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-xs text-zinc-500">
+          <div className="mt-6 text-center text-xs text-[#64748B]">
             Already have an account?{" "}
             <Link href="/login" className="text-brand-600 hover:underline">
               Sign in

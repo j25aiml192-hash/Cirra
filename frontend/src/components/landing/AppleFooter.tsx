@@ -5,10 +5,10 @@ import Link from "next/link";
 
 export function AppleFooter() {
   return (
-    <footer className="w-full bg-[#f5f5f7] text-[#333333] border-t border-[#e0e0e0] py-16 px-4 sm:px-6">
-      <div className="max-w-[1024px] mx-auto text-[12px] text-[#7a7a7a]">
+    <footer className="w-full bg-[#F1F6FD] text-[#334155] border-t border-[#D6E4F5] py-16 px-4 sm:px-6">
+      <div className="max-w-[1024px] mx-auto text-[12px] text-[#475569]">
         {/* Footnote Disclaimers */}
-        <div className="space-y-2 pb-8 border-b border-[#e0e0e0] leading-[1.33]">
+        <div className="space-y-2 pb-8 border-b border-[#D6E4F5] leading-[1.33]">
           <p>
             1. Anomaly detection latencies and blast-radius prevention estimates are calculated against synthetic burst scenarios comparing 15-minute continuous sampling against 24-hour batch billing exports.
           </p>
@@ -21,11 +21,11 @@ export function AppleFooter() {
         </div>
 
         {/* 5-Column Navigation Grid with Relaxed 2.41 leading */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 py-10 border-b border-[#e0e0e0]">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 py-10 border-b border-[#D6E4F5]">
           {/* Column 1 */}
           <div>
-            <h4 className="text-[14px] font-semibold text-[#1d1d1f] mb-3">Pillars</h4>
-            <ul className="text-[14px] text-[#474749] space-y-2.5">
+            <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Pillars</h4>
+            <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
                 <a href="#overview" className="hover:text-[#1d1d1f] transition-colors">
                   SEE: Multi-Cloud
@@ -56,8 +56,8 @@ export function AppleFooter() {
 
           {/* Column 2 */}
           <div>
-            <h4 className="text-[14px] font-semibold text-[#1d1d1f] mb-3">Connectors</h4>
-            <ul className="text-[14px] text-[#474749] space-y-2.5">
+            <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Connectors</h4>
+            <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
                 <a href="#connectors" className="hover:text-[#1d1d1f] transition-colors">
                   AWS CUR 2.0
@@ -88,8 +88,8 @@ export function AppleFooter() {
 
           {/* Column 3 */}
           <div>
-            <h4 className="text-[14px] font-semibold text-[#1d1d1f] mb-3">Solutions</h4>
-            <ul className="text-[14px] text-[#474749] space-y-2.5">
+            <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Solutions</h4>
+            <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
                 <span className="text-[#1d1d1f]">Priya:</span> Platform &amp; DevOps
               </li>
@@ -110,8 +110,8 @@ export function AppleFooter() {
 
           {/* Column 4 */}
           <div>
-            <h4 className="text-[14px] font-semibold text-[#1d1d1f] mb-3">Security</h4>
-            <ul className="text-[14px] text-[#474749] space-y-2.5">
+            <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Security</h4>
+            <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
                 <a href="#specs" className="hover:text-[#1d1d1f] transition-colors">
                   Postgres RLS Policy
@@ -136,8 +136,8 @@ export function AppleFooter() {
 
           {/* Column 5 */}
           <div>
-            <h4 className="text-[14px] font-semibold text-[#1d1d1f] mb-3">Cirra Account</h4>
-            <ul className="text-[14px] text-[#474749] space-y-2.5">
+            <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Cirra Account</h4>
+            <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
                 <Link href="/dashboard" className="hover:text-[#1d1d1f] transition-colors">
                   Launch Console
@@ -169,11 +169,10 @@ export function AppleFooter() {
 
         {/* Legal Row */}
         <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-[#7a7a7a]">
-          <div className="flex items-center gap-2.5">
-            <img src="/cirra-logo.png" alt="Cirra" className="h-5 w-5 rounded-full object-contain" />
-            <span>Copyright &copy; {new Date().getFullYear()} Cirra Technologies Inc. All rights reserved.</span>
+          <div>
+            Copyright &copy; {new Date().getFullYear()} Cirra Technologies Inc. All rights reserved.
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-[#7a7a7a]">
+          <div className="flex flex-wrap items-center gap-4 text-[#64748B]">
             <span className="hover:text-[#1d1d1f] cursor-pointer">Privacy Policy</span>
             <span>|</span>
             <span className="hover:text-[#1d1d1f] cursor-pointer">Terms of Use</span>

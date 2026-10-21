@@ -8,8 +8,8 @@ export function AppleGlobalNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#000000] text-[#ffffff] h-[44px] border-b border-[#333333]/40">
-      <div className="max-w-[1024px] mx-auto h-full px-4 flex items-center justify-between text-[12px] font-normal tracking-[-0.01em]">
+    <nav className="sticky top-0 z-50 w-full bg-white/90 text-[#0A192F] h-[44px] border-b border-[#D6E4F5] backdrop-blur-md">
+      <div className="max-w-[1024px] mx-auto h-full px-4 flex items-center justify-between text-[12px] font-medium tracking-[-0.01em]">
         {/* Apple-style Logo mark */}
         <Link
           href="/"
@@ -18,30 +18,33 @@ export function AppleGlobalNav() {
         >
           <img
             src="/cirra-logo.png"
-            alt="Cirra"
-            className="w-5 h-5 rounded-full object-cover shadow-sm"
+            alt=""
+            aria-hidden="true"
+            className="w-5 h-5 rounded-md object-contain"
           />
-          <span className="font-semibold tracking-tight text-[13px] text-[#ffffff]">Cirra</span>
+          <span className="font-semibold tracking-tight text-[13px] text-[#0A192F]">
+            Cirra
+          </span>
         </Link>
 
         {/* Global Links (Apple cadence) */}
-        <div className="hidden md:flex items-center gap-7 text-[#d6d6d6]">
-          <a href="#overview" className="hover:text-[#ffffff] transition-colors">
+        <div className="hidden md:flex items-center gap-7 text-[#475569]">
+          <a href="#overview" className="hover:text-[#0A192F] transition-colors">
             Overview
           </a>
-          <a href="#sentinel" className="hover:text-[#ffffff] transition-colors">
+          <a href="#sentinel" className="hover:text-[#0A192F] transition-colors">
             Sentinel
           </a>
-          <a href="#actions" className="hover:text-[#ffffff] transition-colors">
+          <a href="#actions" className="hover:text-[#0A192F] transition-colors">
             Action Center
           </a>
-          <a href="#ledger" className="hover:text-[#ffffff] transition-colors">
+          <a href="#ledger" className="hover:text-[#0A192F] transition-colors">
             Savings Ledger
           </a>
-          <a href="#connectors" className="hover:text-[#ffffff] transition-colors">
+          <a href="#connectors" className="hover:text-[#0A192F] transition-colors">
             Connectors
           </a>
-          <a href="#specs" className="hover:text-[#ffffff] transition-colors">
+          <a href="#specs" className="hover:text-[#0A192F] transition-colors">
             Specs
           </a>
           <Link href="/dashboard" className="text-[#2997ff] hover:underline transition-all">
@@ -50,17 +53,17 @@ export function AppleGlobalNav() {
         </div>
 
         {/* Right Utility Cluster */}
-        <div className="flex items-center gap-4 text-[#d6d6d6]">
+        <div className="flex items-center gap-4 text-[#475569]">
           <Link
             href="/login"
-            className="hidden sm:inline-block text-[12px] hover:text-[#ffffff] transition-colors"
+            className="hidden sm:inline-block text-[12px] hover:text-[#0A192F] transition-colors"
           >
             Sign In
           </Link>
 
           <Link
             href="/signup"
-            className="hidden sm:inline-flex items-center justify-center text-[12px] bg-[#0066cc] text-[#ffffff] px-3 py-1 rounded-full hover:bg-[#0071e3] apple-btn-active transition-all"
+            className="hidden sm:inline-flex items-center justify-center text-[12px] bg-[#0062E0] text-white px-3 py-1 rounded-full hover:bg-[#0052C2] apple-btn-active transition-all"
           >
             Run free audit
           </Link>
@@ -68,7 +71,7 @@ export function AppleGlobalNav() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-[#d6d6d6] hover:text-[#ffffff] p-1"
+            className="md:hidden text-[#475569] hover:text-[#0A192F] p-1"
             aria-label="Toggle Navigation"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
@@ -78,61 +81,61 @@ export function AppleGlobalNav() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#000000] border-b border-[#333333] px-6 py-4 space-y-3 text-[14px] text-[#d6d6d6]">
+        <div className="md:hidden bg-white border-b border-[#D6E4F5] px-6 py-4 space-y-3 text-[14px] text-[#475569] shadow-md">
           <a
             href="#overview"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Overview
           </a>
           <a
             href="#sentinel"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Sentinel Anomaly Detection
           </a>
           <a
             href="#actions"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Action Center
           </a>
           <a
             href="#ledger"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Savings Ledger
           </a>
           <a
             href="#connectors"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Connectors
           </a>
           <a
             href="#specs"
             onClick={() => setMobileMenuOpen(false)}
-            className="block py-1 hover:text-[#ffffff]"
+            className="block py-1 hover:text-[#0A192F]"
           >
             Technical Specs
           </a>
-          <div className="pt-3 border-t border-[#333333] flex flex-col gap-2">
+          <div className="pt-3 border-t border-[#D6E4F5] flex flex-col gap-2">
             <Link
               href="/signup"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-center py-2 rounded-full bg-[#0066cc] text-[#ffffff] font-medium"
+              className="text-center py-2 rounded-full bg-[#0062E0] text-white font-medium"
             >
               Run free audit
             </Link>
             <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-center py-2 rounded-full border border-[#444444] text-[#ffffff] font-medium"
+              className="text-center py-2 rounded-full border border-[#D6E4F5] text-[#0A192F] font-medium"
             >
               Sign In
             </Link>

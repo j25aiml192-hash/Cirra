@@ -12,6 +12,7 @@ export interface DataTableProps<T> {
   data: T[];
   loading?: boolean;
   emptyText?: string;
+  headerStyle?: React.CSSProperties;
 }
 
 export function DataTable<T>({
@@ -19,18 +20,19 @@ export function DataTable<T>({
   data,
   loading = false,
   emptyText = "No data found",
+  headerStyle,
 }: DataTableProps<T>) {
   if (loading) {
     return (
-      <div className="w-full overflow-hidden rounded-xl border border-slate-100 bg-white">
-        <div style={{ background: "#F8FAFC", padding: "12px 16px", borderBottom: "1px solid #F1F5F9" }}>
+      <div className="w-full overflow-hidden rounded-xl border border-[#D6E4F5] bg-white">
+        <div style={{ background: "#F8FAFD", padding: "12px 16px", borderBottom: "1px solid #D6E4F5" }}>
           <div className="grid grid-cols-4 gap-4">
             {columns.slice(0, 4).map((_, i) => (
               <div key={i} className="animate-shimmer h-3 rounded" />
             ))}
           </div>
         </div>
-        <div className="divide-y divide-slate-50 p-2">
+        <div className="divide-y divide-[#EBF2FA] p-2">
           {[1, 2, 3, 4, 5].map((idx) => (
             <div key={idx} className="grid grid-cols-4 gap-4 py-3 px-3">
               <div className="animate-shimmer h-4 rounded w-3/4" />
@@ -46,28 +48,29 @@ export function DataTable<T>({
 
   if (data.length === 0) {
     return (
-      <div className="w-full rounded-xl border border-slate-100 bg-white py-12 text-center text-xs text-slate-400">
+      <div className="w-full rounded-xl border border-[#D6E4F5] bg-white py-12 text-center text-xs text-[#64748B]">
         {emptyText}
       </div>
     );
   }
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-slate-100 bg-white shadow-sm">
+    <div className="w-full overflow-x-auto rounded-xl border border-[#D6E4F5] bg-white shadow-[0_4px_24px_-4px_rgba(12,48,96,0.05),0_1px_3px_rgba(0,0,0,0.02)]">
       <table className="w-full text-left" style={{ borderCollapse: "collapse" }}>
         <thead>
-          <tr style={{ background: "#F8FAFC", borderBottom: "1px solid #F1F5F9" }}>
+          <tr style={{ background: "#F8FAFD", borderBottom: "1px solid #D6E4F5" }}>
             {columns.map((col, index) => (
               <th
                 key={String(col.key) + index}
                 style={{
-                  fontSize: 11,
-                  fontWeight: 600,
+                  fontSize: 12,
+                  fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "#94A3B8",
+                  color: "#334155",
                   padding: "10px 16px",
                   width: col.width,
+                  ...headerStyle,
                 }}
               >
                 {col.header}
@@ -79,9 +82,9 @@ export function DataTable<T>({
           {data.map((row, rIndex) => (
             <tr
               key={rIndex}
-              className="hover:bg-slate-50/70 transition-colors"
+              className="hover:bg-[#F4F8FD] transition-colors"
               style={{
-                borderBottom: "1px solid #F1F5F9",
+                borderBottom: "1px solid #EBF2FA",
                 fontSize: 13,
               }}
             >
@@ -92,7 +95,7 @@ export function DataTable<T>({
                     key={String(col.key) + cIndex}
                     style={{
                       padding: "12px 16px",
-                      color: "#1E293B",
+                      color: "#0F1E36",
                     }}
                   >
                     {col.render ? col.render(val, row) : (val as React.ReactNode)}

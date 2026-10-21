@@ -5,6 +5,8 @@ import {
   BarChart,
   Bar,
   XAxis,
+  YAxis,
+  CartesianGrid,
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
@@ -13,6 +15,7 @@ import type { MonthlySpendData } from "@/types";
 export interface SpendBarChartProps {
   data: MonthlySpendData[];
   loading?: boolean;
+  selectedProvider?: string;
 }
 
 interface CustomTooltipProps {
@@ -30,61 +33,35 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     const total = payload.reduce((sum, item) => sum + item.value, 0);
 
     return (
-      <div
-        style={{
-          background: "#FFFFFF",
-          borderRadius: 12,
-          padding: "12px 16px",
-          border: "1px solid #F1F5F9",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.08)",
-          minWidth: 180,
-        }}
-      >
-        <div style={{ fontSize: 12, fontWeight: 700, color: "#0F172A", marginBottom: 8 }}>
-          {label} Spend
+      <div className="bg-white rounded-xl p-3.5 border border-[#BCD9FC] shadow-[0_10px_30px_-4px_rgba(12,48,96,0.12)] min-w-[210px] select-none">
+        <div className="text-xs font-bold text-[#0A192F] mb-2.5 pb-1.5 border-b border-[#E2EDF8] flex items-center justify-between">
+          <span>{label} Spend Total</span>
+          <span className="text-[10px] font-semibold text-[#0062E0] bg-[#EBF3FE] px-2 py-0.5 rounded-full border border-[#BCD9FC]">
+            FOCUS Normalized
+          </span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <div className="flex flex-col gap-1.5">
           {payload.map((entry, index) => (
             <div
               key={index}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                fontSize: 12,
-              }}
+              className="flex items-center justify-between text-xs"
             >
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div className="flex items-center gap-2">
                 <span
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
-                    background: entry.color,
-                  }}
+                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                  style={{ background: entry.color }}
                 />
-                <span style={{ color: "#64748B" }}>{entry.name}</span>
+                <span className="text-[#4A607A] font-medium">{entry.name}</span>
               </div>
-              <span style={{ fontWeight: 600, color: "#0F172A" }}>
+              <span className="font-bold text-[#0A192F] cirra-metric">
                 ${entry.value.toLocaleString()}
               </span>
             </div>
           ))}
         </div>
-        <div
-          style={{
-            marginTop: 8,
-            paddingTop: 8,
-            borderTop: "1px solid #F1F5F9",
-            display: "flex",
-            justifyContent: "space-between",
-            fontSize: 12,
-            fontWeight: 700,
-            color: "#0F172A",
-          }}
-        >
-          <span>Total</span>
-          <span>${total.toLocaleString()}</span>
+        <div className="mt-2.5 pt-2 border-t border-[#E2EDF8] flex items-center justify-between text-xs font-bold text-[#0A192F]">
+          <span>Combined Billed</span>
+          <span className="cirra-metric text-[#0062E0]">${total.toLocaleString()}</span>
         </div>
       </div>
     );
@@ -93,52 +70,108 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 const legendItems = [
-  { name: "AWS", color: "#F59E0B" },
-  { name: "GCP", color: "#3B82F6" },
-  { name: "OpenAI", color: "#10B981" },
-  { name: "Anthropic", color: "#7C3AED" },
+  { name: "AWS", color: "#F58536" },
+  { name: "GCP", color: "#1A73E8" },
+  { name: "OpenAI", color: "#10A37F" },
+  { name: "Anthropic", color: "#9333EA" },
 ];
 
-export function SpendBarChart({ data, loading = false }: SpendBarChartProps) {
+export function SpendBarChart({
+  data,
+  loading = false,
+  selectedProvider = "All",
+}: SpendBarChartProps) {
   if (loading) {
     return (
-      <div className="w-full h-[280px] flex items-center justify-center p-4">
-        <div className="animate-shimmer w-full h-full rounded-xl" />
+      <div className="w-full h-[320px] flex items-center justify-center p-4">
+        <div className="w-full h-full rounded-xl bg-[#E2EDF8]/60 animate-pulse" />
       </div>
     );
   }
 
+  const getBarOpacity = (provName: string) => {
+    if (!selectedProvider || selectedProvider === "All") return 1;
+    return selectedProvider.toLowerCase() === provName.toLowerCase() ? 1 : 0.2;
+  };
+
   return (
-    <div className="w-full">
-      <div style={{ height: 280, width: "100%" }}>
+    <div className="w-full select-none">
+      <div className="h-[290px] sm:h-[320px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
+          <BarChart data={data} margin={{ top: 16, right: 12, left: -10, bottom: 0 }}>
+            <CartesianGrid stroke="#EBF2FA" strokeDasharray="3 3" vertical={false} />
             <XAxis
               dataKey="month"
+              axisLine={{ stroke: "#D6E4F5" }}
+              tickLine={false}
+              tick={{ fontSize: 12, fill: "#475569", fontWeight: 500 }}
+              dy={8}
+            />
+            <YAxis
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#94A3B8" }}
+              tick={{ fontSize: 12, fill: "#475569", fontWeight: 500 }}
+              tickFormatter={(val: number) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+              dx={-4}
             />
-            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0,0,0,0.02)" }} />
-            <Bar dataKey="aws" name="AWS" fill="#F59E0B" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="gcp" name="GCP" fill="#3B82F6" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="openai" name="OpenAI" fill="#10B981" radius={[6, 6, 0, 0]} />
-            <Bar dataKey="anthropic" name="Anthropic" fill="#7C3AED" radius={[6, 6, 0, 0]} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0,98,224,0.03)" }} />
+            <Bar
+              dataKey="aws"
+              name="AWS"
+              fill="#F58536"
+              fillOpacity={getBarOpacity("AWS")}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
+            />
+            <Bar
+              dataKey="gcp"
+              name="GCP"
+              fill="#1A73E8"
+              fillOpacity={getBarOpacity("GCP")}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
+            />
+            <Bar
+              dataKey="openai"
+              name="OpenAI"
+              fill="#10A37F"
+              fillOpacity={getBarOpacity("OpenAI")}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
+            />
+            <Bar
+              dataKey="anthropic"
+              name="Anthropic"
+              fill="#9333EA"
+              fillOpacity={getBarOpacity("Anthropic")}
+              radius={[4, 4, 0, 0]}
+              maxBarSize={32}
+            />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Legend bottom */}
-      <div className="flex items-center justify-center gap-6 mt-3 pt-3 border-t border-slate-100">
-        {legendItems.map((item) => (
-          <div key={item.name} className="flex items-center gap-2 text-xs font-medium text-slate-600">
-            <span
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ background: item.color }}
-            />
-            <span>{item.name}</span>
-          </div>
-        ))}
+      <div className="flex flex-wrap items-center justify-center gap-5 mt-4 pt-3.5 border-t border-[#EBF2FA]">
+        {legendItems.map((item) => {
+          const isDimmed =
+            selectedProvider !== "All" &&
+            selectedProvider.toLowerCase() !== item.name.toLowerCase();
+          return (
+            <div
+              key={item.name}
+              className={`flex items-center gap-2 text-xs font-semibold transition-opacity duration-200 ${
+                isDimmed ? "opacity-35 text-[#64748B]" : "text-[#334155]"
+              }`}
+            >
+              <span
+                className="w-2.5 h-2.5 rounded-full shadow-sm"
+                style={{ background: item.color }}
+              />
+              <span>{item.name}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

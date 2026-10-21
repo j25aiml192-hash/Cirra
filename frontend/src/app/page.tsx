@@ -12,41 +12,30 @@ import { AppleFooter } from "@/components/landing/AppleFooter";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-[#ffffff] text-[#1d1d1f] font-sans selection:bg-[#0066cc] selection:text-[#ffffff] flex flex-col">
-      {/* 1. Global Navigation (44px, Pure Black #000000) */}
+    <div className="cirra-bg-canvas min-h-screen text-[#0A192F] font-sans selection:bg-[#0062E0] selection:text-white flex flex-col">
       <AppleGlobalNav />
 
       {/* 2. Alternating Full-Bleed Product Tiles */}
       <main className="flex-1">
-        {/* Tile 1: Pure White Canvas Hero Tile */}
         <HeroTile />
 
-        {/* Tile 2: Near-Black Tile 1 (#272729) Sentinel Anomaly Detection */}
         <SentinelTile />
 
-        {/* Tile 3: Signature Parchment (#f5f5f7) Action Center */}
         <ActionCenterTile />
 
-        {/* Tile 4: Near-Black Tile 2 (#2a2a2c) Audited Savings Ledger */}
         <SavingsLedgerTile />
 
-        {/* Tile 5: Pure White Canvas Utility Grid (Connectors & Hyperscalers) */}
         <ConnectorsGrid />
 
-        {/* Tile 6: Signature Parchment (#f5f5f7) Ask Cirra */}
         <AppleAskCirraTile />
 
-        {/* Tile 7: Near-Black Tile 3 (#252527) Technical Specs */}
         <SpecsTile />
 
-        {/* Tile 8: Pure White Canvas Free Cost Audit Pill Bar */}
         <AppleAuditTile />
 
-        {/* Tile 9: Signature Parchment (#f5f5f7) Frequently Asked Questions */}
         <AppleFaqTile />
       </main>
 
-      {/* 4. Apple Dense Footer */}
       <AppleFooter />
     </div>
   );

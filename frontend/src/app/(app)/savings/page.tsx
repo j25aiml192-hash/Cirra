@@ -82,8 +82,8 @@ export default function SavingsPage() {
       header: "Action Type / Strategy",
       render: (val, row) => (
         <div>
-          <div className="font-semibold text-slate-900">{String(val)}</div>
-          <div className="text-[11px] text-slate-400">{row.method}</div>
+          <div className="font-semibold text-[#0A192F]">{String(val)}</div>
+          <div className="text-[11px] text-[#64748B]">{row.method}</div>
         </div>
       ),
     },
@@ -91,7 +91,7 @@ export default function SavingsPage() {
       key: "baseline_cost",
       header: "Baseline Cost",
       render: (val) => (
-        <span className="font-mono text-xs text-slate-500">
+        <span className="font-mono text-xs text-[#475569]">
           ${Number(val).toLocaleString()}
         </span>
       ),
@@ -152,7 +152,7 @@ export default function SavingsPage() {
       key: "date",
       header: "Date",
       render: (val) => (
-        <span className="text-xs text-slate-400">{String(val)}</span>
+        <span className="text-xs text-[#64748B]">{String(val)}</span>
       ),
     },
   ];
@@ -218,8 +218,8 @@ export default function SavingsPage() {
       {/* Savings Table */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-semibold text-slate-900 text-base">Savings Ledger & Remediation Log</h3>
-          <span className="text-xs text-slate-400">{entries.length} actions registered</span>
+          <h3 className="font-semibold text-[#0A192F] text-base">Savings Ledger & Remediation Log</h3>
+          <span className="text-xs text-[#64748B]">{entries.length} actions registered</span>
         </div>
         <DataTable
           columns={columns}

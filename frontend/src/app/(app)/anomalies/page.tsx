@@ -127,8 +127,8 @@ export default function AnomaliesPage() {
       {/* Anomaly rows as cards */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-semibold text-slate-900 text-base">Active Spend Alerts</h3>
-          <span className="text-xs text-slate-400">{anomalies.length} unresolved alerts</span>
+          <h3 className="font-semibold text-[#0A192F] text-base">Active Spend Alerts</h3>
+          <span className="text-xs text-[#64748B]">{anomalies.length} unresolved alerts</span>
         </div>
 
         {anomalies.map((anomaly) => {
@@ -141,7 +141,7 @@ export default function AnomaliesPage() {
           return (
             <div
               key={anomaly.id}
-              className="bg-white rounded-2xl p-5 shadow-sm border border-black/5 transition-all hover:shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+              className="cirra-card p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
               style={{ borderLeft: `4px solid ${borderLeftColor}` }}
             >
               <div className="flex items-start gap-3.5 flex-1">
@@ -150,15 +150,15 @@ export default function AnomaliesPage() {
                 </Badge>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h4 className="font-bold text-slate-900 text-sm">{anomaly.serviceName}</h4>
+                    <h4 className="font-bold text-[#0A192F] text-sm">{anomaly.serviceName}</h4>
                     <span className="text-xs font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full">
                       {anomaly.surgePercent}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 max-w-2xl">
+                  <p className="text-xs text-[#475569] mt-1 max-w-2xl">
                     {anomaly.explanation?.summary}
                   </p>
-                  <div className="flex items-center gap-3 mt-2 text-[11px] text-slate-400">
+                  <div className="flex items-center gap-3 mt-2 text-[11px] text-[#64748B]">
                     <span>Detected {anomaly.detected_at}</span>
                     <span>·</span>
                     <span className="font-mono">Current: ${anomaly.currentCost?.toLocaleString()} vs Expected: ${anomaly.expectedCost?.toLocaleString()}</span>
@@ -170,14 +170,14 @@ export default function AnomaliesPage() {
                 <button
                   type="button"
                   onClick={() => handleDismiss(anomaly.id)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#475569] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-colors"
                 >
                   Dismiss
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedAnomaly(anomaly)}
-                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors flex items-center gap-1.5 shadow-sm"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0062E0] text-white hover:bg-[#0052C2] transition-colors flex items-center gap-1.5 shadow-sm"
                 >
                   <Eye className="w-3.5 h-3.5" />
                   <span>View Details</span>
@@ -188,10 +188,10 @@ export default function AnomaliesPage() {
         })}
 
         {anomalies.length === 0 && (
-          <div className="bg-white rounded-2xl p-12 text-center border border-black/5">
+          <div className="cirra-card p-12 text-center">
             <CheckCircle className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
-            <h4 className="font-semibold text-slate-900">Zero active anomalies</h4>
-            <p className="text-xs text-slate-400 mt-1">All multi-cloud spend is running within forecasted boundaries.</p>
+            <h4 className="font-semibold text-[#0A192F]">Zero active anomalies</h4>
+            <p className="text-xs text-[#64748B] mt-1">All multi-cloud spend is running within forecasted boundaries.</p>
           </div>
         )}
       </div>
@@ -199,18 +199,18 @@ export default function AnomaliesPage() {
       {/* Detail Modal / Drawer if an anomaly is selected */}
       {selectedAnomaly && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="cirra-card max-w-lg w-full p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-[#D6E4F5] pb-3">
               <div className="flex items-center gap-2">
                 <Badge variant={getSeverityBadgeVariant(selectedAnomaly.severity)} className="uppercase text-[10px]">
                   {selectedAnomaly.severity}
                 </Badge>
-                <h3 className="font-bold text-slate-900 text-base">{selectedAnomaly.serviceName}</h3>
+                <h3 className="font-bold text-[#0A192F] text-base">{selectedAnomaly.serviceName}</h3>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedAnomaly(null)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                className="text-[#64748B] hover:text-[#334155] p-1"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -218,40 +218,40 @@ export default function AnomaliesPage() {
 
             <div className="space-y-3 text-xs">
               <div>
-                <span className="font-semibold text-slate-700">Root Cause Diagnostics:</span>
-                <p className="mt-1 text-slate-600 bg-slate-50 p-3 rounded-xl border border-slate-100 leading-relaxed">
+                <span className="font-semibold text-[#334155]">Root Cause Diagnostics:</span>
+                <p className="mt-1 text-[#475569] bg-[#F8FAFD] p-3 rounded-xl border border-[#D6E4F5] leading-relaxed">
                   {selectedAnomaly.explanation?.root_cause}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slate-400 text-[10px] uppercase font-bold">Observed Spend</span>
+                <div className="bg-[#F8FAFD] border border-[#D6E4F5] p-3 rounded-xl">
+                  <span className="text-[#64748B] text-[10px] uppercase font-bold">Observed Spend</span>
                   <div className="text-base font-bold text-rose-600 mt-0.5">
                     ${selectedAnomaly.currentCost?.toLocaleString()}
                   </div>
                 </div>
-                <div className="bg-slate-50 p-3 rounded-xl">
-                  <span className="text-slate-400 text-[10px] uppercase font-bold">Baseline Expected</span>
-                  <div className="text-base font-bold text-slate-700 mt-0.5">
+                <div className="bg-[#F8FAFD] border border-[#D6E4F5] p-3 rounded-xl">
+                  <span className="text-[#64748B] text-[10px] uppercase font-bold">Baseline Expected</span>
+                  <div className="text-base font-bold text-[#334155] mt-0.5">
                     ${selectedAnomaly.expectedCost?.toLocaleString()}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex justify-end gap-2 pt-3 border-t border-[#D6E4F5]">
               <button
                 type="button"
                 onClick={() => handleDismiss(selectedAnomaly.id)}
-                className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"
+                className="px-3.5 py-2 rounded-lg text-xs font-medium text-[#475569] hover:bg-[#F0F5FD]"
               >
                 Dismiss Alert
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedAnomaly(null)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#0062E0] text-white hover:bg-[#0052C2] shadow-sm"
               >
                 Acknowledge & Close
               </button>

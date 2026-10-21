@@ -33,7 +33,7 @@ export default function AiSpendPage() {
       render: (val, row) => (
         <div>
           <div className="font-semibold text-slate-900">{String(val)}</div>
-          <div className="text-[11px] text-slate-400">{row.customer ?? "Standard"}</div>
+          <div className="text-[11px] text-[#64748B]">{row.customer ?? "Standard"}</div>
         </div>
       ),
     },
@@ -50,7 +50,7 @@ export default function AiSpendPage() {
       key: "apiKeyId",
       header: "Key (Masked)",
       render: (val) => (
-        <span className="font-mono text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
+        <span className="font-mono text-xs text-[#475569] bg-[#F0F5FD] border border-[#D6E4F5] px-2 py-0.5 rounded">
           {String(val)}
         </span>
       ),
@@ -129,15 +129,15 @@ export default function AiSpendPage() {
       </div>
 
       {/* Provider Tabs Filter + Model Cost Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+      <div className="cirra-card p-6">
         <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
           <div>
-            <h3 className="font-semibold text-slate-900 text-base">Model Cost Attribution</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Aggregated costs by foundation model family</p>
+            <h3 className="font-semibold text-[#0A192F] text-base">Model Cost Attribution</h3>
+            <p className="text-xs text-[#475569] mt-0.5">Aggregated costs by foundation model family</p>
           </div>
 
           {/* Provider Tabs */}
-          <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-full">
+          <div className="flex items-center gap-1.5 bg-[#F0F5FD] border border-[#D6E4F5] p-1 rounded-full">
             {["all", "OpenAI", "Anthropic"].map((p) => {
               const active = activeProvider === p;
               return (
@@ -147,8 +147,8 @@ export default function AiSpendPage() {
                   onClick={() => setActiveProvider(p)}
                   className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all ${
                     active
-                      ? "bg-white text-indigo-600 shadow-sm"
-                      : "text-slate-600 hover:text-slate-900"
+                      ? "bg-white text-[#0062E0] shadow-sm border border-[#BCD9FC]"
+                      : "text-[#475569] hover:text-[#0A192F]"
                   }`}
                 >
                   {p === "all" ? "All Providers" : p}
@@ -160,16 +160,16 @@ export default function AiSpendPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {filteredModels.map((m) => (
-            <div key={m.model} className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 flex flex-col justify-between">
+            <div key={m.model} className="p-4 rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
                   {m.provider}
                 </span>
-                <div className="text-sm font-bold text-slate-900 mt-1 truncate">
+                <div className="text-sm font-bold text-[#0A192F] mt-1 truncate">
                   {m.model}
                 </div>
               </div>
-              <div className="text-base font-extrabold text-indigo-600 mt-3">
+              <div className="text-base font-extrabold text-[#0062E0] mt-3">
                 ${m.cost.toLocaleString()}
               </div>
             </div>
@@ -180,8 +180,8 @@ export default function AiSpendPage() {
       {/* Full Usage DataTable */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-semibold text-slate-900 text-base">API Key Token Telemetry</h3>
-          <span className="text-xs text-slate-400">{filteredItems.length} active keys tracked</span>
+          <h3 className="font-semibold text-[#0A192F] text-base">API Key Token Telemetry</h3>
+          <span className="text-xs text-[#64748B]">{filteredItems.length} active keys tracked</span>
         </div>
         <DataTable
           columns={columns}

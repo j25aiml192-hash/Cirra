@@ -15,7 +15,7 @@ export const SideSheetContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-zinc-200 bg-white p-6 shadow-xl transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right dark:border-zinc-800 dark:bg-zinc-950",
+        "fixed inset-y-0 right-0 z-50 flex h-full w-full max-w-md flex-col border-l border-[#D6E4F5] bg-white p-6 shadow-[0_8px_32px_-8px_rgba(12,48,96,0.16)] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
         className
       )}
       {...props}
