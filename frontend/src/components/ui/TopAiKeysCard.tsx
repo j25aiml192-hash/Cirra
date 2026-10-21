@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Key, Bot, ShieldCheck } from "lucide-react";
+import { formatNumber } from "@/lib/utils";
 import type { TopAiKey } from "@/types";
 
 export interface TopAiKeysCardProps {
@@ -86,7 +87,7 @@ export function TopAiKeysCard({ data, loading = false }: TopAiKeysCardProps) {
                   <span className="font-bold text-[#0A192F]">{keyItem.tokens}</span>
                 </div>
                 <div className="text-xs font-bold text-[#0A192F] cirra-metric flex-shrink-0">
-                  ${keyItem.spend.toLocaleString()}
+                  ${formatNumber(keyItem.spend)}
                 </div>
               </div>
             </div>

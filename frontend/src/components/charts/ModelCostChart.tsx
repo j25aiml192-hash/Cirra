@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { formatNumber } from "@/lib/utils";
 
 interface ModelCostChartProps {
   data: Array<{ model: string; cost: number }>;
@@ -42,7 +43,7 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
             axisLine={false}
           />
           <Tooltip
-            formatter={(value: number) => [`$${value.toLocaleString()}`, "Cost"]}
+            formatter={(value: number) => [`$${formatNumber(value)}`, "Cost"]}
             contentStyle={{
               backgroundColor: "#FFFFFF",
               borderRadius: "12px",

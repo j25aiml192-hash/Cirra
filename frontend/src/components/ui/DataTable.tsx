@@ -13,6 +13,8 @@ export interface DataTableProps<T> {
   loading?: boolean;
   emptyText?: string;
   headerStyle?: React.CSSProperties;
+  cellStyle?: React.CSSProperties;
+  rowStyle?: React.CSSProperties;
 }
 
 export function DataTable<T>({
@@ -21,6 +23,8 @@ export function DataTable<T>({
   loading = false,
   emptyText = "No data found",
   headerStyle,
+  cellStyle,
+  rowStyle,
 }: DataTableProps<T>) {
   if (loading) {
     return (
@@ -86,6 +90,7 @@ export function DataTable<T>({
               style={{
                 borderBottom: "1px solid #EBF2FA",
                 fontSize: 13,
+                ...rowStyle,
               }}
             >
               {columns.map((col, cIndex) => {
@@ -94,8 +99,9 @@ export function DataTable<T>({
                   <td
                     key={String(col.key) + cIndex}
                     style={{
-                      padding: "12px 16px",
+                      padding: "14px 18px",
                       color: "#0F1E36",
+                      ...cellStyle,
                     }}
                   >
                     {col.render ? col.render(val, row) : (val as React.ReactNode)}

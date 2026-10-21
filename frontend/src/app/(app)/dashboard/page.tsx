@@ -9,15 +9,15 @@ import {
   Cpu,
   ShieldCheck,
   Filter,
-  Search,
-  Bell,
 } from "lucide-react";
+import { Topbar } from "@/components/layout/Topbar";
 import { useDashboard } from "@/hooks/useDashboard";
 import { PeriodTabs } from "@/components/ui/PeriodTabs";
 import { StatCard } from "@/components/ui/StatCard";
 import { SpendBarChart } from "@/components/charts/SpendBarChart";
 import { TopServicesTable } from "@/components/ui/TopServicesTable";
 import { TopAiKeysCard } from "@/components/ui/TopAiKeysCard";
+import { formatNumber } from "@/lib/utils";
 import type { Period } from "@/types";
 
 export default function DashboardPage() {
@@ -25,9 +25,9 @@ export default function DashboardPage() {
   const [selectedProvider, setSelectedProvider] = useState<string>("All");
   const { data, isLoading } = useDashboard();
 
-  const totalSpendFormatted = data ? `$${data.total_spend_mtd.toLocaleString()}` : "$0";
-  const aiSpendFormatted = data ? `$${data.ai_spend_mtd.toLocaleString()}` : "$0";
-  const projectedFormatted = data ? `$${(data.forecasted_spend / 1000).toFixed(0)}K` : "$0";
+  const totalSpendFormatted = data ? `$${formatNumber(data.total_spend_mtd)}` : "$0";
+  const aiSpendFormatted = data ? `$${formatNumber(data.ai_spend_mtd)}` : "$0";
+  const projectedFormatted = data ? `$${formatNumber(data.forecasted_spend / 1000)}K` : "$0";
   const coveragePercentFormatted = data ? `${data.attributionCoverage.percentage}%` : "0%";
   const coverageSub = data
     ? `${data.attributionCoverage.resourcesCount} of ${data.attributionCoverage.totalResources} resources`
@@ -36,82 +36,11 @@ export default function DashboardPage() {
   const providers = ["All", "AWS", "GCP", "OpenAI", "Anthropic"];
 
   return (
-    <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
-      {/* 0. Top Navigation Pill Bar (Directly mirroring the top header in reference design) */}
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4 pb-1">
-        {/* Navigation Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-white/80 border border-[#D6E4F5] shadow-xs backdrop-blur-md overflow-x-auto max-w-full">
-          <Link
-            href="/dashboard"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-[#0062E0] text-white shadow-sm shadow-[#0062E0]/25"
-          >
-            Overview
-          </Link>
-          <Link
-            href="/spend/cloud"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-all whitespace-nowrap"
-          >
-            Cloud Spend
-          </Link>
-          <Link
-            href="/spend/ai"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-all whitespace-nowrap"
-          >
-            AI Models
-          </Link>
-          <Link
-            href="/allocation"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-all whitespace-nowrap"
-          >
-            Attribution
-          </Link>
-          <Link
-            href="/anomalies"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-all whitespace-nowrap"
-          >
-            Anomalies
-          </Link>
-          <Link
-            href="/savings"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F0F5FD] transition-all whitespace-nowrap"
-          >
-            Savings
-          </Link>
-        </div>
+    <div className="min-h-screen">
+      <Topbar />
 
-        {/* Right Search, Notification & User Avatar */}
-        <div className="flex items-center gap-2.5 self-end md:self-auto">
-          <div className="relative hidden sm:block w-56 lg:w-64">
-            <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search FOCUS resources..."
-              className="w-full h-8 pl-8 pr-3 rounded-xl bg-white/90 border border-[#D6E4F5] text-xs text-[#0A192F] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
-            />
-          </div>
-
-          <button
-            type="button"
-            aria-label="Notifications"
-            className="w-8 h-8 rounded-xl bg-white border border-[#D6E4F5] flex items-center justify-center relative hover:bg-[#F0F5FD] hover:border-[#BCD4F0] transition-all shadow-xs"
-          >
-            <Bell className="w-3.5 h-3.5 text-[#5A6E85]" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#0062E0] rounded-full ring-2 ring-white" />
-          </button>
-
-          <Link
-            href="/settings/profile"
-            className="h-8 pl-1.5 pr-2.5 rounded-xl bg-white border border-[#D6E4F5] flex items-center gap-2 text-xs font-semibold text-[#0A192F] hover:bg-[#F0F5FD] hover:border-[#BCD4F0] transition-all shadow-xs"
-          >
-            <div className="w-5 h-5 rounded-lg bg-gradient-to-tr from-[#0052C2] to-[#0070F3] flex items-center justify-center shadow-xs">
-              <span className="text-white text-[10px] font-bold">HK</span>
-            </div>
-            <span className="font-bold">Hiten</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 1. Header Row & Telemetry Status (inspired by reference layout) */}
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
+        {/* 1. Header Row & Telemetry Status (inspired by reference layout) */}
       <div className="space-y-3">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -307,6 +236,7 @@ export default function DashboardPage() {
       <div>
         <TopAiKeysCard data={data?.topAiKeys ?? []} loading={isLoading} />
       </div>
-    </main>
+      </main>
+    </div>
   );
 }

@@ -7,6 +7,7 @@ import { StatCard } from "@/components/ui/StatCard";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
 import { useAiSpend } from "@/hooks/useSpend";
+import { formatNumber } from "@/lib/utils";
 import type { AiSpendRecord } from "@/types";
 
 export default function AiSpendPage() {
@@ -85,78 +86,79 @@ export default function AiSpendPage() {
       header: "Cost (USD)",
       render: (val) => (
         <span className="font-bold text-slate-900">
-          ${Number(val).toLocaleString()}
+          ${formatNumber(Number(val))}
         </span>
       ),
     },
   ];
 
   return (
-    <div className="p-8 space-y-6">
-      <Topbar title="AI & Foundation Model Spend" subtitle="Real-time token attribution, prompt caching rates, and model cost controls" />
+    <div className="min-h-screen">
+      <Topbar />
 
-      {/* 3 StatCards: violet, blue, green */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <StatCard
-          variant="violet"
-          icon={<Cpu className="w-4 h-4" />}
-          label="TOTAL AI RUN-RATE"
-          value={`$${data ? data.totalCostUsd.toLocaleString() : 0}`}
-          sub="OpenAI + Anthropic APIs"
-          delta="+18.4%"
-          deltaPositive={false}
-          loading={isLoading}
-        />
-        <StatCard
-          variant="blue"
-          icon={<Zap className="w-4 h-4" />}
-          label="BILLABLE TOKENS"
-          value={`${data ? (data.totalTokens / 1000000000).toFixed(1) : 0}B`}
-          sub="Prompt + completion volume"
-          delta="+24.1%"
-          deltaPositive={false}
-          loading={isLoading}
-        />
-        <StatCard
-          variant="green"
-          icon={<Database className="w-4 h-4" />}
-          label="CACHE OPTIMIZATION"
-          value={`${data ? data.cachedTokensPercent : 0}%`}
-          sub="Saved ~$8,400 via prompt cache"
-          progress={data?.cachedTokensPercent ? Math.round(data.cachedTokensPercent) : 0}
-          loading={isLoading}
-        />
-      </div>
-
-      {/* Provider Tabs Filter + Model Cost Card */}
-      <div className="cirra-card p-6">
-        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
-          <div>
-            <h3 className="font-semibold text-[#0A192F] text-base">Model Cost Attribution</h3>
-            <p className="text-xs text-[#475569] mt-0.5">Aggregated costs by foundation model family</p>
-          </div>
-
-          {/* Provider Tabs */}
-          <div className="flex items-center gap-1.5 bg-[#F0F5FD] border border-[#D6E4F5] p-1 rounded-full">
-            {["all", "OpenAI", "Anthropic"].map((p) => {
-              const active = activeProvider === p;
-              return (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setActiveProvider(p)}
-                  className={`px-3.5 py-1 rounded-full text-xs font-semibold transition-all ${
-                    active
-                      ? "bg-white text-[#0062E0] shadow-sm border border-[#BCD9FC]"
-                      : "text-[#475569] hover:text-[#0A192F]"
-                  }`}
-                >
-                  {p === "all" ? "All Providers" : p}
-                </button>
-              );
-            })}
-          </div>
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
+        {/* 3 StatCards: violet, blue, green */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <StatCard
+            variant="violet"
+            icon={<Cpu className="w-4 h-4" />}
+            label="TOTAL AI RUN-RATE"
+            value={data ? `$${formatNumber(data.totalCostUsd)}` : "$0"}
+            sub="OpenAI + Anthropic APIs"
+            delta="+18.4%"
+            deltaPositive={false}
+            loading={isLoading}
+          />
+          <StatCard
+            variant="blue"
+            icon={<Zap className="w-4 h-4" />}
+            label="BILLABLE TOKENS"
+            value={`${data ? (data.totalTokens / 1000000000).toFixed(1) : 0}B`}
+            sub="Prompt + completion volume"
+            delta="+24.1%"
+            deltaPositive={false}
+            loading={isLoading}
+          />
+          <StatCard
+            variant="green"
+            icon={<Database className="w-4 h-4" />}
+            label="CACHE OPTIMIZATION"
+            value={`${data ? data.cachedTokensPercent : 0}%`}
+            sub="Saved ~$8,400 via prompt cache"
+            progress={data?.cachedTokensPercent ? Math.round(data.cachedTokensPercent) : 0}
+            loading={isLoading}
+          />
         </div>
+
+        {/* Provider Tabs Filter + Model Cost Card */}
+        <div className="cirra-card p-6">
+          <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+            <div>
+              <h3 className="font-semibold text-[#0A192F] text-base">Model Cost Attribution</h3>
+              <p className="text-xs text-[#475569] mt-0.5">Aggregated costs by foundation model family</p>
+            </div>
+
+            {/* Provider Tabs */}
+            <div className="inline-flex items-center p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] shadow-inner overflow-x-auto">
+              {["all", "OpenAI", "Anthropic"].map((p) => {
+                const active = activeProvider === p;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setActiveProvider(p)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                      active
+                        ? "bg-[#181B20] text-white shadow-xs"
+                        : "text-[#4A5E73] font-medium hover:text-[#0A192F] hover:bg-white/40"
+                    }`}
+                  >
+                    {p === "all" ? "All Providers" : p}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           {filteredModels.map((m) => (
@@ -170,7 +172,7 @@ export default function AiSpendPage() {
                 </div>
               </div>
               <div className="text-base font-extrabold text-[#0062E0] mt-3">
-                ${m.cost.toLocaleString()}
+                ${formatNumber(m.cost)}
               </div>
             </div>
           ))}
@@ -189,7 +191,8 @@ export default function AiSpendPage() {
           loading={isLoading}
           emptyText="No AI spend records for this filter"
         />
-      </div>
+        </div>
+      </main>
     </div>
   );
 }

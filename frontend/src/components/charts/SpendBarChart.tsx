@@ -11,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 import type { MonthlySpendData } from "@/types";
+import { formatNumber } from "@/lib/utils";
 
 export interface SpendBarChartProps {
   data: MonthlySpendData[];
@@ -54,14 +55,14 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
                 <span className="text-[#4A607A] font-medium">{entry.name}</span>
               </div>
               <span className="font-bold text-[#0A192F] cirra-metric">
-                ${entry.value.toLocaleString()}
+                ${formatNumber(Number(entry.value))}
               </span>
             </div>
           ))}
         </div>
         <div className="mt-2.5 pt-2 border-t border-[#E2EDF8] flex items-center justify-between text-xs font-bold text-[#0A192F]">
           <span>Combined Billed</span>
-          <span className="cirra-metric text-[#0062E0]">${total.toLocaleString()}</span>
+          <span className="cirra-metric text-[#0062E0]">${formatNumber(total)}</span>
         </div>
       </div>
     );

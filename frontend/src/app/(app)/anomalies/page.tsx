@@ -5,6 +5,7 @@ import { AlertTriangle, ShieldAlert, CheckCircle, Clock, Eye, X } from "lucide-r
 import { Topbar } from "@/components/layout/Topbar";
 import { StatCard } from "@/components/ui/StatCard";
 import { Badge } from "@/components/ui/Badge";
+import { formatNumber } from "@/lib/utils";
 import type { Anomaly } from "@/types";
 
 const mockAnomaliesList: Anomaly[] = [
@@ -81,10 +82,11 @@ export default function AnomaliesPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <Topbar title="Sentinel Anomaly Detection" subtitle="Statistical ARIMA + MAD anomaly detection engine with root-cause insights" />
+    <div className="min-h-screen">
+      <Topbar />
 
-      {/* 4 Stat Cards */}
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
+        {/* 4 Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         <StatCard
           variant="red"
@@ -161,7 +163,7 @@ export default function AnomaliesPage() {
                   <div className="flex items-center gap-3 mt-2 text-[11px] text-[#64748B]">
                     <span>Detected {anomaly.detected_at}</span>
                     <span>·</span>
-                    <span className="font-mono">Current: ${anomaly.currentCost?.toLocaleString()} vs Expected: ${anomaly.expectedCost?.toLocaleString()}</span>
+                    <span className="font-mono">Current: ${formatNumber(anomaly.currentCost)} vs Expected: ${formatNumber(anomaly.expectedCost)}</span>
                   </div>
                 </div>
               </div>
@@ -228,13 +230,13 @@ export default function AnomaliesPage() {
                 <div className="bg-[#F8FAFD] border border-[#D6E4F5] p-3 rounded-xl">
                   <span className="text-[#64748B] text-[10px] uppercase font-bold">Observed Spend</span>
                   <div className="text-base font-bold text-rose-600 mt-0.5">
-                    ${selectedAnomaly.currentCost?.toLocaleString()}
+                    ${formatNumber(selectedAnomaly.currentCost)}
                   </div>
                 </div>
                 <div className="bg-[#F8FAFD] border border-[#D6E4F5] p-3 rounded-xl">
                   <span className="text-[#64748B] text-[10px] uppercase font-bold">Baseline Expected</span>
                   <div className="text-base font-bold text-[#334155] mt-0.5">
-                    ${selectedAnomaly.expectedCost?.toLocaleString()}
+                    ${formatNumber(selectedAnomaly.expectedCost)}
                   </div>
                 </div>
               </div>
@@ -259,6 +261,7 @@ export default function AnomaliesPage() {
           </div>
         </div>
       )}
+      </main>
     </div>
   );
 }
