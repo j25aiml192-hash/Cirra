@@ -93,7 +93,7 @@ export default function ConnectionsSettingsPage() {
             setSelectedProvider("aws");
             setTestStatus("idle");
           }}
-          className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium text-xs flex items-center gap-2 hover:bg-indigo-700 shadow-sm transition-all"
+          className="px-4 py-2 rounded-xl bg-[#0062E0] text-white font-medium text-xs flex items-center gap-2 hover:bg-[#0052C2] shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Connection
         </button>
@@ -111,7 +111,7 @@ export default function ConnectionsSettingsPage() {
               className={`rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between ${
                 isError
                   ? "bg-red-50/70 border border-red-200"
-                  : "bg-white border border-black/5 hover:shadow-md"
+                  : "bg-white border border-[#D6E4F5] shadow-[0_4px_24px_-4px_rgba(12,48,96,0.05),0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#BCD4F0] hover:shadow-[0_8px_30px_-6px_rgba(12,48,96,0.08),0_2px_6px_rgba(0,0,0,0.03)]"
               }`}
               style={{
                 borderLeft: isError ? "4px solid #EF4444" : undefined,
@@ -126,8 +126,8 @@ export default function ConnectionsSettingsPage() {
                     {prov.letter}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-slate-900 text-sm leading-tight">{conn.name}</h4>
-                    <span className="text-xs text-slate-400">{prov.name}</span>
+                    <h4 className="font-semibold text-[#0A192F] text-sm leading-tight">{conn.name}</h4>
+                    <span className="text-xs text-[#64748B]">{prov.name}</span>
                   </div>
                 </div>
 
@@ -152,22 +152,22 @@ export default function ConnectionsSettingsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between pt-4 mt-3 border-t border-slate-100/80">
-                <span className="text-xs text-slate-400">
+              <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#D6E4F5]">
+                <span className="text-xs text-[#64748B]">
                   Last synced {conn.last_synced_at ?? "never"}
                 </span>
 
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    className="px-2.5 py-1 text-xs font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-100/60 rounded-md transition-colors"
+                    className="px-2.5 py-1 text-xs font-medium text-[#475569] hover:text-[#0A192F] hover:bg-[#F0F5FD] rounded-md transition-colors"
                   >
                     Test
                   </button>
                   <button
                     type="button"
                     onClick={() => handleRemove(conn.id)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                    className="p-1.5 text-[#64748B] hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -186,17 +186,17 @@ export default function ConnectionsSettingsPage() {
             onClick={() => setSheetOpen(false)}
           />
 
-          <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
+          <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white border-l border-[#D6E4F5] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
             <div>
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center justify-between border-b border-[#D6E4F5] pb-4">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">Connect New Provider</h3>
-                  <p className="text-xs text-slate-400 mt-0.5">Telemetry ingested with read-only least-privilege credentials</p>
+                  <h3 className="font-bold text-[#0A192F] text-lg">Connect New Provider</h3>
+                  <p className="text-xs text-[#475569] mt-0.5">Telemetry ingested with read-only least-privilege credentials</p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSheetOpen(false)}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded-md"
+                  className="p-1 text-[#64748B] hover:text-[#334155] rounded-md"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -204,7 +204,7 @@ export default function ConnectionsSettingsPage() {
 
               {/* Provider grid (2x4) */}
               <div className="mt-5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B] block mb-2.5">
                   Select Provider
                 </label>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -220,8 +220,8 @@ export default function ConnectionsSettingsPage() {
                         }}
                         className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
                           isSelected
-                            ? "border-indigo-600 bg-indigo-50/40 ring-1 ring-indigo-600"
-                            : "border-slate-200 hover:border-slate-300 bg-white"
+                            ? "border-[#0062E0] bg-[#EBF3FE] ring-1 ring-[#0062E0]"
+                            : "border-[#D6E4F5] hover:border-[#BCD4F0] bg-white"
                         }`}
                       >
                         <div className="flex items-center gap-2.5">
@@ -231,9 +231,9 @@ export default function ConnectionsSettingsPage() {
                           >
                             {prov.letter}
                           </div>
-                          <span className="text-xs font-semibold text-slate-800">{prov.name}</span>
+                          <span className="text-xs font-semibold text-[#334155]">{prov.name}</span>
                         </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600" />}
+                        {isSelected && <Check className="w-3.5 h-3.5 text-[#0062E0]" />}
                       </button>
                     );
                   })}
@@ -242,38 +242,38 @@ export default function ConnectionsSettingsPage() {
 
               {/* Dynamic Credential Fields */}
               {selectedProvider && (
-                <div className="mt-6 space-y-3.5 pt-4 border-t border-slate-100">
+                <div className="mt-6 space-y-3.5 pt-4 border-t border-[#D6E4F5]">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 block mb-1">
+                    <label className="text-xs font-semibold text-[#334155] block mb-1">
                       Connection Nickname
                     </label>
                     <input
                       value={connName}
                       onChange={(e) => setConnName(e.target.value)}
                       placeholder="e.g. Production Billing"
-                      className="w-full h-9 px-3 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500"
+                      className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white focus:outline-none focus:border-[#0062E0]"
                     />
                   </div>
 
                   {["aws", "bedrock"].includes(selectedProvider) && (
                     <>
                       <div>
-                        <label className="text-xs font-semibold text-slate-700 block mb-1">
+                        <label className="text-xs font-semibold text-[#334155] block mb-1">
                           Role ARN (Read-Only)
                         </label>
                         <input
                           placeholder="arn:aws:iam::123456789012:role/CirraCostReader"
-                          className="w-full h-9 px-3 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500"
+                          className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0]"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-slate-700 block mb-1">
+                        <label className="text-xs font-semibold text-[#334155] block mb-1">
                           External ID
                         </label>
                         <input
                           defaultValue="cirra-tenant-token-98f2b"
                           readOnly
-                          className="w-full h-9 px-3 text-xs rounded-lg border border-slate-200 bg-slate-50 text-slate-500"
+                          className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-[#F8FAFD] text-[#475569]"
                         />
                       </div>
                     </>
@@ -281,38 +281,38 @@ export default function ConnectionsSettingsPage() {
 
                   {["openai", "anthropic"].includes(selectedProvider) && (
                     <div>
-                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      <label className="text-xs font-semibold text-[#334155] block mb-1">
                         Admin Usage Read-Only API Key
                       </label>
                       <input
                         type="password"
                         placeholder="sk-admin-..."
-                        className="w-full h-9 px-3 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500 font-mono"
+                        className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
                       />
                     </div>
                   )}
 
                   {["gcp", "vertex"].includes(selectedProvider) && (
                     <div>
-                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      <label className="text-xs font-semibold text-[#334155] block mb-1">
                         Service Account JSON Key
                       </label>
                       <textarea
                         rows={3}
                         placeholder='{"type": "service_account", ...}'
-                        className="w-full p-2.5 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500 font-mono"
+                        className="w-full p-2.5 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
                       />
                     </div>
                   )}
 
                   {selectedProvider === "kubernetes" && (
                     <div>
-                      <label className="text-xs font-semibold text-slate-700 block mb-1">
+                      <label className="text-xs font-semibold text-[#334155] block mb-1">
                         Prometheus / OpenCost Endpoint
                       </label>
                       <input
                         placeholder="https://opencost.internal.cluster:9003"
-                        className="w-full h-9 px-3 text-xs rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-500"
+                        className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0]"
                       />
                     </div>
                   )}
@@ -323,7 +323,7 @@ export default function ConnectionsSettingsPage() {
                       type="button"
                       onClick={handleTestConnection}
                       disabled={testStatus === "testing"}
-                      className="w-full h-9 rounded-lg border border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-slate-100 transition-colors"
+                      className="w-full h-9 rounded-lg border border-[#D6E4F5] bg-[#F8FAFD] text-[#334155] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#F0F5FD] transition-colors"
                     >
                       {testStatus === "testing" ? (
                         <>
@@ -347,11 +347,11 @@ export default function ConnectionsSettingsPage() {
             </div>
 
             {/* Bottom Actions */}
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="pt-4 border-t border-[#D6E4F5] flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setSheetOpen(false)}
-                className="px-3.5 py-2 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"
+                className="px-3.5 py-2 rounded-lg text-xs font-medium text-[#475569] hover:bg-[#F0F5FD]"
               >
                 Cancel
               </button>
@@ -359,7 +359,7 @@ export default function ConnectionsSettingsPage() {
                 type="button"
                 onClick={handleSaveConnection}
                 disabled={testStatus !== "success"}
-                className="px-5 py-2 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 transition-colors shadow-sm"
+                className="px-5 py-2 rounded-lg text-xs font-semibold bg-[#0062E0] text-white hover:bg-[#0052C2] disabled:opacity-40 transition-colors shadow-sm"
               >
                 Save & Connect
               </button>

@@ -34,18 +34,18 @@ export function AppleFaqTile() {
   ];
 
   return (
-    <section id="faq" className="w-full bg-[#f5f5f7] text-[#1d1d1f] py-24 px-4 sm:px-6">
+    <section id="faq" className="w-full bg-[#F1F6FD] text-[#0A192F] py-24 px-4 sm:px-6">
       <div className="max-w-[860px] mx-auto">
         <div className="text-center mb-14">
-          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#1d1d1f] leading-[1.10]">
+          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#0A192F] leading-[1.10]">
             Frequently Asked Questions.
           </h2>
-          <p className="mt-3 text-[17px] font-normal text-[#7a7a7a] tracking-[-0.015em] leading-[1.47]">
+          <p className="mt-3 text-[17px] font-normal text-[#475569] tracking-[-0.015em] leading-[1.47]">
             Architecture, zero-trust security, and integration answers.
           </p>
         </div>
 
-        <div className="divide-y divide-[#e0e0e0] border-t border-b border-[#e0e0e0]">
+        <div className="divide-y divide-[#D6E4F5] border-t border-b border-[#D6E4F5]">
           {faqs.map((item, idx) => {
             const isOpen = openIndex === idx;
 
@@ -54,17 +54,17 @@ export function AppleFaqTile() {
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full flex items-center justify-between text-left text-[17px] font-semibold text-[#1d1d1f] hover:text-[#0066cc] transition-colors"
+                  className="w-full flex items-center justify-between text-left text-[17px] font-semibold text-[#0A192F] hover:text-[#0062E0] transition-colors"
                 >
                   <span>{item.q}</span>
                   <ChevronDown
-                    className={`w-5 h-5 text-[#7a7a7a] transition-transform duration-200 ${
-                      isOpen ? "rotate-180 text-[#0066cc]" : ""
+                    className={`w-5 h-5 text-[#64748B] transition-transform duration-200 ${
+                      isOpen ? "rotate-180 text-[#0062E0]" : ""
                     }`}
                   />
                 </button>
                 {isOpen && (
-                  <p className="mt-3 text-[15px] text-[#474749] leading-[1.47] pr-8">
+                  <p className="mt-3 text-[15px] text-[#475569] leading-[1.47] pr-8">
                     {item.a}
                   </p>
                 )}

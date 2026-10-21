@@ -9,34 +9,33 @@ export interface PeriodTabsProps {
 }
 
 const pills: Array<{ value: Period; label: string }> = [
-  { value: "30d", label: "30 Days" },
-  { value: "90d", label: "90 Days" },
-  { value: "6m", label: "6 Months" },
-  { value: "12m", label: "12 Months" },
+  { value: "30d", label: "30 days" },
+  { value: "90d", label: "90 days" },
+  { value: "6m", label: "6 months" },
+  { value: "12m", label: "12 months" },
 ];
 
 export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div
+      role="tablist"
+      aria-label="Select period"
+      className="inline-flex items-center bg-[#EAF2FC] p-1 rounded-xl border border-[#D6E4F5] select-none shadow-sm"
+    >
       {pills.map((pill) => {
         const isActive = value === pill.value;
         return (
           <button
             key={pill.value}
             type="button"
+            role="tab"
+            aria-selected={isActive}
             onClick={() => onChange(pill.value)}
-            style={{
-              background: isActive ? "#4F46E5" : "rgba(255,255,255,0.7)",
-              color: isActive ? "#FFFFFF" : "#475569",
-              border: isActive ? "1px solid #4F46E5" : "1px solid rgba(0,0,0,0.08)",
-              borderRadius: 999,
-              padding: "6px 14px",
-              fontSize: 13,
-              fontWeight: 500,
-              cursor: "pointer",
-              transition: "all 0.15s ease",
-              boxShadow: isActive ? "0 2px 8px rgba(79, 70, 229, 0.25)" : "none",
-            }}
+            className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070F3] ${
+              isActive
+                ? "bg-white text-[#0062E0] shadow-[0_2px_8px_rgba(0,98,224,0.12)] border border-[#BCD9FC]"
+                : "text-[#4A607A] hover:text-[#0A192F] hover:bg-white/50"
+            }`}
           >
             {pill.label}
           </button>
@@ -45,3 +44,4 @@ export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
     </div>
   );
 }
+

@@ -37,44 +37,44 @@ function NavItem({ href, icon, label, badge, badgeColor = "amber", collapsed }: 
   const pathname = usePathname();
   const isActive = pathname === href;
 
-  const badgeBg =
-    badgeColor === "amber" ? "bg-amber-100 text-amber-800" :
-    badgeColor === "rose" ? "bg-rose-100 text-rose-800" : "bg-indigo-100 text-indigo-800";
-
   return (
     <Link
       href={href}
       title={collapsed ? label : undefined}
       className={cn(
-        "relative flex items-center h-10 px-2.5 rounded-[10px] transition-colors group",
+        "group relative flex items-center h-9 px-2.5 rounded-xl text-sm font-medium transition-all duration-150 select-none",
         isActive
-          ? "bg-indigo-50 text-indigo-600 font-semibold"
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-[#EBF3FE] text-[#0062E0] font-semibold border border-[#BCD9FC]/70 shadow-[0_1px_3px_rgba(0,98,224,0.06)]"
+          : "text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F2F7FD]"
       )}
       style={{
         justifyContent: collapsed ? "center" : "flex-start",
       }}
     >
-      <div className="relative flex items-center justify-center w-5 h-5 flex-shrink-0">
+      <div className={cn(
+        "relative flex items-center justify-center w-4 h-4 flex-shrink-0 transition-colors",
+        isActive ? "text-[#0062E0]" : "text-[#5A6E85] group-hover:text-[#0A192F]"
+      )}>
         {icon}
         {badge && collapsed && (
           <span
-            className={cn(
-              "absolute -top-1 -right-1 w-2 h-2 rounded-full",
-              badgeColor === "amber" ? "bg-amber-500" : "bg-rose-500"
-            )}
+            className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#EA3943] ring-2 ring-white"
           />
         )}
       </div>
 
       {!collapsed && (
         <div className="flex flex-1 items-center justify-between ml-2.5 overflow-hidden">
-          <span className="text-sm truncate">{label}</span>
+          <span className="truncate">{label}</span>
           {badge && (
             <span
               className={cn(
-                "ml-auto text-[11px] font-semibold px-1.5 py-0.2 rounded-full",
-                badgeBg
+                "ml-auto text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none",
+                badgeColor === "amber"
+                  ? "bg-[#FFF4E5] text-[#B45309] border border-[#FDE68A]"
+                  : badgeColor === "rose"
+                  ? "bg-[#FEECEC] text-[#DC2626] border border-[#FECACA]"
+                  : "bg-[#EBF3FE] text-[#0062E0] border border-[#BCD9FC]"
               )}
             >
               {badge}
@@ -88,43 +88,37 @@ function NavItem({ href, icon, label, badge, badgeColor = "amber", collapsed }: 
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   return (
-    <nav
-      className="fixed left-4 top-1/2 -translate-y-1/2 z-50 transition-all duration-200 flex flex-col justify-between"
+    <aside
+      className="fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between cirra-sidebar transition-all duration-200 select-none"
       style={{
-        width: collapsed ? 68 : 240,
-        height: "calc(100vh - 32px)",
-        maxHeight: 740,
-        background: "rgba(255, 255, 255, 0.85)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        border: "1px solid rgba(255, 255, 255, 0.6)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
-        borderRadius: 20,
-        padding: "16px 10px",
+        width: collapsed ? 76 : 240,
       }}
     >
-      {/* Top: Logo + Toggle */}
-      <div>
+      {/* Top: Logo & Nav items */}
+      <div className="flex flex-col flex-1 overflow-y-auto px-3 py-4">
+        {/* Brand header */}
         <div
           className={cn(
-            "flex items-center pb-3 border-b border-black/5",
-            collapsed ? "justify-center" : "justify-between px-2"
+            "flex items-center pb-3.5 mb-3 border-b border-[#D6E4F5]",
+            collapsed ? "justify-center" : "justify-between px-1"
           )}
         >
           <Link
             href="/"
-            title="Go to Cirra landing page"
-            className="flex items-center gap-2.5 group cursor-pointer hover:opacity-85 transition-all"
+            title="Cirra — Cloud & AI Cost Intelligence"
+            className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <div className="w-9 h-9 rounded-[10px] bg-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0052C2] to-[#0070F3] flex items-center justify-center flex-shrink-0 shadow-sm shadow-[#0062E0]/25 transition-transform group-hover:scale-105">
               <span className="text-white font-bold text-sm tracking-tight">C</span>
             </div>
             {!collapsed && (
               <div className="flex flex-col">
-                <span className="font-semibold text-slate-900 text-sm leading-tight group-hover:text-indigo-600 transition-colors">
+                <span className="font-bold text-[#0A192F] text-[15px] tracking-tight leading-tight">
                   Cirra
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium">Cost Control</span>
+                <span className="text-[10px] text-[#5A6E85] font-medium tracking-normal">
+                  Cost Intelligence
+                </span>
               </div>
             )}
           </Link>
@@ -132,18 +126,19 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           <button
             type="button"
             onClick={onToggle}
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-md hover:bg-slate-100/50 transition-colors"
+            className="text-[#5A6E85] hover:text-[#0A192F] p-1 rounded-lg hover:bg-[#EBF3FE] transition-colors"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
           </button>
         </div>
 
-        {/* Navigation Items */}
-        <div className="mt-3 space-y-1">
+        {/* Section: Overview */}
+        <div className="space-y-1">
           {!collapsed && (
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1">
-              OVERVIEW
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1">
+              Overview
             </div>
           )}
           <NavItem
@@ -154,14 +149,14 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           />
 
           {!collapsed && (
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1 mt-2.5">
-              SPEND
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1 mt-3">
+              Spend
             </div>
           )}
           <NavItem
             href="/spend/cloud"
             icon={<Cloud className="w-4 h-4" />}
-            label="Cloud"
+            label="Cloud Spend"
             collapsed={collapsed}
           />
           <NavItem
@@ -172,8 +167,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           />
 
           {!collapsed && (
-            <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-400 px-3 py-1 mt-2.5">
-              OPTIMIZE
+            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1 mt-3">
+              Optimize
             </div>
           )}
           <NavItem
@@ -205,8 +200,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         </div>
       </div>
 
-      {/* Bottom: Settings & Avatar */}
-      <div className="pt-2 border-t border-black/5 space-y-1">
+      {/* Bottom: Settings & User Profile */}
+      <div className="p-3 border-t border-[#D6E4F5] space-y-1 bg-white/60">
         <NavItem
           href="/settings/connections"
           icon={<Plug className="w-4 h-4" />}
@@ -228,21 +223,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
 
         <div
           className={cn(
-            "flex items-center pt-2 px-1 mt-1",
-            collapsed ? "justify-center" : "gap-2.5 px-2"
+            "flex items-center pt-2 mt-1 border-t border-[#D6E4F5]",
+            collapsed ? "justify-center" : "gap-2.5 px-2 py-1.5 rounded-xl bg-[#F0F5FD] border border-[#D6E4F5]"
           )}
         >
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-xs font-semibold shadow-sm flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-[#DCEBFC] text-[#0062E0] flex items-center justify-center text-[11px] font-bold flex-shrink-0 border border-[#BCD9FC]">
             HK
           </div>
           {!collapsed && (
             <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-semibold text-slate-800 truncate">Hiten K.</span>
-              <span className="text-[10px] text-slate-400 truncate">Acme Inc. (Admin)</span>
+              <span className="text-xs font-semibold text-[#0A192F] truncate leading-tight">
+                Hiten K.
+              </span>
+              <span className="text-[10px] text-[#5A6E85] truncate leading-tight">
+                Acme Inc. (Admin)
+              </span>
             </div>
           )}
         </div>
       </div>
-    </nav>
+    </aside>
   );
 }

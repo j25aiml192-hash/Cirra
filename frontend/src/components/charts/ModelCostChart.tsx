@@ -24,10 +24,10 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
           data={data}
           margin={{ top: 5, right: 20, left: 40, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#e4e4e7" />
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EBF2FA" />
           <XAxis
             type="number"
-            stroke="#71717a"
+            stroke="#475569"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -36,7 +36,7 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
           <YAxis
             type="category"
             dataKey="model"
-            stroke="#71717a"
+            stroke="#475569"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -44,14 +44,15 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
           <Tooltip
             formatter={(value: number) => [`$${value.toLocaleString()}`, "Cost"]}
             contentStyle={{
-              backgroundColor: "#18181b",
-              borderRadius: "8px",
-              border: "none",
-              color: "#fff",
+              backgroundColor: "#FFFFFF",
+              borderRadius: "12px",
+              border: "1px solid #BCD9FC",
+              color: "#0A192F",
               fontSize: "12px",
+              boxShadow: "0 10px 30px -4px rgba(12,48,96,0.12)",
             }}
           />
-          <Bar dataKey="cost" fill="#8B5CF6" radius={[0, 4, 4, 0]} />
+          <Bar dataKey="cost" fill="#6366F1" radius={[0, 4, 4, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

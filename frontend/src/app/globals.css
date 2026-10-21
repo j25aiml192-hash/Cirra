@@ -1,66 +1,86 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-
 :root {
-  --bg-page:        #f5f5f7;
-  --bg-surface:     #ffffff;
-  --brand:          #0066cc;
-  --brand-focus:    #0071e3;
-  --brand-on-dark:  #2997ff;
+  --bg-gradient-start: #E8F1FC;
+  --bg-gradient-mid:   #F1F6FD;
+  --bg-gradient-end:   #F8FAFE;
 
-  --ink:            #1d1d1f;
-  --ink-muted-80:   #333333;
-  --ink-muted-48:   #7a7a7a;
-  --body-muted:     #cccccc;
+  --card-bg:           #FFFFFF;
+  --card-border:       #D6E4F5;
+  --card-border-hover: #BCD4F0;
 
-  --surface-tile-1: #272729;
-  --surface-tile-2: #2a2a2c;
-  --surface-tile-3: #252527;
-  --surface-black:  #000000;
-  --canvas-parchment: #f5f5f7;
+  --text-navy:         #0A192F;
+  --text-primary:      #0F1E36;
+  --text-secondary:    #4A607A;
+  --text-muted:        #7E93AB;
 
-  --hairline:       #e0e0e0;
+  --brand-blue:        #0062E0;
+  --brand-blue-hover:  #0052C2;
+  --brand-blue-light:  #E8F2FE;
+  --brand-blue-border: #BCD9FC;
+
+  --color-aws:         #F58536;
+  --color-gcp:         #1A73E8;
+  --color-openai:      #10A37F;
+  --color-anthropic:   #9333EA;
+
+  --radius-card:       16px;
+  --radius-pill:       9999px;
+
+  --shadow-subtle:     0 2px 10px -2px rgba(12, 45, 90, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-card:       0 4px 24px -4px rgba(12, 48, 96, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-card-hover: 0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 body {
-  background: #ffffff;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Inter", system-ui, sans-serif;
-  color: #1d1d1f;
+  background: linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
+  background-attachment: fixed;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
+  color: var(--text-primary);
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Apple Single System Drop Shadow (reserved for product imagery) */
-.apple-product-shadow {
-  box-shadow: rgba(0, 0, 0, 0.22) 3px 5px 30px 0;
+/* Background ambient radial gradients for subtle realistic depth */
+.cirra-bg-canvas {
+  background: 
+    radial-gradient(circle at 12% 8%, rgba(186, 218, 255, 0.5) 0%, transparent 45%),
+    radial-gradient(circle at 88% 18%, rgba(200, 227, 255, 0.4) 0%, transparent 40%),
+    radial-gradient(circle at 50% 65%, rgba(215, 235, 255, 0.3) 0%, transparent 50%),
+    linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
+  background-attachment: fixed;
 }
 
-/* Apple Tight Letter Spacing */
-.tracking-apple-tight {
-  letter-spacing: -0.022em;
+/* Premium Card with subtle blue border and soft depth */
+.cirra-card {
+  background: #FFFFFF;
+  border: 1px solid #D6E4F5;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px -4px rgba(12, 48, 96, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.tracking-apple-body {
-  letter-spacing: -0.015em;
+.cirra-card:hover {
+  border-color: #BCD4F0;
+  box-shadow: 0 8px 30px -6px rgba(12, 48, 96, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-/* Apple Button Active Scale */
-.apple-btn-active:active {
-  transform: scale(0.95);
+/* Frosted sidebar */
+.cirra-sidebar {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid #D6E4F5;
 }
 
-/* Subtle frosted backdrop filter */
-.apple-frosted {
-  background: rgba(245, 245, 247, 0.8);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-}
-
-.apple-frosted-dark {
-  background: rgba(29, 29, 31, 0.8);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+/* Metric typography */
+.cirra-metric {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: #0A192F;
 }

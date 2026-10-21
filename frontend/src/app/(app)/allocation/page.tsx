@@ -94,21 +94,21 @@ export default function AllocationPage() {
       <Topbar title="Cost Allocation & Unit Economics" subtitle="Hierarchical tagging rules and ML-driven attribution coverage" />
 
       {/* Coverage Bar Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+      <div className="cirra-card p-6">
         <div className="flex justify-between text-sm mb-3">
-          <span className="font-semibold text-slate-900">Attribution Coverage</span>
-          <span className="text-slate-500 font-medium">84.2% attributed · 15.8% unallocated</span>
+          <span className="font-semibold text-[#0A192F]">Attribution Coverage</span>
+          <span className="text-[#475569] font-medium">84.2% attributed · 15.8% unallocated</span>
         </div>
-        <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
-          <div className="h-full bg-indigo-500 rounded-full" style={{ width: "84.2%" }} />
+        <div className="h-3 rounded-full bg-[#EBF2FA] overflow-hidden">
+          <div className="h-full bg-[#0062E0] rounded-full" style={{ width: "84.2%" }} />
         </div>
-        <div className="flex gap-6 mt-3 text-xs text-slate-500 font-medium">
+        <div className="flex gap-6 mt-3 text-xs text-[#475569] font-medium">
           <span className="flex items-center">
-            <span className="w-2 h-2 bg-indigo-500 rounded-full inline-block mr-1.5" />
+            <span className="w-2 h-2 bg-[#0062E0] rounded-full inline-block mr-1.5" />
             $108,100 attributed
           </span>
           <span className="flex items-center">
-            <span className="w-2 h-2 bg-slate-300 rounded-full inline-block mr-1.5" />
+            <span className="w-2 h-2 bg-[#CBD5E1] rounded-full inline-block mr-1.5" />
             $20,320 unallocated
           </span>
         </div>
@@ -131,9 +131,9 @@ export default function AllocationPage() {
                 className="bg-white/80 backdrop-blur rounded-xl p-3.5 border border-amber-200/50 flex items-center justify-between gap-4"
               >
                 <div>
-                  <div className="text-xs font-semibold text-slate-900">{sug.pattern}</div>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    Suggested Team: <span className="font-semibold text-indigo-600">{sug.suggestedTeam}</span> ·{" "}
+                  <div className="text-xs font-semibold text-[#0A192F]">{sug.pattern}</div>
+                  <div className="text-[11px] text-[#475569] mt-0.5">
+                    Suggested Team: <span className="font-semibold text-[#0062E0]">{sug.suggestedTeam}</span> ·{" "}
                     Confidence: <span className="font-medium text-emerald-600">{(sug.confidence * 100).toFixed(0)}%</span> ·{" "}
                     Attributed spend: <span className="font-semibold">${sug.estimatedSpend.toLocaleString()}/mo</span>
                   </div>
@@ -150,7 +150,7 @@ export default function AllocationPage() {
                   <button
                     type="button"
                     onClick={() => handleDismissSuggestion(sug.id)}
-                    className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-500 text-xs font-medium hover:bg-slate-50"
+                    className="px-2.5 py-1 rounded-lg bg-white border border-[#D6E4F5] text-[#475569] text-xs font-medium hover:bg-[#F0F5FD]"
                   >
                     <X className="w-3.5 h-3.5" /> Dismiss
                   </button>
@@ -162,40 +162,40 @@ export default function AllocationPage() {
       )}
 
       {/* Rules Table Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-black/5">
+      <div className="cirra-card p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="font-semibold text-slate-900 text-base">Allocation Rules Hierarchy</h3>
-            <p className="text-xs text-slate-400 mt-0.5">Rules are evaluated sequentially from top to bottom</p>
+            <h3 className="font-semibold text-[#0A192F] text-base">Allocation Rules Hierarchy</h3>
+            <p className="text-xs text-[#475569] mt-0.5">Rules are evaluated sequentially from top to bottom</p>
           </div>
           <button
             type="button"
-            className="px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white text-xs font-medium flex items-center gap-1.5 hover:bg-indigo-700 shadow-sm transition-colors"
+            className="px-3.5 py-1.5 rounded-lg bg-[#0062E0] text-white text-xs font-medium flex items-center gap-1.5 hover:bg-[#0052C2] shadow-sm transition-colors"
           >
             <Plus className="w-3.5 h-3.5" /> Add Rule
           </button>
         </div>
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-[#EBF2FA]">
           {rules.map((rule) => (
             <div
               key={rule.id}
-              className="py-3 px-2 flex items-center justify-between hover:bg-slate-50/70 rounded-lg group transition-colors"
+              className="py-3 px-2 flex items-center justify-between hover:bg-[#F4F8FD] rounded-lg group transition-colors"
             >
               <div className="flex items-center gap-3">
-                <GripVertical className="w-4 h-4 text-slate-300 cursor-grab opacity-40 group-hover:opacity-100" />
-                <span className="text-xs font-mono font-bold text-slate-400 w-6">#{rule.priority}</span>
+                <GripVertical className="w-4 h-4 text-[#94A3B8] cursor-grab opacity-40 group-hover:opacity-100" />
+                <span className="text-xs font-mono font-bold text-[#64748B] w-6">#{rule.priority}</span>
                 <Badge variant={rule.match_type === "tag" ? "indigo" : "neutral"} className="uppercase text-[10px]">
                   {rule.match_type}
                 </Badge>
-                <code className="text-xs font-mono font-medium text-slate-800 bg-slate-100 px-2 py-0.5 rounded">
+                <code className="text-xs font-mono font-medium text-[#334155] bg-[#F0F5FD] px-2 py-0.5 rounded">
                   {rule.match_value}
                 </code>
               </div>
 
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#EBF3FE] text-[#0062E0] border border-[#BCD9FC]">
                     {rule.assign_team}
                   </span>
                   {rule.assign_feature && (
@@ -204,7 +204,7 @@ export default function AllocationPage() {
                     </span>
                   )}
                   {rule.spendAttributed && (
-                    <span className="text-xs font-mono text-slate-400 ml-2">
+                    <span className="text-xs font-mono text-[#64748B] ml-2">
                       ${rule.spendAttributed.toLocaleString()}
                     </span>
                   )}
@@ -214,7 +214,7 @@ export default function AllocationPage() {
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     type="button"
-                    className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded"
+                    className="p-1.5 text-[#64748B] hover:text-[#334155] hover:bg-[#F0F5FD] rounded"
                   >
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>

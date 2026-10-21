@@ -37,14 +37,14 @@ export function ConnectorsGrid() {
   ];
 
   return (
-    <section id="connectors" className="w-full bg-[#ffffff] text-[#1d1d1f] py-24 px-4 sm:px-6">
+    <section id="connectors" className="w-full bg-white text-[#0A192F] py-24 px-4 sm:px-6">
       <div className="max-w-[1024px] mx-auto">
         {/* Apple Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
-          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#1d1d1f] leading-[1.10]">
+          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#0A192F] leading-[1.10]">
             Connect your infrastructure.
           </h2>
-          <p className="mt-3 text-[17px] font-normal text-[#7a7a7a] tracking-[-0.015em] leading-[1.47]">
+          <p className="mt-3 text-[17px] font-normal text-[#475569] tracking-[-0.015em] leading-[1.47]">
             Read-only cross-account IAM. Zero agent overhead. Never accesses customer application data or prompt payloads.
           </p>
         </div>
@@ -54,27 +54,27 @@ export function ConnectorsGrid() {
           {connectors.map((item, i) => (
             <div
               key={i}
-              className="rounded-[18px] border border-[#e0e0e0] bg-[#ffffff] p-6 flex flex-col justify-between hover:border-[#cccccc] transition-colors"
+              className="rounded-[18px] border border-[#D6E4F5] bg-white p-6 flex flex-col justify-between hover:border-[#BCD4F0] transition-colors shadow-[0_4px_24px_-4px_rgba(12,48,96,0.05)]"
             >
               <div>
-                <span className="text-[12px] font-medium text-[#7a7a7a] block mb-1">
+                <span className="text-[12px] font-medium text-[#64748B] block mb-1">
                   {item.category}
                 </span>
-                <h3 className="text-[17px] font-semibold text-[#1d1d1f] leading-[1.24]">
+                <h3 className="text-[17px] font-semibold text-[#0A192F] leading-[1.24]">
                   {item.name}
                 </h3>
-                <p className="mt-3 text-[14px] text-[#7a7a7a] leading-[1.43] tracking-[-0.015em]">
+                <p className="mt-3 text-[14px] text-[#475569] leading-[1.43] tracking-[-0.015em]">
                   {item.desc}
                 </p>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-[#f0f0f0] flex items-center justify-between">
-                <span className="text-[11px] font-medium text-[#1d1d1f] bg-[#f5f5f7] px-2.5 py-1 rounded-full">
+              <div className="mt-8 pt-4 border-t border-[#EBF2FA] flex items-center justify-between">
+                <span className="text-[11px] font-medium text-[#334155] bg-[#F0F5FD] px-2.5 py-1 rounded-full">
                   {item.badge}
                 </span>
                 <Link
                   href="/dashboard"
-                  className="text-[14px] font-normal text-[#0066cc] hover:underline flex items-center gap-0.5"
+                  className="text-[14px] font-medium text-[#0062E0] hover:underline flex items-center gap-0.5"
                 >
                   <span>{item.linkText}</span>
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -88,7 +88,7 @@ export function ConnectorsGrid() {
         <div className="mt-12 text-center">
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-1 text-[17px] font-normal text-[#0066cc] hover:underline"
+            className="inline-flex items-center gap-1 text-[17px] font-medium text-[#0062E0] hover:underline"
           >
             <span>View all 18 supported multi-cloud &amp; AI integrations</span>
             <ChevronRight className="w-4 h-4" />

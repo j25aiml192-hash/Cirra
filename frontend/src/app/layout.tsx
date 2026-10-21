@@ -6,7 +6,7 @@ import { Providers } from "./providers";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const viewport: Viewport = {
-  themeColor: "#4f46e5",
+  themeColor: "#0062E0",
   width: "device-width",
   initialScale: 1,
 };
@@ -53,7 +53,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="antialiased min-h-screen bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 selection:bg-indigo-500 selection:text-white">
+      <body className="antialiased min-h-screen cirra-bg-canvas text-[#0F1E36] selection:bg-[#0062E0] selection:text-white font-sans">
         <Providers>{children}</Providers>
       </body>
     </html>

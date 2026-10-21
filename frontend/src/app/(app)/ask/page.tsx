@@ -45,13 +45,13 @@ export default function AskPage() {
       {messages.length === 0 ? (
         /* Empty state */
         <div className="flex flex-col items-center gap-4 text-center my-auto">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-200">
+          <div className="w-14 h-14 rounded-2xl bg-[#0062E0] flex items-center justify-center shadow-lg shadow-[#0062E0]/20">
             <Sparkles className="w-7 h-7 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900">
+          <h2 className="text-2xl font-bold text-[#0A192F]">
             Ask anything about your spend
           </h2>
-          <p className="text-slate-500 max-w-md text-sm">
+          <p className="text-[#475569] max-w-md text-sm">
             Cirra queries your live data — every number comes from the database, never guessed
           </p>
           <div className="flex flex-wrap gap-2 justify-center mt-3">
@@ -64,7 +64,7 @@ export default function AskPage() {
                 key={q}
                 type="button"
                 onClick={() => handleAsk(q)}
-                className="text-xs px-4 py-2 rounded-full border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors shadow-sm"
+                className="text-xs px-4 py-2 rounded-full border border-[#BCD9FC] bg-[#EBF3FE] text-[#0062E0] hover:bg-[#DCEBFC] transition-colors shadow-sm"
               >
                 {q}
               </button>
@@ -80,13 +80,13 @@ export default function AskPage() {
               <div className="flex justify-end">
                 <div
                   style={{
-                    background: "#4F46E5",
+                    background: "#0062E0",
                     color: "white",
                     borderRadius: "16px 16px 4px 16px",
                     padding: "12px 18px",
                     fontSize: 14,
                     maxWidth: "80%",
-                    boxShadow: "0 2px 10px rgba(79, 70, 229, 0.2)",
+                    boxShadow: "0 2px 10px rgba(0, 98, 224, 0.2)",
                   }}
                 >
                   {entry.question}
@@ -98,17 +98,17 @@ export default function AskPage() {
                 <div
                   style={{
                     background: "#FFFFFF",
-                    border: "1px solid #F1F5F9",
+                    border: "1px solid #D6E4F5",
                     borderRadius: "16px 16px 16px 4px",
                     padding: "16px 20px",
                     maxWidth: "92%",
-                    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
+                    boxShadow: "0 4px 24px -4px rgba(12, 48, 96, 0.06)",
                   }}
                   className="space-y-3.5"
                 >
-                  <div className="flex items-center justify-between text-xs pb-1 border-b border-slate-100">
-                    <div className="flex items-center gap-1.5 font-semibold text-slate-800">
-                      <Bot className="w-4 h-4 text-indigo-600" />
+                  <div className="flex items-center justify-between text-xs pb-1 border-b border-[#EBF2FA]">
+                    <div className="flex items-center gap-1.5 font-semibold text-[#334155]">
+                      <Bot className="w-4 h-4 text-[#0062E0]" />
                       <span>Cirra Verified Response</span>
                     </div>
                     {entry.confidence && (
@@ -119,13 +119,13 @@ export default function AskPage() {
                     )}
                   </div>
 
-                  <p className="text-sm text-slate-800 leading-relaxed font-normal">
+                  <p className="text-sm text-[#0F1E36] leading-relaxed font-normal">
                     {entry.answer}
                   </p>
 
                   {entry.sql && (
-                    <div className="rounded-xl bg-slate-900 p-3 text-xs text-indigo-200 font-mono overflow-x-auto shadow-inner">
-                      <div className="flex items-center gap-2 text-slate-400 text-[11px] mb-1 font-sans">
+                    <div className="rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] p-3 text-xs text-[#334155] font-mono overflow-x-auto">
+                      <div className="flex items-center gap-2 text-[#64748B] text-[11px] mb-1 font-sans">
                         <Terminal className="w-3.5 h-3.5" />
                         <span>Executed SQL against FOCUS ClickHouse</span>
                       </div>
@@ -139,8 +139,8 @@ export default function AskPage() {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white border border-slate-100 rounded-2xl px-4 py-3 text-xs text-slate-500 flex items-center gap-2 shadow-sm">
-                <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
+              <div className="bg-white border border-[#D6E4F5] rounded-2xl px-4 py-3 text-xs text-[#475569] flex items-center gap-2 shadow-sm">
+                <Sparkles className="w-4 h-4 text-[#0062E0] animate-spin" />
                 <span>Synthesizing deterministic database query...</span>
               </div>
             </div>
@@ -158,19 +158,19 @@ export default function AskPage() {
             onKeyDown={(e) => e.key === "Enter" && handleAsk()}
             placeholder="Ask anything about your spend..."
             className="w-full h-14 pl-5 pr-16 rounded-full bg-white/90 backdrop-blur
-                       border-2 border-indigo-200 text-slate-900 text-sm sm:text-base shadow-sm
-                       focus:outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                       border-2 border-[#D6E4F5] text-[#0A192F] text-sm sm:text-base shadow-sm
+                       focus:outline-none focus:border-[#0062E0] focus:ring-4 focus:ring-[#0062E0]/10 transition-all"
           />
           <button
             type="button"
             onClick={() => handleAsk()}
             disabled={!input.trim() || isLoading}
-            className="absolute right-2.5 w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-700 disabled:opacity-40 transition-colors shadow-md"
+            className="absolute right-2.5 w-10 h-10 rounded-full bg-[#0062E0] flex items-center justify-center hover:bg-[#0052C2] disabled:opacity-40 transition-colors shadow-md"
           >
             <Send className="w-4 h-4 text-white" />
           </button>
         </div>
-        <p className="text-center text-xs text-slate-400 mt-2">
+        <p className="text-center text-xs text-[#64748B] mt-2">
           Every number is sourced from your database — no hallucinated figures
         </p>
       </div>

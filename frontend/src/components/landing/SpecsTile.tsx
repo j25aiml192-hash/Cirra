@@ -38,25 +38,25 @@ export function SpecsTile() {
   ];
 
   return (
-    <section id="specs" className="w-full bg-[#252527] text-[#ffffff] py-24 px-4 sm:px-6">
+    <section id="specs" className="w-full bg-[#E8F1FC] text-[#0A192F] py-24 px-4 sm:px-6">
       <div className="max-w-[860px] mx-auto">
         <div className="text-center mb-14">
-          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#ffffff] leading-[1.10]">
+          <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#0A192F] leading-[1.10]">
             Enterprise-grade by design.
           </h2>
-          <p className="mt-3 text-[17px] font-normal text-[#cccccc] tracking-[-0.015em] leading-[1.47]">
+          <p className="mt-3 text-[17px] font-normal text-[#475569] tracking-[-0.015em] leading-[1.47]">
             Built from day one for platform engineering, security auditability, and finance rigor.
           </p>
         </div>
 
         {/* Apple Configurator Specs Table */}
-        <div className="divide-y divide-[#3a3a3c] border-t border-b border-[#3a3a3c]">
+        <div className="divide-y divide-[#D6E4F5] border-t border-b border-[#D6E4F5]">
           {specs.map((spec, i) => (
             <div key={i} className="py-6 grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-8 items-start">
-              <span className="md:col-span-4 text-[17px] font-semibold text-[#ffffff] tracking-[-0.015em]">
+              <span className="md:col-span-4 text-[17px] font-semibold text-[#0A192F] tracking-[-0.015em]">
                 {spec.category}
               </span>
-              <span className="md:col-span-8 text-[17px] font-normal text-[#cccccc] leading-[1.47] tracking-[-0.015em]">
+              <span className="md:col-span-8 text-[17px] font-normal text-[#475569] leading-[1.47] tracking-[-0.015em]">
                 {spec.detail}
               </span>
             </div>
@@ -67,7 +67,7 @@ export function SpecsTile() {
         <div className="mt-12 text-center">
           <Link
             href="/dashboard"
-            className="inline-flex items-center justify-center text-[17px] font-normal text-[#ffffff] bg-[#0066cc] hover:bg-[#0071e3] px-6 py-2.5 rounded-full apple-btn-active transition-all"
+            className="inline-flex items-center justify-center text-[17px] font-medium text-white bg-[#0062E0] hover:bg-[#0052C2] px-6 py-2.5 rounded-full apple-btn-active transition-all"
           >
             Launch Console Demo
           </Link>
