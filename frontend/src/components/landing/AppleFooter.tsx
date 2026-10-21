@@ -168,7 +168,7 @@ export function AppleFooter() {
         </div>
 
         {/* Legal Row */}
-        <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-[#64748B]">
+        <div className="pt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[12px] text-[#7a7a7a]">
           <div>
             Copyright &copy; {new Date().getFullYear()} Cirra Technologies Inc. All rights reserved.
           </div>

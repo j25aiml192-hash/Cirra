@@ -108,9 +108,11 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             title="Cirra — Cloud & AI Cost Intelligence"
             className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0052C2] to-[#0070F3] flex items-center justify-center flex-shrink-0 shadow-sm shadow-[#0062E0]/25 transition-transform group-hover:scale-105">
-              <span className="text-white font-bold text-sm tracking-tight">C</span>
-            </div>
+            <img
+              src="/cirra-logo.png"
+              alt="Cirra"
+              className="w-8 h-8 rounded-xl object-contain flex-shrink-0 shadow-sm shadow-[#0062E0]/25 transition-transform group-hover:scale-105"
+            />
             {!collapsed && (
               <div className="flex flex-col">
                 <span className="font-bold text-[#0A192F] text-[15px] tracking-tight leading-tight">

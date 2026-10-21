@@ -18,9 +18,14 @@ export default function OnboardingPage() {
     <div className="cirra-bg-canvas flex min-h-screen flex-col items-center justify-center px-4">
       <div className="w-full max-w-xl">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-[#0A192F]">
-            Connect your first provider
-          </h1>
+        <img
+          src="/cirra-logo.png"
+          alt="Cirra"
+          className="mx-auto mb-4 h-12 w-12 rounded-xl object-contain shadow-sm"
+        />
+        <h1 className="text-3xl font-bold tracking-tight text-[#0A192F]">
+          Connect your first provider
+        </h1>
           <p className="mt-2 text-sm text-[#475569]">
             Cirra uses read-only access to ingest billing metadata and telemetry.
           </p>

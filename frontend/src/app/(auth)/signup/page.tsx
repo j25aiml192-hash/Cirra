@@ -3,7 +3,6 @@
 import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Layers } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -22,9 +21,11 @@ export default function SignupPage() {
     <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-600 text-white shadow-md">
-            <Layers className="h-6 w-6" />
-          </div>
+          <img
+            src="/cirra-logo.png"
+            alt="Cirra"
+            className="mx-auto mb-3 h-12 w-12 rounded-xl object-contain shadow-sm"
+          />
           <CardTitle>Create your Cirra workspace</CardTitle>
           <CardDescription>Start cutting wasted cloud & AI spend in under 5 minutes</CardDescription>
         </CardHeader>
