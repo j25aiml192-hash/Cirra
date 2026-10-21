@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { formatNumber } from "@/lib/utils";
 import type { TopService } from "@/types";
 
 export interface TopServicesTableProps {
@@ -103,7 +104,7 @@ export function TopServicesTable({
 
                 <div className="text-right flex-shrink-0 pl-2">
                   <div className="text-sm font-bold text-[#0A192F] cirra-metric">
-                    ${service.spend.toLocaleString()}
+                    ${formatNumber(service.spend)}
                   </div>
                   <div
                     className={`text-[11px] font-bold mt-0.5 ${

@@ -1,98 +1,90 @@
 "use client";
 
-import React, { useState } from "react";
-import { TrendingDown, Sparkles, Check, ArrowRight, ShieldCheck } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Check, Search } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
+import { useSavings } from "@/hooks/useSavings";
+import { formatNumber } from "@/lib/utils";
 import type { SavingsEntry } from "@/types";
 
-const mockSavingsEntries: SavingsEntry[] = [
-  {
-    id: "sav-1",
-    action_type: "EC2 Instance Downsizing (m6i.4xlarge → m6i.2xlarge)",
-    method: "Right-sizing idle compute",
-    baseline_cost: 8400,
-    realized_cost: 4200,
-    savings_amount: 4200,
-    confidence_badge: "99% Confidence",
-    status: "realized",
-    date: "Oct 12, 2026",
-  },
-  {
-    id: "sav-2",
-    action_type: "OpenAI Prompt Cache Integration (Copilot v2)",
-    method: "Prefix Caching Optimization",
-    baseline_cost: 16500,
-    realized_cost: 8100,
-    savings_amount: 8400,
-    confidence_badge: "95% Confidence",
-    status: "realized",
-    date: "Oct 15, 2026",
-  },
-  {
-    id: "sav-3",
-    action_type: "Idle RDS Multi-AZ Snapshot & Terminate",
-    method: "Orphaned test database deletion",
-    baseline_cost: 3800,
-    realized_cost: 200,
-    savings_amount: 3600,
-    confidence_badge: "98% Confidence",
-    status: "pending_approval",
-    date: "Oct 19, 2026",
-  },
-  {
-    id: "sav-4",
-    action_type: "S3 Infrequent Access Lifecycle Policy",
-    method: "Storage tiering automation",
-    baseline_cost: 6500,
-    realized_cost: 2300,
-    savings_amount: 4200,
-    confidence_badge: "92% Confidence",
-    status: "approved",
-    date: "Oct 20, 2026",
-  },
-  {
-    id: "sav-5",
-    action_type: "GKE Preemptible Node Pool Conversion",
-    method: "Batch workload spot utilization",
-    baseline_cost: 18000,
-    realized_cost: 4200,
-    savings_amount: 13800,
-    confidence_badge: "90% Confidence",
-    status: "identified",
-    date: "Oct 20, 2026",
-  },
-];
-
 export default function SavingsPage() {
-  const [entries, setEntries] = useState<SavingsEntry[]>(mockSavingsEntries);
+  const { data, isLoading, approveAction } = useSavings();
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const totalIdentified = entries.reduce((acc, curr) => acc + curr.savings_amount, 0);
+  const entries = useMemo(() => data?.entries ?? [], [data?.entries]);
 
-  const handleApprove = (id: string) => {
-    setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, status: "approved" } : e))
-    );
-  };
+  // Totals calculated dynamically from backend data layer
+  const totalIdentified = useMemo(() => {
+    if (data?.total_realized_savings !== undefined && data?.total_pipeline_savings !== undefined) {
+      return data.total_realized_savings + data.total_pipeline_savings;
+    }
+    return entries.reduce((acc, curr) => acc + curr.savings_amount, 0);
+  }, [data, entries]);
+
+  const totalRealized = useMemo(() => {
+    if (data?.total_realized_savings !== undefined) {
+      return data.total_realized_savings;
+    }
+    return entries
+      .filter((e) => e.status === "realized")
+      .reduce((acc, curr) => acc + curr.savings_amount, 0);
+  }, [data, entries]);
+
+  const totalPipeline = useMemo(() => {
+    if (data?.total_pipeline_savings !== undefined) {
+      return data.total_pipeline_savings;
+    }
+    return entries
+      .filter((e) => e.status !== "realized")
+      .reduce((acc, curr) => acc + curr.savings_amount, 0);
+  }, [data, entries]);
+
+  // Counts for filter pills
+  const counts = useMemo(() => {
+    return {
+      all: entries.length,
+      realized: entries.filter((e) => e.status === "realized").length,
+      pending_approval: entries.filter((e) => e.status === "pending_approval").length,
+      approved: entries.filter((e) => e.status === "approved").length,
+      identified: entries.filter((e) => e.status === "identified").length,
+    };
+  }, [entries]);
+
+  // Filtered rows
+  const filteredEntries = useMemo(() => {
+    return entries.filter((row) => {
+      if (statusFilter !== "all" && row.status !== statusFilter) {
+        return false;
+      }
+      if (
+        searchQuery &&
+        !row.action_type.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [entries, statusFilter, searchQuery]);
 
   const columns: Column<SavingsEntry>[] = [
     {
       key: "action_type",
-      header: "Action Type / Strategy",
-      render: (val, row) => (
-        <div>
-          <div className="font-semibold text-[#0A192F]">{String(val)}</div>
-          <div className="text-[11px] text-[#64748B]">{row.method}</div>
-        </div>
+      header: "Action / Strategy",
+      render: (val) => (
+        <span className="font-semibold text-[#0A192F] text-sm leading-snug">
+          {String(val)}
+        </span>
       ),
     },
     {
       key: "baseline_cost",
       header: "Baseline Cost",
       render: (val) => (
-        <span className="font-mono text-xs text-[#475569]">
-          ${Number(val).toLocaleString()}
+        <span className="font-medium text-xs sm:text-sm text-[#475569] tabular-nums">
+          ${formatNumber(Number(val))}
         </span>
       ),
     },
@@ -100,8 +92,8 @@ export default function SavingsPage() {
       key: "realized_cost",
       header: "Realized Cost",
       render: (val) => (
-        <span className="font-mono text-xs text-slate-700">
-          ${Number(val).toLocaleString()}
+        <span className="font-medium text-xs sm:text-sm text-[#334155] tabular-nums">
+          ${formatNumber(Number(val))}
         </span>
       ),
     },
@@ -109,8 +101,8 @@ export default function SavingsPage() {
       key: "savings_amount",
       header: "Monthly Savings",
       render: (val) => (
-        <span className="font-mono text-sm font-bold text-emerald-600">
-          +${Number(val).toLocaleString()}/mo
+        <span className="font-bold text-sm sm:text-base text-emerald-600 tabular-nums">
+          +${formatNumber(Number(val))}/mo
         </span>
       ),
     },
@@ -118,115 +110,166 @@ export default function SavingsPage() {
       key: "confidence_badge",
       header: "Confidence",
       render: (val) => (
-        <Badge variant="indigo">{String(val)}</Badge>
+        <Badge variant="indigo" className="text-[11px] font-semibold px-2 py-0.5">
+          {String(val)}
+        </Badge>
       ),
     },
     {
       key: "status",
       header: "Status",
-      render: (val, row) => {
+      render: (_val, row) => {
         if (row.status === "realized") {
-          return <Badge variant="success">Realized</Badge>;
+          return (
+            <Badge variant="success" className="text-[11px] font-semibold px-2 py-0.5">
+              Realized
+            </Badge>
+          );
         }
         if (row.status === "approved") {
-          return <Badge variant="info">Approved</Badge>;
+          return (
+            <Badge variant="info" className="text-[11px] font-semibold px-2 py-0.5">
+              Approved
+            </Badge>
+          );
         }
         if (row.status === "pending_approval") {
           return (
             <div className="flex items-center gap-2">
-              <Badge variant="warning">Requires Gate</Badge>
+              <Badge variant="warning" className="text-[11px] font-semibold px-2 py-0.5">
+                Pending Gate
+              </Badge>
               <button
                 type="button"
-                onClick={() => handleApprove(row.id)}
-                className="px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                onClick={() => approveAction(row.id)}
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-[#181B20] text-white hover:bg-[#2D333B] active:scale-95 transition-all shadow-xs flex items-center gap-1"
               >
+                <Check className="w-3.5 h-3.5" />
                 Approve
               </button>
             </div>
           );
         }
-        return <Badge variant="neutral">Identified</Badge>;
+        return (
+          <Badge variant="neutral" className="text-[11px] font-semibold px-2 py-0.5">
+            Identified
+          </Badge>
+        );
       },
     },
     {
       key: "date",
       header: "Date",
       render: (val) => (
-        <span className="text-xs text-[#64748B]">{String(val)}</span>
+        <span className="text-xs sm:text-sm font-medium text-[#64748B] tabular-nums">
+          {String(val)}
+        </span>
       ),
     },
   ];
 
   return (
-    <div className="p-8 space-y-6">
-      <Topbar title="Guaranteed Savings & Autonomous Actions" subtitle="Audit-proven cloud optimizations and mandatory human-in-the-loop safety gates" />
+    <div className="min-h-screen">
+      <Topbar title="Savings" />
 
-      {/* Hero Stat: Total identified savings $34,200 in green gradient banner */}
-      <div
-        style={{
-          borderRadius: 20,
-          padding: "24px 32px",
-          background: "linear-gradient(135deg, #065F46 0%, #059669 50%, #10B981 100%)",
-          color: "white",
-          boxShadow: "0 8px 32px rgba(16, 185, 129, 0.25)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-          gap: 16,
-        }}
-      >
-        <div>
-          <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "rgba(255,255,255,0.15)",
-              backdropFilter: "blur(8px)",
-              padding: "4px 12px",
-              borderRadius: 999,
-              fontSize: 11,
-              fontWeight: 600,
-              marginBottom: 8,
-            }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Deterministic ROI Guarantee</span>
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+        {/* Unboxed Key Metrics (Refined font sizes, clean direct typography) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 pb-2">
+          {/* Total Monthly Savings */}
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+              Total Monthly Savings
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+              ${formatNumber(totalIdentified)}
+              <span className="text-sm font-medium text-[#5A6E85] ml-1">/mo</span>
+            </div>
           </div>
-          <div style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-0.02em" }}>
-            ${totalIdentified.toLocaleString()}
-            <span style={{ fontSize: 16, fontWeight: 500, opacity: 0.85, marginLeft: 6 }}>/ month</span>
+
+          {/* Realized Savings */}
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+              Realized Savings
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+              ${formatNumber(totalRealized)}
+            </div>
           </div>
-          <p style={{ fontSize: 13, opacity: 0.9, marginTop: 4, maxWidth: 520 }}>
-            Identified recurring savings verified through pre-action baseline diffs and dry-run telemetry.
-          </p>
+
+          {/* Pipeline Opportunities */}
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+              Pipeline Opportunities
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+              ${formatNumber(totalPipeline)}
+            </div>
+          </div>
+
+          {/* Active Opportunities */}
+          <div className="space-y-1">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+              Active Opportunities
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+              {entries.length}
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12 }}>
-          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 18px", textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>$12,600</div>
-            <div style={{ fontSize: 11, opacity: 0.8 }}>Already Realized</div>
-          </div>
-          <div style={{ background: "rgba(255,255,255,0.15)", borderRadius: 12, padding: "12px 18px", textAlign: "center" }}>
-            <div style={{ fontSize: 18, fontWeight: 700 }}>$21,600</div>
-            <div style={{ fontSize: 11, opacity: 0.8 }}>Pipeline Opportunities</div>
-          </div>
-        </div>
-      </div>
+        {/* Table Controls & Data Ledger */}
+        <div className="space-y-3.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Rounded Pill Bar (Refined Apple pill size) */}
+            <div className="inline-flex items-center p-0.5 sm:p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] shadow-inner max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              {[
+                { id: "all", label: `All (${counts.all})` },
+                { id: "realized", label: `Realized (${counts.realized})` },
+                { id: "pending_approval", label: `Pending (${counts.pending_approval})` },
+                { id: "approved", label: `Approved (${counts.approved})` },
+                { id: "identified", label: `Identified (${counts.identified})` },
+              ].map((tab) => {
+                const active = statusFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setStatusFilter(tab.id)}
+                    className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+                      active
+                        ? "bg-[#181B20] text-white font-semibold shadow-xs"
+                        : "text-[#4A5E73] font-medium hover:text-[#0A192F] hover:bg-white/40"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
 
-      {/* Savings Table */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between px-1">
-          <h3 className="font-semibold text-[#0A192F] text-base">Savings Ledger & Remediation Log</h3>
-          <span className="text-xs text-[#64748B]">{entries.length} actions registered</span>
+            {/* Search Input (Pill Shaped) */}
+            <div className="relative w-full sm:w-56">
+              <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search actions..."
+                className="w-full h-8 pl-8 pr-3 rounded-full bg-white border border-[#D6E4F5] text-xs text-[#0A192F] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
+              />
+            </div>
+          </div>
+
+          {/* Savings Ledger Table */}
+          <DataTable
+            columns={columns}
+            data={filteredEntries}
+            loading={isLoading}
+            emptyText="No savings opportunities found matching criteria"
+            cellStyle={{ padding: "12px 16px" }}
+          />
         </div>
-        <DataTable
-          columns={columns}
-          data={entries}
-          emptyText="No savings opportunities recorded"
-        />
-      </div>
+      </main>
     </div>
   );
 }

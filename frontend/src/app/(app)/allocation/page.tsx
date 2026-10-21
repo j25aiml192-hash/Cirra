@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { GripVertical, Plus, Edit2, Trash2, Check, X, Sparkles } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { Badge } from "@/components/ui/Badge";
+import { formatNumber } from "@/lib/utils";
 import type { AllocationRule, SuggestedRule } from "@/types";
 
 const initialRules: AllocationRule[] = [
@@ -90,10 +91,11 @@ export default function AllocationPage() {
   };
 
   return (
-    <div className="p-8 space-y-6">
-      <Topbar title="Cost Allocation & Unit Economics" subtitle="Hierarchical tagging rules and ML-driven attribution coverage" />
+    <div className="min-h-screen">
+      <Topbar />
 
-      {/* Coverage Bar Card */}
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
+        {/* Coverage Bar Card */}
       <div className="cirra-card p-6">
         <div className="flex justify-between text-sm mb-3">
           <span className="font-semibold text-[#0A192F]">Attribution Coverage</span>
@@ -135,7 +137,7 @@ export default function AllocationPage() {
                   <div className="text-[11px] text-[#475569] mt-0.5">
                     Suggested Team: <span className="font-semibold text-[#0062E0]">{sug.suggestedTeam}</span> ·{" "}
                     Confidence: <span className="font-medium text-emerald-600">{(sug.confidence * 100).toFixed(0)}%</span> ·{" "}
-                    Attributed spend: <span className="font-semibold">${sug.estimatedSpend.toLocaleString()}/mo</span>
+                    Attributed spend: <span className="font-semibold">${formatNumber(sug.estimatedSpend)}/mo</span>
                   </div>
                 </div>
 
@@ -205,7 +207,7 @@ export default function AllocationPage() {
                   )}
                   {rule.spendAttributed && (
                     <span className="text-xs font-mono text-[#64748B] ml-2">
-                      ${rule.spendAttributed.toLocaleString()}
+                      ${formatNumber(rule.spendAttributed)}
                     </span>
                   )}
                 </div>
@@ -231,6 +233,7 @@ export default function AllocationPage() {
           ))}
         </div>
       </div>
+      </main>
     </div>
   );
 }

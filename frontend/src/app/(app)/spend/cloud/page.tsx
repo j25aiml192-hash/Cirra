@@ -9,6 +9,7 @@ import {
 } from "@/components/charts/SpendAreaChart";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { useCloudSpend } from "@/hooks/useSpend";
+import { formatNumber } from "@/lib/utils";
 import type { CloudSpendRecord } from "@/types";
 
 export default function CloudSpendPage() {
@@ -136,7 +137,7 @@ export default function CloudSpendPage() {
       header: "Spend",
       render: (val) => (
         <span className="font-bold text-[#0f172a] cirra-metric text-sm">
-          ${Number(val).toLocaleString()}
+          ${formatNumber(Number(val))}
         </span>
       ),
     },
@@ -145,7 +146,7 @@ export default function CloudSpendPage() {
       header: "Prior Period",
       render: (val) => (
         <span className="text-[#475569] font-medium text-[13px] cirra-metric">
-          ${Number(val).toLocaleString()}
+          ${formatNumber(Number(val))}
         </span>
       ),
     },
@@ -184,52 +185,50 @@ export default function CloudSpendPage() {
   ];
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
-      <Topbar
-        title="Cloud Spend"
-        subtitle="Real-time multi-cloud telemetry normalized into FOCUS 1.0 format"
-      />
+    <div className="min-h-screen">
+      <Topbar />
 
-      {/* Filter Bar */}
-      <div className="cirra-card p-3.5 sm:p-4 flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-        {/* Provider pills matching reference design */}
-        <div className="flex items-center gap-1.5 bg-[#F0F5FD] p-1 rounded-xl border border-[#D6E4F5]">
-          {["all", "AWS", "GCP"].map((p) => {
-            const active = providerFilter === p;
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => setProviderFilter(p)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  active
-                    ? "bg-[#0062E0] text-white shadow-sm shadow-[#0062E0]/20"
-                    : "text-[#5A6E85] hover:text-[#0A192F] hover:bg-white/60"
-                }`}
-              >
-                {p === "all" ? "All Providers" : p}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Search, Team dropdown & Export */}
-        <div className="flex flex-wrap items-center gap-2.5 flex-1 max-w-xl justify-end">
-          <div className="relative min-w-[180px] flex-1 max-w-xs">
-            <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search FOCUS resources, tags, services..."
-              className="w-full h-8 pl-8 pr-3 text-sm rounded-xl border border-[#D6E4F5] bg-white text-[#0f172a] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
-            />
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
+        {/* Filter Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          {/* Provider pills matching reference design */}
+          <div className="inline-flex items-center p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] shadow-inner overflow-x-auto">
+            {["all", "AWS", "GCP"].map((p) => {
+              const active = providerFilter === p;
+              return (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setProviderFilter(p)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                    active
+                      ? "bg-[#181B20] text-white shadow-xs"
+                      : "text-[#4A5E73] font-medium hover:text-[#0A192F] hover:bg-white/40"
+                  }`}
+                >
+                  {p === "all" ? "All Providers" : p}
+                </button>
+              );
+            })}
           </div>
 
-          <select
-            value={teamFilter}
-            onChange={(e) => setTeamFilter(e.target.value)}
-            className="h-8 px-3 text-sm rounded-xl border border-[#D6E4F5] bg-white text-[#334155] font-medium focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs cursor-pointer"
-          >
+          {/* Search, Team dropdown & Export */}
+          <div className="flex flex-wrap items-center gap-2.5 flex-1 max-w-xl justify-end">
+            <div className="relative min-w-[180px] flex-1 max-w-xs">
+              <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search resources..."
+                className="w-full h-9 pl-9 pr-4 text-xs sm:text-sm rounded-full border border-[#D6E4F5] bg-white text-[#0f172a] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
+              />
+            </div>
+
+            <select
+              value={teamFilter}
+              onChange={(e) => setTeamFilter(e.target.value)}
+              className="h-9 px-4 text-xs sm:text-sm rounded-full border border-[#D6E4F5] bg-white text-[#334155] font-medium focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs cursor-pointer"
+            >
             <option value="all">All Teams</option>
             <option value="Core Platform">Core Platform</option>
             <option value="Infrastructure">Infrastructure</option>
@@ -265,7 +264,7 @@ export default function CloudSpendPage() {
               {/* MTD Spend pill matching reference image top-right badge */}
               <div className="bg-[#E6F8F0] border border-[#B3ECCB] px-3.5 py-1.5 rounded-xl text-left sm:text-right w-fit">
                 <div className="text-base sm:text-lg font-bold text-[#0D824D] cirra-metric leading-tight">
-                  ${data ? data.totalCost.toLocaleString() : 0}
+                  ${data ? formatNumber(data.totalCost) : 0}
                 </div>
                 <div className="text-[10px] font-semibold text-[#0D824D] uppercase tracking-wider">
                   Total Spend (MTD)
@@ -326,6 +325,7 @@ export default function CloudSpendPage() {
           />
         </div>
       </div>
+      </main>
     </div>
   );
 }

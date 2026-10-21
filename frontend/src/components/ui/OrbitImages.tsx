@@ -348,7 +348,7 @@ const createEngine = (
       x1 = Math.max(x1, x);
       y0 = Math.min(y0, y);
       y1 = Math.max(y1, y);
-      if (y > lut[front * 2 + 1] + 1e-6) front = i;
+      if (y > (lut[front * 2 + 1] ?? -Infinity) + 1e-6) front = i;
     }
     st.lut = lut;
     st.length = length;
@@ -417,7 +417,11 @@ const createEngine = (
     const i1 = (i0 + 1) % SAMPLES;
     const t = f - Math.floor(f);
     const lut = st.lut as Float32Array;
-    return [lut[i0 * 2] + (lut[i1 * 2] - lut[i0 * 2]) * t, lut[i0 * 2 + 1] + (lut[i1 * 2 + 1] - lut[i0 * 2 + 1]) * t];
+    const x0 = lut[i0 * 2] ?? 0;
+    const x1 = lut[i1 * 2] ?? 0;
+    const y0 = lut[i0 * 2 + 1] ?? 0;
+    const y1 = lut[i1 * 2 + 1] ?? 0;
+    return [x0 + (x1 - x0) * t, y0 + (y1 - y0) * t];
   };
 
   const heading = (u: number) => {
@@ -428,7 +432,7 @@ const createEngine = (
 
   const progress = () => {
     const cfg = config.current;
-    const ease = EASINGS[cfg.easing] || EASINGS.linear;
+    const ease = (EASINGS[cfg.easing] || EASINGS.linear) as (t: number) => number;
     const whole = Math.floor(st.lap);
     return (whole + ease(st.lap - whole)) * (cfg.direction === 'reverse' ? -1 : 1) + st.manual;
   };
@@ -462,6 +466,7 @@ const createEngine = (
     const appear = introRunning ? clamp(elapsed / INTRO_FADE, 0, 1) : 1;
     for (let i = 0; i < count; i++) {
       const it = st.items[i];
+      if (!it) continue;
       let u = p + offsetOf(i, count);
       if (introRunning) u = st.front + wrapSigned(u - st.front) * spread;
       const [x, y] = sample(u);
@@ -631,7 +636,7 @@ const createEngine = (
     if (d.rate) st.manual = d.manual + (along - d.anchor) / d.rate;
     const now = performance.now();
     d.samples.push([now, along]);
-    while (d.samples.length > 2 && now - d.samples[0][0] > 100) d.samples.shift();
+    while (d.samples.length > 2 && d.samples[0] && now - d.samples[0][0] > 100) d.samples.shift();
     wake();
   };
 
@@ -648,9 +653,13 @@ const createEngine = (
     st.suppressUntil = now + 400;
     const s = d.samples;
     if (!cancelled && s.length > 1 && d.rate) {
-      const [t0, a0] = s[0];
-      const [t1, a1] = s[s.length - 1];
-      if (t1 > t0 && now - t1 < 80) st.glide = clamp((((a1 - a0) / (t1 - t0)) * 1000) / d.rate, -3, 3);
+      const s0 = s[0];
+      const s1 = s[s.length - 1];
+      if (s0 && s1) {
+        const [t0, a0] = s0;
+        const [t1, a1] = s1;
+        if (t1 > t0 && now - t1 < 80) st.glide = clamp((((a1 - a0) / (t1 - t0)) * 1000) / d.rate, -3, 3);
+      }
     }
     wake();
   };
@@ -662,7 +671,8 @@ const createEngine = (
     const cfg = config.current;
     if (index < 0) return;
     if (cfg.clickToFront) bringToFront(index);
-    cfg.onItemClick?.(index, cfg.sources[index]);
+    const src = cfg.sources[index];
+    if (src) cfg.onItemClick?.(index, src);
   };
 
   const onClick = (e: MouseEvent) => {
@@ -721,8 +731,11 @@ const createEngine = (
   if (typeof IntersectionObserver !== 'undefined') {
     intersection = new IntersectionObserver(
       entries => {
-        st.visible = entries[entries.length - 1].isIntersecting;
-        if (st.visible) wake();
+        const last = entries[entries.length - 1];
+        if (last) {
+          st.visible = last.isIntersecting;
+          if (st.visible) wake();
+        }
       },
       { threshold: 0.05 }
     );

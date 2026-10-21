@@ -14,8 +14,8 @@ export function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function formatNumber(val: number): string {
-  if (isNaN(val) || val === null || val === undefined) return "0";
+export function formatNumber(val?: number | null): string {
+  if (val === null || val === undefined || isNaN(val)) return "0";
   return Math.round(val)
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ",");

@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { formatNumber } from "@/lib/utils";
 
 /* -------------------------------------------------------------------------- */
 /* Types                                                                      */
@@ -78,7 +79,7 @@ function MultiCloudTooltip({ active, payload, label }: MultiCloudTooltipProps) {
                 <span className="text-[#4A607A] font-medium">{entry.name}</span>
               </div>
               <span className="font-bold text-[#0A192F] cirra-metric">
-                ${Math.round(entry.value).toLocaleString()}
+                ${formatNumber(Math.round(entry.value))}
               </span>
             </div>
           ))}
@@ -87,7 +88,7 @@ function MultiCloudTooltip({ active, payload, label }: MultiCloudTooltipProps) {
         <div className="mt-2.5 pt-2 border-t border-[#E2EDF8] flex items-center justify-between text-xs font-bold text-[#0A192F]">
           <span>Combined Spend</span>
           <span className="cirra-metric text-[#0062E0]">
-            ${Math.round(total).toLocaleString()}
+            ${formatNumber(Math.round(total))}
           </span>
         </div>
       </div>
@@ -115,7 +116,7 @@ function VelocityTooltip({ active, payload, label }: VelocityTooltipProps) {
       <div className="bg-white rounded-xl p-3 border border-[#BCD9FC] shadow-[0_8px_24px_-4px_rgba(12,48,96,0.12)] select-none">
         <div className="text-[11px] font-medium text-[#7E93AB]">{label} Telemetry</div>
         <div className="text-sm font-bold text-[#0A192F] cirra-metric mt-0.5">
-          ${Math.round(val).toLocaleString()}
+          ${formatNumber(Math.round(val))}
           <span className="text-[11px] font-normal text-[#5A6E85] ml-1">/ day</span>
         </div>
       </div>
