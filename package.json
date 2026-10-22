@@ -1,0 +1,16 @@
+{
+  "name": "cirra-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace=frontend",
+    "dev": "npm run dev --workspace=frontend",
+    "install:frontend": "cd frontend && npm install"
+  },
+  "dependencies": {
+    "next": "14.2.0"
+  }
+}
