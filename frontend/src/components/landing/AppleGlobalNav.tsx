@@ -47,7 +47,7 @@ export function AppleGlobalNav() {
           <a href="#specs" className="hover:text-[#0A192F] transition-colors">
             Specs
           </a>
-          <Link href="/dashboard" className="text-[#2997ff] hover:underline transition-all">
+          <Link href="/dashboard" className="text-[#0062E0] hover:underline transition-all">
             Console
           </Link>
         </div>
