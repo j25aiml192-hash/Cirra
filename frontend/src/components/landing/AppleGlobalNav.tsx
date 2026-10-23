@@ -8,8 +8,8 @@ export function AppleGlobalNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/90 text-[#0A192F] h-[44px] border-b border-[#D6E4F5] backdrop-blur-md">
-      <div className="max-w-[1024px] mx-auto h-full px-4 flex items-center justify-between text-[12px] font-medium tracking-[-0.01em]">
+    <nav className="sticky top-0 z-50 w-full bg-white/90 text-[#0A192F] h-[52px] border-b border-[#E8EFF7] backdrop-blur-md">
+      <div className="max-w-[1400px] mx-auto h-full px-6 sm:px-12 flex items-center justify-between text-[13px] font-medium tracking-[-0.01em]">
         {/* Apple-style Logo mark */}
         <Link
           href="/"
