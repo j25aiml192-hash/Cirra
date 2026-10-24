@@ -142,11 +142,109 @@ body {
   animation: marquee-scroll 24s linear infinite;
 }
 
-.animate-marquee-infinite:hover {
-  animation-play-state: paused;
-}
-
 .animate-border-shimmer {
   animation: border-shimmer 3.5s linear infinite;
 }
+
+/* Rhythmic Flashing Line Animation */
+@keyframes flash-line {
+  0%, 100% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(56, 189, 248, 0));
+  }
+  45%, 55% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 18px rgba(0, 98, 224, 0.8));
+  }
+}
+
+.animate-flash-line {
+  animation: flash-line 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Floating Cloud Continuous Drifting Animations for Action Center (Edge to Card) */
+@keyframes float-cloud-left-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(46px, -12px) rotate(0.8deg);
+  }
+  50% {
+    transform: translate(94px, -4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(46px, 10px) rotate(-0.8deg);
+  }
+}
+
+@keyframes float-cloud-left-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(48px, 14px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translate(98px, 4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(48px, -10px) rotate(0.8deg);
+  }
+}
+
+@keyframes float-cloud-right-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(-46px, -12px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translate(-94px, -4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-46px, 10px) rotate(0.8deg);
+  }
+}
+
+@keyframes float-cloud-right-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(-48px, 14px) rotate(0.8deg);
+  }
+  50% {
+    transform: translate(-98px, 4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-48px, -10px) rotate(-0.8deg);
+  }
+}
+
+.animate-float-cloud-left-1 {
+  animation: float-cloud-left-1 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-cloud-left-2 {
+  animation: float-cloud-left-2 7.5s ease-in-out infinite 0.8s;
+  will-change: transform;
+}
+
+.animate-float-cloud-right-1 {
+  animation: float-cloud-right-1 6.8s ease-in-out infinite 0.4s;
+  will-change: transform;
+}
+
+.animate-float-cloud-right-2 {
+  animation: float-cloud-right-2 7.2s ease-in-out infinite 1.2s;
+  will-change: transform;
+}
+
+
+
+
+
 

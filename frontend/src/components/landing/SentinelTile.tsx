@@ -32,19 +32,12 @@ export function SentinelTile() {
   };
 
   return (
-    <section id="sentinel" className="w-full bg-[#34373bff] text-white pb-36 sm:pb-44 relative overflow-hidden scroll-mt-20">
-      {/* Moving Animated Border Ribbon Divider with Cirra Logo & Text */}
-      <div className="w-full relative z-20 overflow-hidden bg-[#0F1117]/90 backdrop-blur-md py-2.5 border-y border-slate-700/50 shadow-[0_4px_24px_rgba(0,0,0,0.35)] select-none">
-        {/* Top Moving Laser Line (Silver/Grey) */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[1.5px] animate-border-shimmer"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, #34373bff 25%, #94A3B8 50%, #CBD5E1 75%, transparent 100%)",
-            backgroundSize: "200% 100%",
-          }}
-        />
+    <section id="sentinel" className="w-full bg-[#050B18] text-white pb-24 sm:pb-36 lg:pb-44 relative overflow-hidden scroll-mt-20">
+      {/* Clean Animated Flashing Line between Hero and Sentinel */}
+      <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#38BDF8] via-[#60A5FA] to-transparent animate-flash-line pointer-events-none z-30" />
 
+      {/* Moving Text Stream Divider (Seamless, No Borders, No Boxes) */}
+      <div className="w-full relative z-20 overflow-hidden bg-[#050B18]/60 backdrop-blur-sm py-3 select-none">
         {/* Infinite Moving Marquee */}
         <div className="flex w-max animate-marquee-infinite items-center gap-7">
           {[...Array(2)].map((_, listIdx) => (
@@ -80,16 +73,6 @@ export function SentinelTile() {
             </div>
           ))}
         </div>
-
-        {/* Bottom Moving Laser Line (Silver/Grey) */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-[1.5px] animate-border-shimmer"
-          style={{
-            background:
-              "linear-gradient(90deg, transparent 0%, #CBD5E1 25%, #94A3B8 50%, #475569 75%, transparent 100%)",
-            backgroundSize: "200% 100%",
-          }}
-        />
       </div>
 
       {/* Animated Glyph Sonar Background in Dark Blue Theme */}
@@ -99,14 +82,14 @@ export function SentinelTile() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[480px] bg-gradient-to-tr from-[#0062E0]/15 via-[#38BDF8]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Horizon Dawn Light Glow at the bottom merging threshold */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-64 bg-gradient-to-t from-[#0062E0]/15 via-[#38BDF8]/12 to-transparent blur-3xl pointer-events-none z-[1]" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-32 bg-gradient-to-t from-[#0062E0]/15 via-[#38BDF8]/10 to-transparent blur-3xl pointer-events-none z-[1]" />
 
-      {/* Seamless Merging Transition: Dark Blue (#050B18) into Light (#F1F6FD) */}
+      {/* Seamless Merging Transition: Delayed start so dark starry space has generous room */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-56 sm:h-72 pointer-events-none z-[2]"
+        className="absolute bottom-0 left-0 right-0 h-44 sm:h-60 pointer-events-none z-[2]"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(5, 11, 24, 0) 0%, rgba(5, 11, 24, 0.3) 25%, rgba(18, 42, 82, 0.45) 50%, rgba(160, 196, 238, 0.65) 75%, rgba(241, 246, 253, 0.95) 94%, #F1F6FD 100%)",
+            "linear-gradient(to bottom, rgba(5, 11, 24, 0) 0%, rgba(5, 11, 24, 0) 25%, rgba(14, 34, 68, 0.25) 50%, rgba(200, 225, 248, 0.6) 75%, rgba(240, 248, 255, 0.95) 92%, #F0F8FF 100%)",
         }}
       />
 
@@ -180,10 +163,10 @@ export function SentinelTile() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveTab("telemetry")}
-                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                     activeTab === "telemetry"
-                      ? "border-[#0062E0] text-[#0062E0] bg-white/90 shadow-xs backdrop-blur-sm"
-                      : "border-transparent text-[#64748B] hover:text-[#0A192F]"
+                      ? "border-[#0A192F] text-white bg-[#0A192F] shadow-sm"
+                      : "border-transparent text-[#64748B] hover:text-[#0A192F] hover:bg-black/[0.04]"
                   }`}
                 >
                   <Activity className="w-3.5 h-3.5" />
@@ -192,10 +175,10 @@ export function SentinelTile() {
 
                 <button
                   onClick={() => setActiveTab("baseline")}
-                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                     activeTab === "baseline"
-                      ? "border-[#0062E0] text-[#0062E0] bg-white/90 shadow-xs backdrop-blur-sm"
-                      : "border-transparent text-[#64748B] hover:text-[#0A192F]"
+                      ? "border-[#0A192F] text-white bg-[#0A192F] shadow-sm"
+                      : "border-transparent text-[#64748B] hover:text-[#0A192F] hover:bg-black/[0.04]"
                   }`}
                 >
                   <Layers className="w-3.5 h-3.5" />
@@ -204,10 +187,10 @@ export function SentinelTile() {
 
                 <button
                   onClick={() => setActiveTab("breakers")}
-                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                  className={`px-3.5 py-2 text-[13px] font-medium rounded-t-lg border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
                     activeTab === "breakers"
-                      ? "border-[#0062E0] text-[#0062E0] bg-white/90 shadow-xs backdrop-blur-sm"
-                      : "border-transparent text-[#64748B] hover:text-[#0A192F]"
+                      ? "border-[#0A192F] text-white bg-[#0A192F] shadow-sm"
+                      : "border-transparent text-[#64748B] hover:text-[#0A192F] hover:bg-black/[0.04]"
                   }`}
                 >
                   <Zap className="w-3.5 h-3.5" />
