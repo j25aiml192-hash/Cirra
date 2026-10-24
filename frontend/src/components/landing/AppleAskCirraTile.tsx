@@ -33,59 +33,69 @@ export function AppleAskCirraTile() {
             {/* Header bar */}
             <div className="h-10 bg-[#F8FAFD] border-b border-[#D6E4F5] px-4 flex items-center justify-between text-[12px] text-[#475569]">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#e0e0e0]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#e0e0e0]" />
-                <span className="w-2.5 h-2.5 rounded-full bg-[#e0e0e0]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#BCD4F0]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#BCD4F0]" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#BCD4F0]" />
                 <span className="ml-2 font-mono text-[11px] text-[#64748B]">
-                  ask-cirra://query/openai-weekly-summary
+                  ask-cirra://architecture/deterministic-engine
                 </span>
               </div>
-              <span className="text-[11px] text-[#0062E0] font-medium bg-[#EBF3FE] px-2 py-0.5 rounded-full">
-                RLS Verified Deterministic Query
+              <span className="text-[11px] text-[#0062E0] font-medium bg-[#EBF3FE] border border-[#BCD9FC] px-2.5 py-0.5 rounded-full">
+                Zero-Hallucination Query Engine
               </span>
             </div>
 
-            <div className="p-6 sm:p-8 space-y-5">
+            <div className="p-6 sm:p-8 space-y-6">
               {/* Natural language question */}
-              <div className="p-3.5 bg-[#F8FAFD] rounded-[11px] border border-[#D6E4F5] text-[15px] font-medium text-[#0A192F]">
-                &quot;Which OpenAI key spent the most last week?&quot;
+              <div className="p-4 bg-[#F8FAFD] rounded-[11px] border border-[#D6E4F5] space-y-1">
+                <div className="text-[11px] font-mono text-[#0062E0] uppercase tracking-wider font-semibold">
+                  Example Natural Language Query
+                </div>
+                <div className="text-[16px] font-medium text-[#0A192F]">
+                  &quot;Show total multi-cloud and AI foundation spend broken down by team and normalized unit cost.&quot;
+                </div>
               </div>
 
-              {/* Result table */}
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-[13px]">
-                  <thead>
-                    <tr className="border-b border-[#D6E4F5] text-[#475569] text-[11px] uppercase tracking-wider font-semibold">
-                      <th className="pb-3 font-medium">Key Identifier</th>
-                      <th className="pb-3 font-medium">Team</th>
-                      <th className="pb-3 font-medium">Token Volume</th>
-                      <th className="pb-3 font-medium text-right">Billed Cost</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#EBF2FA] text-[#0F1E36]">
-                    <tr>
-                      <td className="py-3 font-mono font-medium">prod-copilot-service</td>
-                      <td className="py-3 text-[#64748B]">Core Platform</td>
-                      <td className="py-3 font-mono">1.12B tokens</td>
-                      <td className="py-3 text-right font-semibold font-mono">$14,250</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 font-mono font-medium">rag-embedding-pipeline</td>
-                      <td className="py-3 text-[#64748B]">Search &amp; Retrieval</td>
-                      <td className="py-3 font-mono">420M tokens</td>
-                      <td className="py-3 text-right font-semibold font-mono">$4,850</td>
-                    </tr>
-                    <tr>
-                      <td className="py-3 font-mono font-medium">eval-testing-runner</td>
-                      <td className="py-3 text-[#64748B]">Autonomous Eng</td>
-                      <td className="py-3 font-mono">210M tokens</td>
-                      <td className="py-3 text-right font-semibold font-mono">$3,120</td>
-                    </tr>
-                  </tbody>
-                </table>
+              {/* General 3-Stage Process Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[11px] font-mono text-[#0062E0] uppercase tracking-wider font-semibold">
+                    Step 01
+                  </div>
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    Semantic Parsing
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Translates natural questions into mathematically verified queries without passing sensitive tenant data to the LLM.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[11px] font-mono text-[#0062E0] uppercase tracking-wider font-semibold">
+                    Step 02
+                  </div>
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    Row-Level Security
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Enforces strict PostgreSQL 15 RLS perimeters so queries only execute within verified tenant permission boundaries.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[11px] font-mono text-[#0062E0] uppercase tracking-wider font-semibold">
+                    Step 03
+                  </div>
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    Deterministic Compute
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Executes directly on ClickHouse columnar data. Every number is calculated with 100% mathematical precision.
+                  </p>
+                </div>
               </div>
 
-              {/* Expandable SQL */}
+              {/* Expandable SQL Architecture */}
               <div className="rounded-[11px] bg-[#F8FAFD] border border-[#D6E4F5] overflow-hidden">
                 <button
                   type="button"
@@ -94,7 +104,7 @@ export function AppleAskCirraTile() {
                 >
                   <span className="flex items-center gap-1.5">
                     <Database className="w-3.5 h-3.5 text-[#0062E0]" />
-                    {showSql ? "Hide Generated ClickHouse SQL" : "View Generated ClickHouse SQL"}
+                    {showSql ? "Hide Deterministic FOCUS 1.0 SQL" : "View Deterministic FOCUS 1.0 SQL"}
                   </span>
                   {showSql ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                 </button>
@@ -102,13 +112,36 @@ export function AppleAskCirraTile() {
                 {showSql && (
                   <div className="px-4 pb-3 pt-1 text-[11px] font-mono text-[#334155] border-t border-[#D6E4F5] bg-white overflow-x-auto">
                     <pre className="leading-relaxed">
-                      <code>{`SELECT key_name, team_tag, sum(total_tokens) AS token_volume, sum(billed_cost_usd) AS total_spend
-FROM focus_ai_telemetry
-WHERE provider = 'openai' AND event_timestamp >= now() - INTERVAL 7 DAY
-GROUP BY key_name, team_tag ORDER BY total_spend DESC;`}</code>
+                      <code>{`SELECT ProviderName, ServiceCategory, TeamTag, sum(EffectiveCost) AS TotalSpend
+FROM focus_normalized_costs
+WHERE ChargePeriodStart >= now() - INTERVAL 30 DAY
+GROUP BY ProviderName, ServiceCategory, TeamTag
+ORDER BY TotalSpend DESC;`}</code>
                     </pre>
                   </div>
                 )}
+              </div>
+
+              {/* Guarantees Footer */}
+              <div className="grid grid-cols-3 gap-4 pt-1 text-[12px]">
+                <div>
+                  <span className="text-[#64748B] block">Hallucination Rate</span>
+                  <span className="text-[16px] font-semibold text-[#0D824D] mt-0.5 block">
+                    0.0% Deterministic
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#64748B] block">Isolation Standard</span>
+                  <span className="text-[16px] font-semibold text-[#0A192F] mt-0.5 block">
+                    PostgreSQL 15 RLS
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[#64748B] block">Query Engine</span>
+                  <span className="text-[16px] font-semibold text-[#0A192F] mt-0.5 block">
+                    ClickHouse Columnar
+                  </span>
+                </div>
               </div>
             </div>
           </div>

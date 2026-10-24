@@ -91,19 +91,19 @@ export function AppleFooter() {
             <h4 className="text-[14px] font-semibold text-[#0A192F] mb-3">Solutions</h4>
             <ul className="text-[14px] text-[#334155] space-y-2.5">
               <li>
-                <span className="text-[#1d1d1f]">Priya:</span> Platform &amp; DevOps
+                <span className="text-[#1d1d1f]">Platform &amp; DevOps Teams</span>
               </li>
               <li>
-                <span className="text-[#1d1d1f]">Arjun:</span> CTO &amp; VP Eng
+                <span className="text-[#1d1d1f]">Engineering Leadership</span>
               </li>
               <li>
-                <span className="text-[#1d1d1f]">Meera:</span> CFO &amp; Finance
+                <span className="text-[#1d1d1f]">Finance &amp; FinOps Leaders</span>
               </li>
               <li>
-                <span className="text-[#1d1d1f]">Sam:</span> SRE &amp; On-Call
+                <span className="text-[#1d1d1f]">SRE &amp; Infrastructure Operations</span>
               </li>
               <li>
-                <span className="text-[#474749]">Enterprise FinOps</span>
+                <span className="text-[#474749]">Enterprise Multi-Cloud</span>
               </li>
             </ul>
           </div>

@@ -38,7 +38,7 @@ export function SpecsTile() {
   ];
 
   return (
-    <section id="specs" className="w-full bg-[#E8F1FC] text-[#0A192F] py-24 px-4 sm:px-6">
+    <section id="specs" className="w-full bg-[#E8F1FC] text-[#0A192F] py-24 px-4 sm:px-6 scroll-mt-20">
       <div className="max-w-[860px] mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#0A192F] leading-[1.10]">

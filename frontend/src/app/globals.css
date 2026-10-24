@@ -36,6 +36,11 @@
   --shadow-card-hover: 0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px;
+}
+
 body {
   background: linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
   background-attachment: fixed;
@@ -84,3 +89,64 @@ body {
   letter-spacing: -0.03em;
   color: #0A192F;
 }
+
+/* Animated Moving Border & Floating Motion */
+@keyframes border-beam-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam-spin 3.2s linear infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 3.5s ease-in-out infinite;
+}
+
+/* Continuous Marquee & Border Shimmer Animations */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes border-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 24s linear infinite;
+}
+
+.animate-marquee-infinite:hover {
+  animation-play-state: paused;
+}
+
+.animate-border-shimmer {
+  animation: border-shimmer 3.5s linear infinite;
+}
+

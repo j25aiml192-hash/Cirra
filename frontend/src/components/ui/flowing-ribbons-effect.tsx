@@ -8,8 +8,9 @@ export interface FlowingRibbonsProps {
   animationSpeed?: number;
   removeWaveLine?: boolean;
   className?: string;
-  position?: 'right' | 'full' | 'center';
+  position?: 'left' | 'right' | 'full' | 'center';
   fadeLeft?: boolean;
+  fadeRight?: boolean;
 }
 
 export const FlowingRibbons = ({
@@ -20,6 +21,7 @@ export const FlowingRibbons = ({
   className = '',
   position = 'right',
   fadeLeft = true,
+  fadeRight = false,
 }: FlowingRibbonsProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timeRef = useRef<number>(0);
@@ -170,7 +172,10 @@ export const FlowingRibbons = ({
     let ribbonWidth: number;
     let ribbonOffset: number;
 
-    if (position === 'right') {
+    if (position === 'left') {
+      ribbonWidth = width * 0.85;
+      ribbonOffset = -50;
+    } else if (position === 'right') {
       ribbonWidth = width * 0.85;
       ribbonOffset = width - ribbonWidth + 50;
     } else if (position === 'full') {
@@ -291,15 +296,21 @@ export const FlowingRibbons = ({
     };
   }, [animate, resizeCanvas, handleMouseMove, handleMouseDown, handleMouseUp]);
 
-  const maskStyle: React.CSSProperties =
-    position === 'right' && fadeLeft
-      ? {
-          maskImage:
-            'linear-gradient(to right, transparent 0%, rgba(100, 95, 95, 0.3) 10%, rgba(100, 95, 95, 0.5) 30%, rgba(100, 95, 95, 0.8) 50%, rgba(100, 95, 95, 1) 70%, rgba(100, 95, 95, 1) 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent 0%, rgba(100, 95, 95, 0.3) 10%, rgba(100, 95, 95, 0.5) 30%, rgba(100, 95, 95, 0.8) 50%, rgba(100, 95, 95, 1) 70%, rgba(100, 95, 95, 1) 100%)',
-        }
-      : {};
+  let maskGradient = '';
+  if (position === 'left' || fadeRight) {
+    maskGradient =
+      'linear-gradient(to right, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 30%, rgba(0, 0, 0, 0.5) 55%, rgba(0, 0, 0, 0.18) 80%, transparent 100%)';
+  } else if (position === 'right' && fadeLeft) {
+    maskGradient =
+      'linear-gradient(to right, transparent 0%, rgba(20, 19, 19, 0.3) 10%, rgba(19, 18, 18, 0.5) 30%, rgba(19, 18, 18, 0.8) 50%, rgba(19, 18, 18, 1) 70%, rgba(19, 18, 18, 1) 100%)';
+  }
+
+  const maskStyle: React.CSSProperties = maskGradient
+    ? {
+        maskImage: maskGradient,
+        WebkitMaskImage: maskGradient,
+      }
+    : {};
 
   return (
     <div

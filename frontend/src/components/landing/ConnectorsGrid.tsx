@@ -74,7 +74,7 @@ export function ConnectorsGrid() {
   return (
     <section
       id="connectors"
-      className="w-full bg-white text-[#0A192F] py-24 px-4 sm:px-6"
+      className="w-full bg-white text-[#0A192F] py-24 px-4 sm:px-6 scroll-mt-20"
     >
       <div className="max-w-[1024px] mx-auto">
         <div className="text-center max-w-2xl mx-auto mb-14">

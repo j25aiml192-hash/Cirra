@@ -6,7 +6,7 @@ import { ChevronRight } from "lucide-react";
 
 export function SavingsLedgerTile() {
   return (
-    <section id="ledger" className="w-full bg-[#F1F6FD] text-[#0A192F] py-24 px-4 sm:px-6">
+    <section id="ledger" className="w-full bg-[#F1F6FD] text-[#0A192F] py-24 px-4 sm:px-6 scroll-mt-20">
       <div className="max-w-[1024px] mx-auto text-center">
         {/* Apple Headline Hierarchy */}
         <h2 className="text-[36px] sm:text-[40px] font-semibold tracking-[-0.022em] text-[#0A192F] leading-[1.10]">
@@ -51,69 +51,95 @@ export function SavingsLedgerTile() {
                 <span className="w-2.5 h-2.5 rounded-full bg-[#BCD4F0]" />
                 <span className="w-2.5 h-2.5 rounded-full bg-[#BCD4F0]" />
                 <span className="ml-2 font-mono text-[11px] text-[#64748B]">
-                  ledger://audit/q4-savings-summary
+                  ledger://architecture/verification-engine
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-[#30d158]">
-                Quarter-To-Date: $102,600 Verified
+              <span className="text-[11px] font-medium text-[#0D824D] bg-[#E6F8F0] border border-[#B3ECCB] px-2.5 py-0.5 rounded-full">
+                Mathematical Proof Standard
               </span>
             </div>
 
-            {/* Table Body */}
-            <div className="p-6 sm:p-8 space-y-4">
+            {/* General Capabilities Grid */}
+            <div className="p-6 sm:p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    Counterfactual Baselines
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Separates true optimization from organic traffic drops by contrasting actual invoices against dynamic pre-action forecasts.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    FOCUS 1.0 Reconciliation
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Normalizes heterogeneous cloud invoices and AI token consumption into a single transparent accounting schema.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] space-y-2">
+                  <div className="text-[14px] font-semibold text-[#0A192F]">
+                    CFO &amp; Audit Ready
+                  </div>
+                  <p className="text-[12px] text-[#475569] leading-[1.5]">
+                    Tamper-evident verification logs certify exact realized ROI for finance leadership, auditors, and board decks.
+                  </p>
+                </div>
+              </div>
+
+              {/* General Telemetry Table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-[13px]">
                   <thead>
                     <tr className="border-b border-[#D6E4F5] text-[#475569] text-[11px] uppercase tracking-wider font-semibold">
-                      <th className="pb-3 font-medium">Remediation Action</th>
-                      <th className="pb-3 font-medium">Pillar</th>
-                      <th className="pb-3 font-medium">Counterfactual Baseline</th>
-                      <th className="pb-3 font-medium">Realized Spend</th>
-                      <th className="pb-3 font-medium text-right">Proven Savings</th>
+                      <th className="pb-3 font-medium">Optimization Category</th>
+                      <th className="pb-3 font-medium">Baseline Modeling</th>
+                      <th className="pb-3 font-medium">Standard</th>
+                      <th className="pb-3 font-medium text-right">Verification Output</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#EBF2FA] text-[#334155]">
                     <tr>
                       <td className="py-3.5 text-[#0A192F] font-medium">
-                        Purged 14 Unattached EBS gp3 Volumes
+                        Multi-Cloud Compute &amp; DB Rightsizing
                       </td>
-                      <td className="py-3.5 text-[#64748B]">ACT / Cleanup</td>
-                      <td className="py-3.5 font-mono">$3,420/mo</td>
-                      <td className="py-3.5 font-mono">$0/mo</td>
-                      <td className="py-3.5 text-right font-semibold text-[#30d158] font-mono">
-                        +$3,420/mo
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="py-3.5 text-[#0A192F] font-medium">
-                        GPT-4o Semantic Model Routing
-                      </td>
-                      <td className="py-3.5 text-[#64748B]">PROVE / AI Margin</td>
-                      <td className="py-3.5 font-mono">$18,200/mo</td>
-                      <td className="py-3.5 font-mono">$4,100/mo</td>
-                      <td className="py-3.5 text-right font-semibold text-[#30d158] font-mono">
-                        +$14,100/mo
+                      <td className="py-3.5 text-[#64748B]">Historical 90-Day p95</td>
+                      <td className="py-3.5 font-mono text-[#0062E0]">FOCUS 1.0</td>
+                      <td className="py-3.5 text-right font-medium text-[#0D824D]">
+                        Realized Spend Delta
                       </td>
                     </tr>
                     <tr>
                       <td className="py-3.5 text-[#0A192F] font-medium">
-                        Sentinel Auto-Kill: Leaked API Key
+                        Foundation Model &amp; Token Routing
                       </td>
-                      <td className="py-3.5 text-[#64748B]">GUARD / Circuit Breaker</td>
-                      <td className="py-3.5 font-mono">$12,000 risk</td>
-                      <td className="py-3.5 font-mono">$42 blast</td>
-                      <td className="py-3.5 text-right font-semibold text-[#30d158] font-mono">
-                        +$11,958 avoided
+                      <td className="py-3.5 text-[#64748B]">Semantic Tier Baseline</td>
+                      <td className="py-3.5 font-mono text-[#0062E0]">Open Cost Standard</td>
+                      <td className="py-3.5 text-right font-medium text-[#0D824D]">
+                        Net Margin Efficiency
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-3.5 text-[#0A192F] font-medium">
+                        Sentinel Automated Circuit Breakers
+                      </td>
+                      <td className="py-3.5 text-[#64748B]">Pre-Incident Burn Velocity</td>
+                      <td className="py-3.5 font-mono text-[#0062E0]">Time-Series EWMA</td>
+                      <td className="py-3.5 text-right font-medium text-[#0D824D]">
+                        Avoided Blast Radius
                       </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
 
-              {/* Immutable Hash Signature */}
+              {/* General Compliance Footer */}
               <div className="pt-3 border-t border-[#D6E4F5] flex flex-wrap items-center justify-between text-[11px] text-[#64748B] font-mono">
-                <span>Cryptographic verification: sha256:4f81c9a01...88f2b</span>
-                <span className="text-[#0062E0]">Export signed CFO packet (PDF)</span>
+                <span>Cryptographic proof architecture: SHA-256 verifiable audit records</span>
+                <span className="text-[#0062E0]">Board-certified accounting compliance</span>
               </div>
             </div>
           </div>
