@@ -96,9 +96,6 @@ export function AppleGlobalNav() {
           >
             Specs
           </a>
-          <Link href="/dashboard" className="text-[#0062E0] hover:underline transition-all font-medium">
-            Console
-          </Link>
         </div>
 
         {/* Right Utility Cluster */}

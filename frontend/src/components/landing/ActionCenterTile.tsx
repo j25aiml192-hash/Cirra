@@ -413,9 +413,9 @@ export function ActionCenterTile() {
   ], []);
 
   return (
-    <section id="actions" className="w-full bg-[#F0F8FF] text-[#0A192F] pt-20 sm:pt-28 lg:pt-36 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 scroll-mt-20 relative overflow-hidden">
+    <section id="actions" className="w-full bg-[#F0F8FF] text-[#0A192F] pt-8 sm:pt-12 lg:pt-14 pb-32 sm:pb-44 px-4 sm:px-6 lg:px-8 scroll-mt-20 relative overflow-hidden">
       {/* Soft atmospheric ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-28 bg-gradient-to-b from-[#38BDF8]/15 via-[#0062E0]/5 to-transparent blur-2xl pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-20 bg-gradient-to-b from-[#38BDF8]/15 via-[#0062E0]/5 to-transparent blur-2xl pointer-events-none" />
 
       <div className="max-w-[1360px] mx-auto text-center relative z-10">
         {/* Apple Headline Hierarchy */}

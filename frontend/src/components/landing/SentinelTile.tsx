@@ -32,7 +32,7 @@ export function SentinelTile() {
   };
 
   return (
-    <section id="sentinel" className="w-full bg-[#050B18] text-white pb-24 sm:pb-36 lg:pb-44 relative overflow-hidden scroll-mt-20">
+    <section id="sentinel" className="w-full bg-[#050B18] text-white pb-36 sm:pb-48 lg:pb-56 relative overflow-hidden scroll-mt-20">
       {/* Clean Animated Flashing Line between Hero and Sentinel */}
       <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#38BDF8] via-[#60A5FA] to-transparent animate-flash-line pointer-events-none z-30" />
 
@@ -82,14 +82,14 @@ export function SentinelTile() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[850px] h-[480px] bg-gradient-to-tr from-[#0062E0]/15 via-[#38BDF8]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* Horizon Dawn Light Glow at the bottom merging threshold */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-32 bg-gradient-to-t from-[#0062E0]/15 via-[#38BDF8]/10 to-transparent blur-3xl pointer-events-none z-[1]" />
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-28 bg-gradient-to-t from-[#0062E0]/15 via-[#38BDF8]/10 to-transparent blur-3xl pointer-events-none z-[1]" />
 
       {/* Seamless Merging Transition: Delayed start so dark starry space has generous room */}
       <div
-        className="absolute bottom-0 left-0 right-0 h-44 sm:h-60 pointer-events-none z-[2]"
+        className="absolute bottom-0 left-0 right-0 h-28 sm:h-36 pointer-events-none z-[2]"
         style={{
           background:
-            "linear-gradient(to bottom, rgba(5, 11, 24, 0) 0%, rgba(5, 11, 24, 0) 25%, rgba(14, 34, 68, 0.25) 50%, rgba(200, 225, 248, 0.6) 75%, rgba(240, 248, 255, 0.95) 92%, #F0F8FF 100%)",
+            "linear-gradient(to bottom, rgba(5, 11, 24, 0) 0%, rgba(5, 11, 24, 0.3) 25%, rgba(14, 34, 68, 0.55) 50%, rgba(160, 205, 242, 0.75) 75%, rgba(240, 248, 255, 0.95) 92%, #F0F8FF 100%)",
         }}
       />
 
