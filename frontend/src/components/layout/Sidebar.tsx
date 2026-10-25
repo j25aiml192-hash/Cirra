@@ -68,14 +68,20 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
-    id: "optimize",
-    name: "optimize",
+    id: "ask",
+    name: "ask-cirra",
     files: [
       {
-        name: "ask-cirra",
+        name: "chat",
         href: "/ask",
         icon: <Sparkles className="w-3.5 h-3.5" />,
       },
+    ],
+  },
+  {
+    id: "optimize",
+    name: "optimize",
+    files: [
       {
         name: "allocation",
         href: "/allocation",
@@ -123,6 +129,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({
     overview: true,
     spend: false,
+    ask: false,
     optimize: false,
     settings: false,
   });
@@ -167,6 +174,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     setOpenFolders({
       overview: true,
       spend: true,
+      ask: true,
       optimize: true,
       settings: true,
     });
@@ -176,6 +184,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     setOpenFolders({
       overview: false,
       spend: false,
+      ask: false,
       optimize: false,
       settings: false,
     });
@@ -195,68 +204,33 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         width: collapsed ? 68 : 210,
       }}
     >
-      {/* Top Header */}
+      {/* Top Header - Cirra Brand Bar (Always dark to match topbar seamlessly) */}
       <div
         className={cn(
-          "flex flex-col border-b",
-          isDarkTheme ? "border-[#1A2333] bg-[#0A0D15]/80" : "border-[#E2E8F0] bg-white/70"
+          "h-14 flex items-center bg-[#07090E] border-b border-[#1A2333] transition-all flex-shrink-0",
+          collapsed ? "justify-center px-2" : "px-3.5"
         )}
       >
-        {/* Terminal Title Bar */}
-        <div
-          className={cn(
-            "flex transition-all",
-            collapsed
-              ? "flex-col items-center justify-center gap-1.5 py-3 px-2"
-              : "items-center justify-between px-3.5 py-2.5"
-          )}
+        <Link
+          href="/"
+          title="Cirra — Back to Landing Page"
+          className="flex items-center gap-2.5 group cursor-pointer"
         >
-          {/* Cirra Logo & Brand linking to Landing Page */}
-          <Link
-            href="/"
-            title="Cirra — Back to Landing Page"
-            className="flex items-center gap-2.5 group cursor-pointer"
-          >
-            <img
-              src="/cirra-logo.png"
-              alt="Cirra"
-              className={cn(
-                "rounded-lg object-contain flex-shrink-0 transition-transform group-hover:scale-105 shadow-sm",
-                collapsed ? "w-8 h-8" : "w-7 h-7"
-              )}
-            />
-            {!collapsed && (
-              <span
-                className={cn(
-                  "text-[17px] font-bold tracking-tight transition-colors font-mono",
-                  isDarkTheme
-                    ? "text-zinc-100 group-hover:text-[#38BDF8]"
-                    : "text-slate-900 group-hover:text-[#0062E0]"
-                )}
-              >
-                Cirra
-              </span>
-            )}
-          </Link>
-
-          <button
-            type="button"
-            onClick={onToggle}
+          <img
+            src="/cirra-logo.png"
+            alt="Cirra"
             className={cn(
-              "rounded-md transition-colors",
-              collapsed
-                ? "w-7 h-7 flex items-center justify-center mt-0.5"
-                : "p-1",
-              isDarkTheme
-                ? "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-                : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+              "rounded-lg object-contain flex-shrink-0 transition-transform group-hover:scale-105 shadow-sm",
+              collapsed ? "w-8 h-8" : "w-7 h-7"
             )}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
-        </div>
+          />
+          {!collapsed && (
+            <span className="text-[17px] font-bold tracking-tight text-white group-hover:text-[#38BDF8] transition-colors font-mono">
+              Cirra
+            </span>
+          )}
+        </Link>
+      </div>
 
         {/* Controls Toolbar (when expanded) */}
         {!collapsed && (
@@ -348,7 +322,6 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             </div>
           </div>
         )}
-      </div>
 
       {/* Main Directory Tree Content */}
       <div className="flex-1 overflow-y-auto px-2 py-3 select-none">

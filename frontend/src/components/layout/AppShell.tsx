@@ -1,10 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = () => setCollapsed((c) => !c);
+    window.addEventListener("cirra:toggle-sidebar", handleToggle);
+    return () => window.removeEventListener("cirra:toggle-sidebar", handleToggle);
+  }, []);
 
   return (
     <div className="min-h-screen cirra-bg-canvas text-[#0F1E36]">

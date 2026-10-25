@@ -16,7 +16,7 @@ const config: Config = {
         secondary: "#38BDF8",
         destructive: "#EF4444",
         "muted-foreground": "#475569",
-        page: "#F0F5FD",
+        page: "#DBE6E7",
         surface: "#FFFFFF",
         navy: {
           DEFAULT: "#0A192F",

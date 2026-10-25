@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --bg-gradient-start: #E8F1FC;
-  --bg-gradient-mid:   #F1F6FD;
-  --bg-gradient-end:   #F8FAFE;
+  --bg-gradient-start: #DBE6E7;
+  --bg-gradient-mid:   #DBE6E7;
+  --bg-gradient-end:   #DBE6E7;
 
   --card-bg:           #FFFFFF;
   --card-border:       #D6E4F5;
@@ -42,8 +42,7 @@ html {
 }
 
 body {
-  background: linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
-  background-attachment: fixed;
+  background: #DBE6E7;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   color: var(--text-primary);
   min-height: 100vh;
@@ -51,14 +50,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background ambient radial gradients for subtle realistic depth */
+/* Background canvas for all pages */
 .cirra-bg-canvas {
-  background: 
-    radial-gradient(circle at 12% 8%, rgba(186, 218, 255, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 88% 18%, rgba(200, 227, 255, 0.4) 0%, transparent 40%),
-    radial-gradient(circle at 50% 65%, rgba(215, 235, 255, 0.3) 0%, transparent 50%),
-    linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
+  background: #DBE6E7;
   background-attachment: fixed;
+  min-height: 100vh;
 }
 
 /* Premium Card with subtle blue border and soft depth */
