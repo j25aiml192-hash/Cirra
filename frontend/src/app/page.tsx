@@ -16,7 +16,7 @@ export default function HomePage() {
       <AppleGlobalNav />
 
       {/* 2. Alternating Full-Bleed Product Tiles */}
-      <main className="flex-1">
+      <main className="flex-1 relative z-10 shadow-2xl">
         <HeroTile />
 
         <SentinelTile />

@@ -10,7 +10,11 @@ const config: Config = {
     extend: {
       colors: {
         foreground: "#0A192F",
+        background: "#050B18",
+        border: "rgba(255, 255, 255, 0.12)",
         primary: "#0A192F",
+        secondary: "#38BDF8",
+        destructive: "#EF4444",
         "muted-foreground": "#475569",
         page: "#F0F5FD",
         surface: "#FFFFFF",
