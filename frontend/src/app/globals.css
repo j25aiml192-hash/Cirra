@@ -75,12 +75,13 @@ body {
   box-shadow: 0 8px 30px -6px rgba(12, 48, 96, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-/* Frosted sidebar */
+/* Terminal Tree sidebar */
 .cirra-sidebar {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-right: 1px solid #D6E4F5;
+  background: #F8FAFC;
+  border-right: 1px solid #CBD5E1;
+  color: #0F172A;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.06);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* Metric typography */

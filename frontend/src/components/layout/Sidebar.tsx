@@ -4,18 +4,19 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
   LayoutDashboard,
   Cloud,
   Cpu,
   Sparkles,
-  GitBranch,
-  AlertTriangle,
+  Layers,
+  ShieldAlert,
   TrendingDown,
   Plug,
   Users,
   Settings,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -24,111 +25,232 @@ export interface SidebarProps {
   onToggle: () => void;
 }
 
-interface NavItemProps {
+interface NavFile {
+  name: string;
   href: string;
-  icon: React.ReactNode;
-  label: string;
   badge?: string;
-  badgeColor?: "amber" | "rose" | "indigo";
-  collapsed: boolean;
+  badgeType?: "warning" | "info" | "success";
+  icon?: React.ReactNode;
 }
 
-function NavItem({ href, icon, label, badge, badgeColor = "amber", collapsed }: NavItemProps) {
-  const pathname = usePathname();
-  const isActive = pathname === href;
-
-  return (
-    <Link
-      href={href}
-      title={collapsed ? label : undefined}
-      className={cn(
-        "group relative flex items-center h-9 px-2.5 rounded-xl text-sm font-medium transition-all duration-150 select-none",
-        isActive
-          ? "bg-[#EBF3FE] text-[#0062E0] font-semibold border border-[#BCD9FC]/70 shadow-[0_1px_3px_rgba(0,98,224,0.06)]"
-          : "text-[#4A607A] hover:text-[#0A192F] hover:bg-[#F2F7FD]"
-      )}
-      style={{
-        justifyContent: collapsed ? "center" : "flex-start",
-      }}
-    >
-      <div className={cn(
-        "relative flex items-center justify-center w-4 h-4 flex-shrink-0 transition-colors",
-        isActive ? "text-[#0062E0]" : "text-[#5A6E85] group-hover:text-[#0A192F]"
-      )}>
-        {icon}
-        {badge && collapsed && (
-          <span
-            className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#EA3943] ring-2 ring-white"
-          />
-        )}
-      </div>
-
-      {!collapsed && (
-        <div className="flex flex-1 items-center justify-between ml-2.5 overflow-hidden">
-          <span className="truncate">{label}</span>
-          {badge && (
-            <span
-              className={cn(
-                "ml-auto text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none",
-                badgeColor === "amber"
-                  ? "bg-[#FFF4E5] text-[#B45309] border border-[#FDE68A]"
-                  : badgeColor === "rose"
-                  ? "bg-[#FEECEC] text-[#DC2626] border border-[#FECACA]"
-                  : "bg-[#EBF3FE] text-[#0062E0] border border-[#BCD9FC]"
-              )}
-            >
-              {badge}
-            </span>
-          )}
-        </div>
-      )}
-    </Link>
-  );
+interface NavSection {
+  id: string;
+  name: string;
+  files: NavFile[];
 }
+
+const SECTIONS: NavSection[] = [
+  {
+    id: "overview",
+    name: "overview",
+    files: [
+      {
+        name: "dashboard",
+        href: "/dashboard",
+        icon: <LayoutDashboard className="w-3.5 h-3.5" />,
+      },
+    ],
+  },
+  {
+    id: "spend",
+    name: "spend",
+    files: [
+      {
+        name: "cloud-spend",
+        href: "/spend/cloud",
+        icon: <Cloud className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "ai-models",
+        href: "/spend/ai",
+        icon: <Cpu className="w-3.5 h-3.5" />,
+      },
+    ],
+  },
+  {
+    id: "optimize",
+    name: "optimize",
+    files: [
+      {
+        name: "ask-cirra",
+        href: "/ask",
+        icon: <Sparkles className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "allocation",
+        href: "/allocation",
+        icon: <Layers className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "anomalies",
+        href: "/anomalies",
+        badge: "3",
+        badgeType: "warning",
+        icon: <ShieldAlert className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "savings",
+        href: "/savings",
+        icon: <TrendingDown className="w-3.5 h-3.5" />,
+      },
+    ],
+  },
+  {
+    id: "settings",
+    name: "settings",
+    files: [
+      {
+        name: "connections",
+        href: "/settings/connections",
+        icon: <Plug className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "team",
+        href: "/settings/team",
+        icon: <Users className="w-3.5 h-3.5" />,
+      },
+      {
+        name: "profile",
+        href: "/settings/profile",
+        icon: <Settings className="w-3.5 h-3.5" />,
+      },
+    ],
+  },
+];
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const pathname = usePathname();
+  const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({
+    overview: true,
+    spend: false,
+    optimize: false,
+    settings: false,
+  });
+
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
+
+  // Restore saved theme preference if explicitly chosen, otherwise default to bright
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem("cirra_sidebar_theme");
+      if (saved === "dark") {
+        setIsDarkTheme(true);
+      } else if (saved === "light") {
+        setIsDarkTheme(false);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleToggleTheme = () => {
+    setIsDarkTheme((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("cirra_sidebar_theme", next ? "dark" : "light");
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setOpenFolders((prev) => ({
+      ...prev,
+      [folderId]: !prev[folderId],
+    }));
+  };
+
+  const expandAll = () => {
+    setOpenFolders({
+      overview: true,
+      spend: true,
+      optimize: true,
+      settings: true,
+    });
+  };
+
+  const collapseAll = () => {
+    setOpenFolders({
+      overview: false,
+      spend: false,
+      optimize: false,
+      settings: false,
+    });
+  };
+
+  const isAllOpen = SECTIONS.every((s) => Boolean(openFolders[s.id]));
+
   return (
     <aside
-      className="fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between cirra-sidebar transition-all duration-200 select-none"
+      className={cn(
+        "fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between transition-all duration-200 select-none font-mono text-[13px] leading-relaxed",
+        isDarkTheme
+          ? "bg-[#07090E] text-[#D8E2EE] border-r border-[#1A2333] shadow-[4px_0_30px_rgba(0,0,0,0.4)]"
+          : "bg-[#F8FAFC] text-[#0F172A] border-r border-[#CBD5E1] shadow-[2px_0_20px_rgba(0,0,0,0.06)]"
+      )}
       style={{
-        width: collapsed ? 76 : 240,
+        width: collapsed ? 68 : 210,
       }}
     >
-      {/* Top: Logo & Nav items */}
-      <div className="flex flex-col flex-1 overflow-y-auto px-3 py-4">
-        {/* Brand header */}
+      {/* Top Header */}
+      <div
+        className={cn(
+          "flex flex-col border-b",
+          isDarkTheme ? "border-[#1A2333] bg-[#0A0D15]/80" : "border-[#E2E8F0] bg-white/70"
+        )}
+      >
+        {/* Terminal Title Bar */}
         <div
           className={cn(
-            "flex items-center pb-3.5 mb-3 border-b border-[#D6E4F5]",
-            collapsed ? "justify-center" : "justify-between px-1"
+            "flex transition-all",
+            collapsed
+              ? "flex-col items-center justify-center gap-1.5 py-3 px-2"
+              : "items-center justify-between px-3.5 py-2.5"
           )}
         >
+          {/* Cirra Logo & Brand linking to Landing Page */}
           <Link
             href="/"
-            title="Cirra — Cloud & AI Cost Intelligence"
+            title="Cirra — Back to Landing Page"
             className="flex items-center gap-2.5 group cursor-pointer"
           >
             <img
               src="/cirra-logo.png"
               alt="Cirra"
-              className="w-8 h-8 rounded-xl object-contain flex-shrink-0 shadow-sm shadow-[#0062E0]/25 transition-transform group-hover:scale-105"
+              className={cn(
+                "rounded-lg object-contain flex-shrink-0 transition-transform group-hover:scale-105 shadow-sm",
+                collapsed ? "w-8 h-8" : "w-7 h-7"
+              )}
             />
             {!collapsed && (
-              <div className="flex flex-col">
-                <span className="font-bold text-[#0A192F] text-[15px] tracking-tight leading-tight">
-                  Cirra
-                </span>
-                <span className="text-[10px] text-[#5A6E85] font-medium tracking-normal">
-                  Cost Intelligence
-                </span>
-              </div>
+              <span
+                className={cn(
+                  "text-[17px] font-bold tracking-tight transition-colors font-mono",
+                  isDarkTheme
+                    ? "text-zinc-100 group-hover:text-[#38BDF8]"
+                    : "text-slate-900 group-hover:text-[#0062E0]"
+                )}
+              >
+                Cirra
+              </span>
             )}
           </Link>
 
           <button
             type="button"
             onClick={onToggle}
-            className="text-[#5A6E85] hover:text-[#0A192F] p-1 rounded-lg hover:bg-[#EBF3FE] transition-colors"
+            className={cn(
+              "rounded-md transition-colors",
+              collapsed
+                ? "w-7 h-7 flex items-center justify-center mt-0.5"
+                : "p-1",
+              isDarkTheme
+                ? "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
+                : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/60"
+            )}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
@@ -136,114 +258,436 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           </button>
         </div>
 
-        {/* Section: Overview */}
-        <div className="space-y-1">
-          {!collapsed && (
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1">
-              Overview
+        {/* Controls Toolbar (when expanded) */}
+        {!collapsed && (
+          <div
+            className={cn(
+              "flex items-center justify-between px-3 py-1.5 text-[11px] border-t",
+              isDarkTheme
+                ? "border-[#141B29] text-zinc-400 bg-[#080B12]"
+                : "border-[#EDF2F7] text-slate-500 bg-[#F1F5F9]"
+            )}
+          >
+            <div className="flex items-center gap-1 text-[11px]">
+              <span className={cn("font-semibold", isDarkTheme ? "text-[#38BDF8]" : "text-[#0062E0]")}>
+                git:(
+              </span>
+              <span className={cn("font-bold tracking-tight", isDarkTheme ? "text-zinc-100" : "text-slate-900")}>
+                main
+              </span>
+              <span className={cn("font-semibold", isDarkTheme ? "text-[#38BDF8]" : "text-[#0062E0]")}>
+                )
+              </span>
             </div>
-          )}
-          <NavItem
-            href="/dashboard"
-            icon={<LayoutDashboard className="w-4 h-4" />}
-            label="Dashboard"
-            collapsed={collapsed}
-          />
 
-          {!collapsed && (
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1 mt-3">
-              Spend
-            </div>
-          )}
-          <NavItem
-            href="/spend/cloud"
-            icon={<Cloud className="w-4 h-4" />}
-            label="Cloud Spend"
-            collapsed={collapsed}
-          />
-          <NavItem
-            href="/spend/ai"
-            icon={<Cpu className="w-4 h-4" />}
-            label="AI Models"
-            collapsed={collapsed}
-          />
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={isAllOpen ? collapseAll : expandAll}
+                className={cn(
+                  "px-1.5 py-0.5 rounded text-[10px] transition-colors border",
+                  isDarkTheme
+                    ? "text-zinc-400 border-zinc-800 hover:text-white hover:bg-zinc-800/70"
+                    : "text-slate-500 border-slate-300 hover:text-slate-900 hover:bg-slate-200"
+                )}
+                title={isAllOpen ? "Collapse All" : "Expand All"}
+              >
+                {isAllOpen ? "− all" : "+ all"}
+              </button>
 
-          {!collapsed && (
-            <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-600 px-2.5 py-1 mt-3">
-              Optimize
+              <button
+                type="button"
+                onClick={handleToggleTheme}
+                className={cn(
+                  "p-0.5 rounded text-[10px] transition-colors",
+                  isDarkTheme
+                    ? "text-zinc-400 hover:text-amber-300"
+                    : "text-slate-500 hover:text-indigo-600"
+                )}
+                title={isDarkTheme ? "Switch to Light Tree" : "Switch to Dark Tree"}
+              >
+                {isDarkTheme ? "☼" : "☾"}
+              </button>
             </div>
-          )}
-          <NavItem
-            href="/ask"
-            icon={<Sparkles className="w-4 h-4" />}
-            label="Ask Cirra"
-            collapsed={collapsed}
-          />
-          <NavItem
-            href="/allocation"
-            icon={<GitBranch className="w-4 h-4" />}
-            label="Allocation"
-            collapsed={collapsed}
-          />
-          <NavItem
-            href="/anomalies"
-            icon={<AlertTriangle className="w-4 h-4" />}
-            label="Anomalies"
-            badge="3"
-            badgeColor="amber"
-            collapsed={collapsed}
-          />
-          <NavItem
-            href="/savings"
-            icon={<TrendingDown className="w-4 h-4" />}
-            label="Savings"
-            collapsed={collapsed}
-          />
-        </div>
+          </div>
+        )}
+
+        {/* Quick Search in Tree */}
+        {!collapsed && (
+          <div className="px-2.5 py-1.5">
+            <div
+              className={cn(
+                "flex items-center gap-1.5 px-2 py-1 rounded text-xs border transition-all",
+                isDarkTheme
+                  ? "bg-[#06080E] border-[#1E293B] focus-within:border-[#38BDF8]/60 focus-within:ring-1 focus-within:ring-[#38BDF8]/30"
+                  : "bg-white border-[#CBD5E1] focus-within:border-[#0284C7]/60 focus-within:ring-1 focus-within:ring-[#0284C7]/20"
+              )}
+            >
+              <Search className="w-3 h-3 text-zinc-500 flex-shrink-0" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="filter tree..."
+                className={cn(
+                  "w-full bg-transparent outline-none text-[11px] font-mono",
+                  isDarkTheme
+                    ? "text-zinc-200 placeholder:text-zinc-500"
+                    : "text-slate-900 placeholder:text-slate-400"
+                )}
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="text-zinc-500 hover:text-zinc-300 text-[10px]"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Bottom: Settings & User Profile */}
-      <div className="p-3 border-t border-[#D6E4F5] space-y-1 bg-white/60">
-        <NavItem
-          href="/settings/connections"
-          icon={<Plug className="w-4 h-4" />}
-          label="Connections"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/settings/team"
-          icon={<Users className="w-4 h-4" />}
-          label="Team"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/settings/profile"
-          icon={<Settings className="w-4 h-4" />}
-          label="Settings"
-          collapsed={collapsed}
-        />
+      {/* Main Directory Tree Content */}
+      <div className="flex-1 overflow-y-auto px-2 py-3 select-none">
+        {collapsed ? (
+          /* Collapsed Icon/Rail View with Dark Active Highlights */
+          <div className="flex flex-col items-center space-y-3 pt-2">
+            <Link
+              href="/dashboard"
+              title="Dashboard (/dashboard)"
+              className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                pathname === "/dashboard"
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+            </Link>
 
-        <div
-          className={cn(
-            "flex items-center pt-2 mt-1 border-t border-[#D6E4F5]",
-            collapsed ? "justify-center" : "gap-2.5 px-2 py-1.5 rounded-xl bg-[#F0F5FD] border border-[#D6E4F5]"
-          )}
-        >
-          <div className="w-7 h-7 rounded-lg bg-[#DCEBFC] text-[#0062E0] flex items-center justify-center text-[11px] font-bold flex-shrink-0 border border-[#BCD9FC]">
-            HK
+            <Link
+              href="/spend/cloud"
+              title="Cloud Spend (/spend/cloud)"
+              className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                pathname === "/spend/cloud"
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <Cloud className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/spend/ai"
+              title="AI Models (/spend/ai)"
+              className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                pathname === "/spend/ai"
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <Cpu className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/ask"
+              title="Ask Cirra (/ask)"
+              className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                pathname === "/ask"
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <Sparkles className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/anomalies"
+              title="Anomalies (3 alerts)"
+              className={cn(
+                "relative w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+                pathname === "/anomalies"
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <ShieldAlert className="w-4 h-4" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-500 ring-2 ring-[#07090E]" />
+            </Link>
+
+            <Link
+              href="/settings/connections"
+              title="Settings"
+              className={cn(
+                "w-9 h-9 rounded-lg flex items-center justify-center transition-all mt-4",
+                pathname.startsWith("/settings")
+                  ? isDarkTheme
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "bg-[#0A192F] text-white border border-[#0A192F] shadow-sm"
+                  : isDarkTheme
+                  ? "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-200"
+              )}
+            >
+              <Settings className="w-4 h-4" />
+            </Link>
           </div>
-          {!collapsed && (
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-xs font-semibold text-[#0A192F] truncate leading-tight">
-                Hiten K.
-              </span>
-              <span className="text-[10px] text-[#5A6E85] truncate leading-tight">
-                Acme Inc. (Admin)
+        ) : (
+          /* Real Cirra Directory Tree Navigation without .tsx */
+          <div className="space-y-3 font-mono text-[13px] leading-[1.8] whitespace-pre select-none tracking-normal">
+            {SECTIONS.map((section) => {
+              const isOpen = Boolean(openFolders[section.id]);
+
+              return (
+                <div key={section.id}>
+                  {/* Folder Header: ▼ section_name */}
+                  <div
+                    onClick={() => toggleFolder(section.id)}
+                    className={cn(
+                      "flex items-center gap-1.5 cursor-pointer py-0.5 px-1.5 rounded transition-colors group",
+                      isDarkTheme ? "hover:bg-white/[0.05]" : "hover:bg-slate-200/50"
+                    )}
+                  >
+                    <span className={cn("text-xs font-bold", isDarkTheme ? "text-zinc-400" : "text-slate-700")}>
+                      {isOpen ? "▼" : "▶"}
+                    </span>
+                    <span
+                      className={cn(
+                        "font-bold uppercase tracking-wider text-[11px]",
+                        isDarkTheme
+                          ? "text-zinc-300 group-hover:text-white"
+                          : "text-slate-800 group-hover:text-black"
+                      )}
+                    >
+                      {section.name}
+                    </span>
+                  </div>
+
+                  {/* Files inside section */}
+                  {isOpen && (
+                    <div className="flex flex-col">
+                      {section.files.map((file, idx) => {
+                        const isLast = idx === section.files.length - 1;
+                        const guidePrefix = isLast ? "  └─ " : "  ├─ ";
+
+                        return (
+                          <TreeFileLink
+                            key={file.href}
+                            guidePrefix={guidePrefix}
+                            name={file.name}
+                            href={file.href}
+                            badge={file.badge}
+                            badgeType={file.badgeType}
+                            currentPath={pathname}
+                            isDark={isDarkTheme}
+                            searchQuery={searchQuery}
+                          />
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom User / Session Section */}
+      <div
+        className={cn(
+          "p-2.5 border-t",
+          isDarkTheme ? "border-[#1A2333] bg-[#0A0D15]/80" : "border-[#E2E8F0] bg-white/80"
+        )}
+      >
+        {collapsed ? (
+          <div className="flex justify-center py-0.5">
+            <div
+              className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm transition-all",
+                isDarkTheme
+                  ? "bg-white/15 text-white border border-white/20"
+                  : "bg-[#0A192F] text-white border border-[#0A192F]"
+              )}
+              title="Hiten K. (Admin)"
+            >
+              HK
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col space-y-1 text-[11px]">
+            <div className="flex items-center justify-between text-zinc-400">
+              <div className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                <span className={cn("font-semibold", isDarkTheme ? "text-zinc-200" : "text-slate-800")}>
+                  hiten@acme.inc
+                </span>
+              </div>
+              <span
+                className={cn(
+                  "text-[10px] px-1.5 py-0.5 rounded font-bold border",
+                  isDarkTheme
+                    ? "bg-white/10 text-zinc-300 border-zinc-700"
+                    : "bg-[#0A192F] text-white border-[#0A192F]"
+                )}
+              >
+                admin
               </span>
             </div>
-          )}
-        </div>
+
+            <div
+              className={cn(
+                "flex items-center justify-between text-[10px] pt-1",
+                isDarkTheme ? "text-zinc-500" : "text-slate-600 font-medium"
+              )}
+            >
+              <span>cirra-v1.4 (prod)</span>
+              <Link
+                href="/settings/profile"
+                className={cn(
+                  "underline underline-offset-2 flex items-center gap-0.5",
+                  isDarkTheme ? "hover:text-zinc-200" : "text-slate-700 hover:text-[#0062E0]"
+                )}
+              >
+                profile
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </aside>
+  );
+}
+
+interface TreeFileLinkProps {
+  guidePrefix: string;
+  name: string;
+  href: string;
+  badge?: string;
+  badgeType?: "warning" | "info" | "success";
+  currentPath: string;
+  isDark: boolean;
+  searchQuery?: string;
+}
+
+function TreeFileLink({
+  guidePrefix,
+  name,
+  href,
+  badge,
+  badgeType = "warning",
+  currentPath,
+  isDark,
+  searchQuery = "",
+}: TreeFileLinkProps) {
+  const isActive = currentPath === href;
+
+  if (
+    searchQuery &&
+    !name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    !href.toLowerCase().includes(searchQuery.toLowerCase())
+  ) {
+    return null;
+  }
+
+  return (
+    <Link
+      href={href}
+      title={`${name} (${href})`}
+      className={cn(
+        "group flex items-center py-0.5 px-1 rounded transition-all cursor-pointer font-mono",
+        isActive
+          ? isDark
+            ? "bg-white/10 text-white font-semibold border-l-2 border-[#38BDF8] pl-1.5"
+            : "bg-blue-50 text-[#0062E0] font-semibold border-l-2 border-[#0062E0] pl-1.5"
+          : isDark
+          ? "text-zinc-400 hover:text-white hover:bg-white/[0.04]"
+          : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
+      )}
+    >
+      {/* Tree guides */}
+      {guidePrefix && (
+        <span
+          className={cn(
+            "font-mono select-none mr-0.5",
+            isDark ? "text-zinc-600 group-hover:text-zinc-500" : "text-slate-400"
+          )}
+        >
+          {guidePrefix}
+        </span>
+      )}
+
+      {/* Middle dot bullet: · */}
+      <span
+        className={cn(
+          "mr-1.5 select-none font-bold",
+          isActive
+            ? isDark
+              ? "text-[#38BDF8] drop-shadow-[0_0_6px_rgba(56,189,248,0.8)]"
+              : "text-[#0062E0]"
+            : isDark
+            ? "text-zinc-500 group-hover:text-zinc-300"
+            : "text-slate-400 group-hover:text-slate-600"
+        )}
+      >
+        ·
+      </span>
+
+      {/* Clean Filename without .tsx */}
+      <span
+        className={cn(
+          "truncate transition-colors",
+          isActive
+            ? isDark
+              ? "text-white"
+              : "text-[#0062E0]"
+            : isDark
+            ? "text-zinc-300 group-hover:text-white"
+            : "text-slate-700 group-hover:text-black"
+        )}
+      >
+        {name}
+      </span>
+
+      {/* Badge (e.g. anomalies alert count) */}
+      {badge && (
+        <span
+          className={cn(
+            "ml-auto text-[10px] font-bold px-1.5 py-0.2 rounded leading-none border select-none",
+            badgeType === "warning"
+              ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+              : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+          )}
+        >
+          {badge}
+        </span>
+      )}
+    </Link>
   );
 }

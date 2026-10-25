@@ -107,13 +107,6 @@ export function AppleGlobalNav() {
             Sign In
           </Link>
 
-          <Link
-            href="/signup"
-            className="hidden sm:inline-flex items-center justify-center text-[12px] bg-[#0062E0] text-white px-3 py-1 rounded-full hover:bg-[#0052C2] apple-btn-active transition-all"
-          >
-            Run free audit
-          </Link>
-
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -172,16 +165,9 @@ export function AppleGlobalNav() {
           </a>
           <div className="pt-3 border-t border-[#D6E4F5] flex flex-col gap-2">
             <Link
-              href="/signup"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-center py-2 rounded-full bg-[#0062E0] text-white font-medium"
-            >
-              Run free audit
-            </Link>
-            <Link
               href="/login"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-center py-2 rounded-full border border-[#D6E4F5] text-[#0A192F] font-medium"
+              className="text-center py-2 rounded-full bg-[#0062E0] text-white font-medium"
             >
               Sign In
             </Link>

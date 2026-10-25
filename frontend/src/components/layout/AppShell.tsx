@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
-import { AiChatWidget } from "@/components/ui/AiChatWidget";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -12,12 +11,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
       <div
         className="transition-all duration-200 min-h-screen"
-        style={{ marginLeft: collapsed ? 76 : 240 }}
+        style={{ marginLeft: collapsed ? 68 : 210 }}
       >
         {children}
       </div>
-      <AiChatWidget />
     </div>
   );
 }
-
