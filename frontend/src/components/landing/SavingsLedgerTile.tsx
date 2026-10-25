@@ -226,8 +226,20 @@ function MovingDarkRibbonMesh() {
 
 export function SavingsLedgerTile() {
   return (
-    <section id="ledger" className="w-full bg-[#F0F8FF] text-[#0A192F] pt-28 sm:pt-36 lg:pt-44 pb-24 sm:pb-32 px-4 sm:px-6 lg:px-8 scroll-mt-20">
-      <div className="max-w-[1360px] mx-auto">
+    <section
+      id="ledger"
+      className="w-full bg-gradient-to-b from-[#F0F8FF] via-[#F0F8FF] to-white text-[#0A192F] pt-28 sm:pt-36 lg:pt-44 pb-32 sm:pb-44 px-4 sm:px-6 lg:px-8 scroll-mt-20 relative overflow-hidden"
+    >
+      {/* Seamless Merging Transition into ConnectorsGrid (White) */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-36 sm:h-52 pointer-events-none z-[2]"
+        style={{
+          background:
+            "linear-gradient(to bottom, rgba(240, 248, 255, 0) 0%, rgba(240, 248, 255, 0.45) 30%, rgba(255, 255, 255, 0.85) 70%, #FFFFFF 100%)",
+        }}
+      />
+
+      <div className="max-w-[1360px] mx-auto relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Column: Woven Ribbon Mesh + Equal-Sized Borderless Capability Cards */}
           <div className="lg:col-span-5 relative flex flex-col justify-between gap-6 py-2 min-h-[520px]">
