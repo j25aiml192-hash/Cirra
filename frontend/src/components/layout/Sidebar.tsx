@@ -128,23 +128,27 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   const pathname = usePathname();
   const [openFolders, setOpenFolders] = React.useState<Record<string, boolean>>({
     overview: true,
-    spend: false,
-    ask: false,
-    optimize: false,
-    settings: false,
+    spend: true,
+    ask: true,
+    optimize: true,
+    settings: true,
   });
 
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [isDarkTheme, setIsDarkTheme] = React.useState(false);
+  const [isDarkTheme, setIsDarkTheme] = React.useState(true);
 
-  // Restore saved theme preference if explicitly chosen, otherwise default to bright
+  // Restore saved theme preference and folder state if explicitly saved, otherwise default to dark theme & all open
   React.useEffect(() => {
     try {
       const saved = localStorage.getItem("cirra_sidebar_theme");
-      if (saved === "dark") {
-        setIsDarkTheme(true);
-      } else if (saved === "light") {
+      if (saved === "light") {
         setIsDarkTheme(false);
+      } else if (saved === "dark") {
+        setIsDarkTheme(true);
+      }
+      const savedFolders = localStorage.getItem("cirra_sidebar_open_folders");
+      if (savedFolders) {
+        setOpenFolders(JSON.parse(savedFolders));
       }
     } catch {
       // ignore
@@ -164,30 +168,50 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
   };
 
   const toggleFolder = (folderId: string) => {
-    setOpenFolders((prev) => ({
-      ...prev,
-      [folderId]: !prev[folderId],
-    }));
+    setOpenFolders((prev) => {
+      const updated = {
+        ...prev,
+        [folderId]: !prev[folderId],
+      };
+      try {
+        localStorage.setItem("cirra_sidebar_open_folders", JSON.stringify(updated));
+      } catch {
+        // ignore
+      }
+      return updated;
+    });
   };
 
   const expandAll = () => {
-    setOpenFolders({
+    const allOpen = {
       overview: true,
       spend: true,
       ask: true,
       optimize: true,
       settings: true,
-    });
+    };
+    setOpenFolders(allOpen);
+    try {
+      localStorage.setItem("cirra_sidebar_open_folders", JSON.stringify(allOpen));
+    } catch {
+      // ignore
+    }
   };
 
   const collapseAll = () => {
-    setOpenFolders({
+    const allClosed = {
       overview: false,
       spend: false,
       ask: false,
       optimize: false,
       settings: false,
-    });
+    };
+    setOpenFolders(allClosed);
+    try {
+      localStorage.setItem("cirra_sidebar_open_folders", JSON.stringify(allClosed));
+    } catch {
+      // ignore
+    }
   };
 
   const isAllOpen = SECTIONS.every((s) => Boolean(openFolders[s.id]));

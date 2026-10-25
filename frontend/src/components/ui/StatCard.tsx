@@ -3,23 +3,23 @@
 import * as React from "react";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-export type StatCardVariant = 'blue' | 'green' | 'red' | 'amber' | 'violet';
+export type StatCardVariant = "blue" | "green" | "red" | "amber" | "violet" | "steel";
 
 export interface StatCardProps {
-  variant: StatCardVariant;
+  variant?: StatCardVariant;
   icon: React.ReactNode;
   label: string;
   value: string;
   sub?: string;
   delta?: string;          // e.g. "+4.2%"
-  deltaPositive?: boolean; // green if true, red if false
+  deltaPositive?: boolean;
   progress?: number;       // 0–100, shows ring if provided
   loading?: boolean;
 }
 
 function StatProgressRing({
   value,
-  color = "#0062E0",
+  color = "#2B2B2B",
   size = 42,
   strokeWidth = 3.5,
 }: {
@@ -40,7 +40,7 @@ function StatProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#E2EDF8"
+          stroke="#E5E7EB"
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -57,7 +57,7 @@ function StatProgressRing({
           className="transition-all duration-500 ease-out"
         />
       </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-[#0A192F]">
+      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-[#1A1A1A]">
         {Math.round(clamped)}%
       </div>
     </div>
@@ -65,66 +65,56 @@ function StatProgressRing({
 }
 
 export function StatCard({
-  variant,
   icon,
   label,
   value,
   sub,
   delta,
-  deltaPositive = false,
+  deltaPositive,
   progress,
   loading = false,
 }: StatCardProps) {
   if (loading) {
     return (
-      <div className="cirra-card p-5">
+      <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] shadow-xs">
         <div className="flex items-center justify-between mb-3">
-          <div className="w-24 h-3 bg-[#E2EDF8] rounded animate-pulse" />
-          <div className="w-7 h-7 bg-[#E2EDF8] rounded-lg animate-pulse" />
+          <div className="w-24 h-3 bg-[#E5E7EB] rounded animate-pulse" />
+          <div className="w-8 h-8 bg-[#F3F4F6] rounded-lg animate-pulse" />
         </div>
-        <div className="w-32 h-7 bg-[#E2EDF8] rounded mb-2 animate-pulse" />
-        <div className="w-20 h-3 bg-[#E2EDF8] rounded animate-pulse" />
+        <div className="w-32 h-7 bg-[#E5E7EB] rounded mb-2 animate-pulse" />
+        <div className="w-20 h-3 bg-[#E5E7EB] rounded animate-pulse" />
       </div>
     );
   }
 
-  const ringColor =
-    variant === "green"
-      ? "#10A37F"
-      : variant === "amber"
-      ? "#F58536"
-      : variant === "red"
-      ? "#EA3943"
-      : "#0062E0";
-
   return (
-    <div className="cirra-card p-5 flex flex-col justify-between group">
+    <div className="bg-white rounded-2xl p-5 border border-[#E5E7EB] hover:border-[#D1D5DB] transition-all shadow-xs flex flex-col justify-between group">
       <div>
-        {/* Header row: Label & Icon */}
+        {/* Header row: Label & Icon in Steel & Smoke tones */}
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#4D4D4D]">
             {label}
           </span>
-          <div className="w-7 h-7 rounded-lg bg-[#EBF3FE] border border-[#BCD9FC]/80 flex items-center justify-center text-[#0062E0] group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-[#F3F4F6] border border-[#E5E7EB] flex items-center justify-center text-[#2B2B2B] group-hover:bg-[#E5E7EB] transition-colors shadow-2xs">
             {icon}
           </div>
         </div>
 
-        {/* Value and Ring */}
+        {/* Value and Progress Ring */}
         <div className="flex items-baseline justify-between gap-2">
-          <div className="text-2xl sm:text-[28px] font-bold text-[#0A192F] cirra-metric leading-tight">
+          <div className="text-2xl sm:text-[28px] font-bold text-[#1A1A1A] cirra-metric leading-tight">
             {value}
           </div>
           {progress !== undefined && (
-            <StatProgressRing value={progress} color={ringColor} size={42} strokeWidth={3.5} />
+            <StatProgressRing value={progress} color="#2B2B2B" size={42} strokeWidth={3.5} />
           )}
         </div>
       </div>
 
       {/* Footer row: Subtitle & Delta badge */}
-      <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-[#D6E4F5]/70 text-xs">
+      <div className="flex items-center justify-between gap-2 mt-4 pt-3 border-t border-[#F3F4F6] text-xs">
         {sub ? (
-          <span className="text-xs text-[#5A6E85] font-medium truncate" title={sub}>
+          <span className="text-xs text-[#5E5E5E] font-medium truncate" title={sub}>
             {sub}
           </span>
         ) : (
@@ -132,18 +122,14 @@ export function StatCard({
         )}
 
         {delta && (
-          <span
-            className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[11px] font-bold flex-shrink-0 shadow-sm ${
-              deltaPositive
-                ? "bg-[#E6F8F0] text-[#0D824D] border border-[#B3ECCB]"
-                : "bg-[#FEECEC] text-[#DC2626] border border-[#FECACA]"
-            }`}
-          >
-            {deltaPositive ? (
-              <TrendingDown className="w-3 h-3 text-[#0D824D]" />
-            ) : (
-              <TrendingUp className="w-3 h-3 text-[#DC2626]" />
-            )}
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold flex-shrink-0 bg-[#F3F4F6] text-[#2B2B2B] border border-[#E5E7EB] shadow-2xs">
+            {deltaPositive !== undefined ? (
+              deltaPositive ? (
+                <TrendingDown className="w-3 h-3 text-[#4D4D4D]" />
+              ) : (
+                <TrendingUp className="w-3 h-3 text-[#4D4D4D]" />
+              )
+            ) : null}
             {delta}
           </span>
         )}
@@ -151,4 +137,3 @@ export function StatCard({
     </div>
   );
 }
-
