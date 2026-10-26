@@ -27,9 +27,12 @@ export interface TopAiKey {
 
 export interface DashboardSummary {
   total_spend_mtd: number;
+  total_spend_prior_period?: number;
+  mom_change?: number;
   forecasted_spend: number;
   cloud_spend_mtd: number;
   ai_spend_mtd: number;
+  total_tokens?: number;
   anomalies_detected: number;
   potential_savings_monthly: number;
   active_connections: number;
