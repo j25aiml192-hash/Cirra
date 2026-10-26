@@ -105,7 +105,7 @@ export default function AiSpendPage() {
             label="TOTAL AI RUN-RATE"
             value={data ? `$${formatNumber(data.totalCostUsd)}` : "$0"}
             sub="OpenAI + Anthropic APIs"
-            delta="+18.4%"
+            delta={data?.totalCostUsd ? "Live" : "No usage"}
             deltaPositive={false}
             loading={isLoading}
           />
@@ -113,9 +113,9 @@ export default function AiSpendPage() {
             variant="blue"
             icon={<Zap className="w-4 h-4" />}
             label="BILLABLE TOKENS"
-            value={`${data ? (data.totalTokens / 1000000000).toFixed(1) : 0}B`}
+            value={`${data?.totalTokens ? (data.totalTokens / 1000000000).toFixed(1) : 0}B`}
             sub="Prompt + completion volume"
-            delta="+24.1%"
+            delta={data?.totalTokens ? "Active" : "Idle"}
             deltaPositive={false}
             loading={isLoading}
           />
@@ -123,8 +123,12 @@ export default function AiSpendPage() {
             variant="green"
             icon={<Database className="w-4 h-4" />}
             label="CACHE OPTIMIZATION"
-            value={`${data ? data.cachedTokensPercent : 0}%`}
-            sub="Saved ~$8,400 via prompt cache"
+            value={`${data?.cachedTokensPercent ? data.cachedTokensPercent.toFixed(1) : 0}%`}
+            sub={
+              data?.cachedTokensPercent
+                ? `${data.cachedTokensPercent.toFixed(1)}% cache hit rate`
+                : "No cache events recorded"
+            }
             progress={data?.cachedTokensPercent ? Math.round(data.cachedTokensPercent) : 0}
             loading={isLoading}
           />
@@ -160,24 +164,30 @@ export default function AiSpendPage() {
             </div>
           </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-          {filteredModels.map((m) => (
-            <div key={m.model} className="p-4 rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
-                  {m.provider}
-                </span>
-                <div className="text-sm font-bold text-[#0A192F] mt-1 truncate">
-                  {m.model}
+          {filteredModels.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {filteredModels.map((m) => (
+                <div key={m.model} className="p-4 rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#64748B]">
+                      {m.provider}
+                    </span>
+                    <div className="text-sm font-bold text-[#0A192F] mt-1 truncate">
+                      {m.model}
+                    </div>
+                  </div>
+                  <div className="text-base font-extrabold text-[#0062E0] mt-3">
+                    ${formatNumber(m.cost)}
+                  </div>
                 </div>
-              </div>
-              <div className="text-base font-extrabold text-[#0062E0] mt-3">
-                ${formatNumber(m.cost)}
-              </div>
+              ))}
             </div>
-          ))}
+          ) : (
+            <div className="p-8 text-center text-xs text-[#64748B] bg-[#F8FAFD] rounded-xl border border-[#D6E4F5]">
+              No model costs recorded for this provider filter.
+            </div>
+          )}
         </div>
-      </div>
 
       {/* Full Usage DataTable */}
       <div className="space-y-3">

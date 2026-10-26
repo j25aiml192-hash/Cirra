@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { SettingsView } from "@/components/settings/SettingsView";
+import { UnifiedSettings } from "@/components/settings/UnifiedSettings";
 
 export default function ProfileSettingsPage() {
-  return <SettingsView initialTab="profile" />;
+  return <UnifiedSettings initialTab="profile" />;
 }

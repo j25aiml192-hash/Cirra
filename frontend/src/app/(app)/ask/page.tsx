@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, Bot, Terminal, CheckCircle2 } from "lucide-react";
 import { useAsk } from "@/hooks/useAsk";
+import { Topbar } from "@/components/layout/Topbar";
 
 interface ChatEntry {
   question: string;
@@ -41,7 +42,9 @@ export default function AskPage() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pt-12 pb-24 flex flex-col min-h-[calc(100vh-80px)]">
+    <div className="min-h-screen">
+      <Topbar />
+      <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 flex flex-col min-h-[calc(100vh-80px)]">
       {messages.length === 0 ? (
         /* Empty state */
         <div className="flex flex-col items-center gap-4 text-center my-auto">
@@ -174,6 +177,7 @@ export default function AskPage() {
           Every number is sourced from your database — no hallucinated figures
         </p>
       </div>
+    </div>
     </div>
   );
 }

@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import {
-  PanelLeft,
   Search,
   Bell,
   AlertTriangle,
@@ -13,7 +12,9 @@ import {
   ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSidebar } from "./AppShell";
 
 export interface TopbarProps {
   title?: string;
@@ -31,50 +32,45 @@ interface AlertItem {
   href: string;
 }
 
-const INITIAL_ALERTS: AlertItem[] = [
-  {
-    id: "alert-1",
-    title: "AWS NAT Gateway Egress Spike",
-    desc: "+$6,080 (+420%) unexpected transfer surge in us-east-1 VPC",
-    time: "14m ago",
-    severity: "critical",
-    unread: true,
-    href: "/anomalies",
-  },
-  {
-    id: "alert-2",
-    title: "OpenAI GPT-4o Token Runaway",
-    desc: "+$8,600 prompt completion spike on key 'prod-copilot-svc'",
-    time: "2h ago",
-    severity: "high",
-    unread: true,
-    href: "/anomalies",
-  },
-  {
-    id: "alert-3",
-    title: "GCP BigQuery Unpartitioned Scan",
-    desc: "18.5 TB ad-hoc query scanned without date filter",
-    time: "Yesterday",
-    severity: "medium",
-    unread: true,
-    href: "/anomalies",
-  },
-];
+const INITIAL_ALERTS: AlertItem[] = [];
 
 export function Topbar({ title, subtitle }: TopbarProps) {
+  const pathname = usePathname();
+  const { isExpanded } = useSidebar();
   const [searchExpanded, setSearchExpanded] = React.useState(false);
   const [showAlerts, setShowAlerts] = React.useState(false);
   const [alerts, setAlerts] = React.useState<AlertItem[]>(INITIAL_ALERTS);
 
+  const getNavbarTitle = () => {
+    // Keep "Welcome back, Hiten" on dashboard and ask cirra (as requested)
+    if (!pathname || pathname === "/dashboard" || pathname === "/" || pathname === "/ask") {
+      return "Welcome back, Hiten";
+    }
+
+    // Dynamic title for each page based on active route
+    if (pathname === "/anomalies") return "Anomalies";
+    if (pathname === "/spend/cloud") return "Cloud Spend";
+    if (pathname === "/spend/ai") return "AI Models";
+    if (pathname === "/allocation") return "Allocation";
+    if (pathname === "/savings") return "Savings";
+    if (pathname.startsWith("/settings")) return "Settings";
+
+    if (title) return title;
+
+    const segment = pathname.split("/").filter(Boolean).pop();
+    return segment
+      ? segment
+          .split("-")
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(" ")
+      : "Welcome back, Hiten";
+  };
+
+  const displayTitle = getNavbarTitle();
+
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   const unreadCount = alerts.filter((a) => a.unread).length;
-
-  const toggleSidebar = () => {
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(new CustomEvent("cirra:toggle-sidebar"));
-    }
-  };
 
   // Close dropdown on outside click or Escape
   React.useEffect(() => {
@@ -112,24 +108,19 @@ export function Topbar({ title, subtitle }: TopbarProps) {
   };
 
   return (
-    <header className="flex items-center justify-between gap-3 h-14 px-4 sm:px-6 bg-[#07090E] border-b border-[#1A2333] sticky top-0 z-30 select-none text-white shadow-sm">
-      {/* Left: Sidebar Toggle Button & Greeting Title */}
-      <div className="flex items-center gap-3 min-w-0">
-        <button
-          type="button"
-          onClick={toggleSidebar}
-          className="p-1.5 -ml-1 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800/70 transition-colors"
-          title="Toggle sidebar (⌘B)"
-          aria-label="Toggle sidebar"
-        >
-          <PanelLeft className="w-4 h-4" />
-        </button>
-
+    <header
+      className="fixed top-0 left-0 right-0 h-14 bg-[#07090E] border-b border-[#1A2333] z-30 select-none text-white shadow-sm flex items-center justify-between pr-4 sm:pr-6 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      style={{
+        paddingLeft: isExpanded ? 272 : 96,
+      }}
+    >
+      {/* Left: Greeting Title / Page Title */}
+      <div className="flex items-center min-w-0">
         <div className="flex items-center gap-2 truncate">
           <h1 className="text-[14px] sm:text-[15px] font-semibold text-white tracking-tight truncate">
-            {title || "Welcome back, Hiten"}
+            {displayTitle}
           </h1>
-          {subtitle && (
+          {subtitle && pathname !== "/dashboard" && pathname !== "/" && pathname !== "/ask" && (
             <span className="hidden xl:inline-block text-xs text-zinc-400 font-normal truncate">
               · {subtitle}
             </span>
