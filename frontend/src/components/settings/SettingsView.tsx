@@ -839,3 +839,4 @@ export function SettingsView({ initialTab = "profile" }: SettingsViewProps) {
     </div>
   );
 }
+
