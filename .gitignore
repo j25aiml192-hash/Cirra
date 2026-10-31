@@ -1,7 +1,12 @@
 node_modules/
 .next/
 .env
+.env*.local
 .env.local
+**/.env
+**/.env.local
+**/.env.*
+!.env.example
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -11,3 +16,6 @@ dist/
 *.log
 *.tsbuildinfo
 apps/
+.temp/
+**/.temp/
+supabase/supabase/

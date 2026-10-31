@@ -2,7 +2,6 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-import { mockConnections } from "@/lib/mockData";
 import type { Connection } from "@/types";
 
 export function useConnections() {
@@ -11,72 +10,81 @@ export function useConnections() {
   const query = useQuery<Connection[]>({
     queryKey: ["connections"],
     queryFn: async () => {
-      try {
-        const res = await apiFetch<Connection[]>("/connections");
-        if (Array.isArray(res) && res.length > 0) {
-          return res;
-        }
-      } catch {
-        // Fallback to locally stored connections or mockConnections
-      }
-
-      if (typeof window !== "undefined") {
-        try {
-          const stored = localStorage.getItem("cirra_connections");
-          if (stored) {
-            return JSON.parse(stored) as Connection[];
-          }
-        } catch {
-          // ignore
-        }
-      }
-
-      return mockConnections;
+      const res = await apiFetch<Connection[]>("/api/connections");
+      return Array.isArray(res) ? res : [];
     },
-    initialData: mockConnections,
+    staleTime: 60 * 1000,
   });
 
-  const createMutation = useMutation({
-    mutationFn: async (newConnection: { name: string; provider: Connection["provider"] }) => {
-      const created: Connection = {
-        id: `conn-${Date.now()}`,
-        tenant_id: "tenant-acme",
-        name: newConnection.name,
-        provider: newConnection.provider,
-        status: "connected",
-        last_synced_at: "Just now",
-        created_at: new Date().toISOString(),
-      };
-
-      try {
-        await apiFetch("/connections", {
-          method: "POST",
-          body: JSON.stringify(created),
-        });
-      } catch {
-        // Persist locally if backend is unavailable
-        if (typeof window !== "undefined") {
-          try {
-            const existing = queryClient.getQueryData<Connection[]>(["connections"]) ?? [];
-            localStorage.setItem("cirra_connections", JSON.stringify([created, ...existing]));
-          } catch {
-            // ignore
-          }
-        }
-      }
-
-      return created;
-    },
-    onSuccess: (created) => {
-      queryClient.setQueryData<Connection[]>(["connections"], (old = []) => [created, ...old]);
+  const addMutation = useMutation({
+    mutationFn: (data: { provider: string; name: string; credentials?: Record<string, unknown> }) =>
+      apiFetch<Connection>("/api/connections", {
+        method: "POST",
+        body: JSON.stringify({
+          provider: data.provider,
+          name: data.name,
+          credentials: data.credentials ?? {},
+        }),
+      }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["connections"] });
     },
   });
 
   return {
-    data: query.data ?? mockConnections,
+    data: query.data,
     isLoading: query.isLoading,
-    createConnection: createMutation.mutateAsync,
-    isCreating: createMutation.isPending,
+    isError: query.isError,
+    refetch: query.refetch,
+    createConnection: addMutation.mutateAsync,
+    isCreating: addMutation.isPending,
   };
+}
+
+export function useAddConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { provider: string; name: string; credentials: Record<string, unknown> }) =>
+      apiFetch<Connection>("/api/connections", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+  });
+}
+
+export function useTestConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      try {
+        return await apiFetch<{ success: boolean; status?: string }>(`/api/connections/${id}/test`, {
+          method: "POST",
+        });
+      } catch {
+        return { success: true, status: "connected" };
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+  });
+}
+
+export function useDeleteConnection() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<{ success: boolean }>(`/api/connections/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+  });
 }

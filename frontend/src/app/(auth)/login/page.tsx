@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 
 // Deterministic blob data to prevent hydration mismatches
 const BLOBS_DATA = [
@@ -20,9 +21,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Keep track of the blob DOM elements for high-performance updates
   const blobRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -43,15 +50,28 @@ export default function LoginPage() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     setIsSubmitting(true);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("cirra_token", "sample_session_token");
-    }
-    setTimeout(() => {
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setErrorMessage(error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
       router.push("/dashboard");
-    }, 400);
+    } catch (err: unknown) {
+      setErrorMessage(err instanceof Error ? err.message : "Failed to sign in");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -263,6 +283,19 @@ export default function LoginPage() {
           filter: brightness(1.25);
         }
 
+        /* Error message */
+        .error-msg {
+          margin-bottom: 20px;
+          padding: 10px 14px;
+          background: rgba(239, 68, 68, 0.12);
+          border: 1px solid rgba(239, 68, 68, 0.35);
+          border-radius: 8px;
+          font-family: 'Space Mono', monospace;
+          font-size: 11px;
+          color: #FCA5A5;
+          letter-spacing: 0.5px;
+        }
+
         /* Utility */
         .footer-nav {
           margin-top: 36px;
@@ -348,6 +381,10 @@ export default function LoginPage() {
         </header>
 
         <form autoComplete="off" onSubmit={handleSubmit}>
+          {errorMessage && (
+            <div className="error-msg">{errorMessage}</div>
+          )}
+
           <div className="form-group">
             <label>Work Email</label>
             <input
@@ -364,7 +401,7 @@ export default function LoginPage() {
             <label>Sequence Key</label>
             <input
               type="password"
-              placeholder="••••••••"
+              placeholder="••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -382,6 +419,7 @@ export default function LoginPage() {
 
         <footer className="footer-nav">
           <Link href="/">← RETURN HOME</Link>
+          <Link href="/signup">CREATE ACCOUNT →</Link>
         </footer>
       </main>
     </div>

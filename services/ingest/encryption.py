@@ -4,12 +4,14 @@ import os
 from typing import Any, Dict
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
-DEFAULT_ENCRYPTION_KEY = "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
-
-
 def _get_aes_key() -> bytes:
-    key_str = os.getenv("ENCRYPTION_KEY", DEFAULT_ENCRYPTION_KEY)
-    key_bytes = base64.b64decode(key_str)
+    key_str = os.getenv("ENCRYPTION_KEY")
+    if not key_str or not key_str.strip():
+        raise ValueError("ENCRYPTION_KEY environment variable is missing or empty.")
+    try:
+        key_bytes = base64.b64decode(key_str)
+    except Exception as e:
+        raise ValueError(f"Invalid base64 encoding in ENCRYPTION_KEY: {e}") from e
     if len(key_bytes) != 32:
         raise ValueError("ENCRYPTION_KEY must be exactly 32 bytes when base64-decoded.")
     return key_bytes

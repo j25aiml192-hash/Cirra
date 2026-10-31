@@ -1,40 +1,72 @@
 "use client";
 
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { AskResponse } from "@/types";
 
+export interface ChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+  sql?: string;
+  rows?: Array<Record<string, unknown>>;
+  confidence?: number;
+}
+
+export function useSendMessage() {
+  return useMutation<AskResponse, Error, { question: string }>({
+    mutationFn: (data) =>
+      apiFetch<AskResponse>("/api/ask", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+  });
+}
+
 export function useAsk() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const sendMessageMutation = useSendMessage();
 
   const ask = async (question: string): Promise<AskResponse> => {
-    setIsLoading(true);
+    setMessages((prev) => [...prev, { role: "user", content: question }]);
 
     try {
-      const res = await apiFetch<AskResponse>("/ask", {
-        method: "POST",
-        body: JSON.stringify({ question }),
-      });
-      if (res && res.answer) {
-        return res;
-      }
-    } catch {
-      // Backend not yet responding or no provider data configured
-    } finally {
-      setIsLoading(false);
+      const res = await sendMessageMutation.mutateAsync({ question });
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: res.answer,
+          sql: res.sql,
+          rows: res.rows,
+          confidence: res.confidence,
+        },
+      ]);
+      return res;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to query telemetry";
+      const fallback: AskResponse = {
+        answer: errorMessage,
+        sql: "",
+        rows: [],
+        confidence: 0,
+      };
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: errorMessage,
+        },
+      ]);
+      return fallback;
     }
-
-    return {
-      answer:
-        "No live provider telemetry found. Please connect your cloud or AI accounts in Settings > Connections to run deterministic queries against your real FOCUS billing data.",
-      sql: "SELECT * FROM focus_billing WHERE tenant_id = 'current_tenant';",
-      rows: [],
-      confidence: 1.0,
-    };
   };
 
   return {
     ask,
-    isLoading,
+    messages,
+    isLoading: sendMessageMutation.isPending,
+    isError: sendMessageMutation.isError,
+    error: sendMessageMutation.error,
   };
 }

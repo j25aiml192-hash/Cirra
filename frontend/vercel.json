@@ -5,5 +5,11 @@
       "source": "/api/:path*",
       "destination": "https://api.cirra.dev/api/:path*"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/ingest",
+      "schedule": "0 */4 * * *"
+    }
   ]
 }

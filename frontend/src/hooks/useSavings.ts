@@ -3,9 +3,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { SavingsOverview } from "@/types";
 import { apiFetch } from "@/lib/api";
-import { mockSavings } from "@/lib/mockData";
 
-export const emptySavingsData: SavingsOverview = mockSavings;
+const initialSavingsOverview: SavingsOverview = {
+  total_realized_savings: 0,
+  total_pipeline_savings: 0,
+  entries: [],
+};
 
 export function useSavings() {
   const queryClient = useQueryClient();
@@ -14,43 +17,31 @@ export function useSavings() {
     queryKey: ["savings"],
     queryFn: async () => {
       try {
-        const res = await apiFetch<SavingsOverview>("/savings");
-        if (res && Array.isArray(res.entries) && res.entries.length > 0) {
-          return res;
-        }
+        const res = await apiFetch<SavingsOverview>("/api/savings");
+        return res ?? initialSavingsOverview;
       } catch {
-        // Fallback to rich savings pipeline data
+        return initialSavingsOverview;
       }
-      return mockSavings;
     },
-    initialData: mockSavings,
+    staleTime: 60 * 1000,
   });
 
   const approveMutation = useMutation({
     mutationFn: async (id: string) => {
-      try {
-        await apiFetch(`/savings/${id}/approve`, { method: "POST" });
-      } catch {
-        // Fallback for local simulation
-      }
-      return id;
-    },
-    onSuccess: (id) => {
-      queryClient.setQueryData<SavingsOverview>(["savings"], (old) => {
-        if (!old) return old;
-        return {
-          ...old,
-          entries: old.entries.map((entry) =>
-            entry.id === id ? { ...entry, status: "approved" as const } : entry
-          ),
-        };
+      return apiFetch<{ success: boolean }>(`/api/savings/${id}/approve`, {
+        method: "POST",
       });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["savings"] });
     },
   });
 
   return {
-    data: query.data ?? mockSavings,
+    data: query.data,
     isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
     approveAction: approveMutation.mutate,
     isApproving: approveMutation.isPending,
   };

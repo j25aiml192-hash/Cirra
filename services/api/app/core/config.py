@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,9 +22,16 @@ class Settings(BaseSettings):
 
     # Security & Encryption (AES-256 base64 key)
     ENCRYPTION_KEY: str = Field(
-        default="MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=",
+        ...,
         alias="ENCRYPTION_KEY"
     )
+
+    @field_validator("ENCRYPTION_KEY")
+    @classmethod
+    def validate_encryption_key(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("ENCRYPTION_KEY environment variable is required and cannot be empty.")
+        return v
 
     # JWT Authentication
     CIRRA_JWT_SECRET: str = Field(default="cirra-super-secret-jwt-key-2026-very-secure", alias="CIRRA_JWT_SECRET")
