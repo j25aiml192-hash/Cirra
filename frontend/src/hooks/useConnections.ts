@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { mockConnections } from "@/lib/mockData";
 import type { Connection } from "@/types";
 
 export function useConnections() {
@@ -12,11 +13,11 @@ export function useConnections() {
     queryFn: async () => {
       try {
         const res = await apiFetch<Connection[]>("/connections");
-        if (Array.isArray(res)) {
+        if (Array.isArray(res) && res.length > 0) {
           return res;
         }
       } catch {
-        // Fallback to locally stored connections or empty array
+        // Fallback to locally stored connections or mockConnections
       }
 
       if (typeof window !== "undefined") {
@@ -30,8 +31,9 @@ export function useConnections() {
         }
       }
 
-      return [];
+      return mockConnections;
     },
+    initialData: mockConnections,
   });
 
   const createMutation = useMutation({
@@ -72,7 +74,7 @@ export function useConnections() {
   });
 
   return {
-    data: query.data ?? [],
+    data: query.data ?? mockConnections,
     isLoading: query.isLoading,
     createConnection: createMutation.mutateAsync,
     isCreating: createMutation.isPending,

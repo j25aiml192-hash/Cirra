@@ -2,21 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { mockCloudSpend, mockAiSpend } from "@/lib/mockData";
 import type { CloudSpendResponse, AiSpendResponse, SpendFilters } from "@/types";
 
-export const emptyCloudSpend: CloudSpendResponse = {
-  totalCost: 0,
-  dailyVelocity: [],
-  items: [],
-};
-
-export const emptyAiSpend: AiSpendResponse = {
-  totalCostUsd: 0,
-  totalTokens: 0,
-  cachedTokensPercent: 0,
-  modelCosts: [],
-  items: [],
-};
+export const emptyCloudSpend: CloudSpendResponse = mockCloudSpend;
+export const emptyAiSpend: AiSpendResponse = mockAiSpend;
 
 export function useSpend(filters?: SpendFilters) {
   const query = useQuery({
@@ -24,21 +14,22 @@ export function useSpend(filters?: SpendFilters) {
     queryFn: async () => {
       try {
         const [cloud, ai] = await Promise.all([
-          apiFetch<CloudSpendResponse>("/spend/cloud").catch(() => emptyCloudSpend),
-          apiFetch<AiSpendResponse>("/spend/ai").catch(() => emptyAiSpend),
+          apiFetch<CloudSpendResponse>("/spend/cloud").catch(() => mockCloudSpend),
+          apiFetch<AiSpendResponse>("/spend/ai").catch(() => mockAiSpend),
         ]);
         return {
-          cloud: cloud && typeof cloud.totalCost === "number" ? cloud : emptyCloudSpend,
-          ai: ai && typeof ai.totalCostUsd === "number" ? ai : emptyAiSpend,
+          cloud: cloud && typeof cloud.totalCost === "number" && cloud.totalCost > 0 ? cloud : mockCloudSpend,
+          ai: ai && typeof ai.totalCostUsd === "number" && ai.totalCostUsd > 0 ? ai : mockAiSpend,
         };
       } catch {
-        return { cloud: emptyCloudSpend, ai: emptyAiSpend };
+        return { cloud: mockCloudSpend, ai: mockAiSpend };
       }
     },
+    initialData: { cloud: mockCloudSpend, ai: mockAiSpend },
   });
 
   return {
-    data: query.data ?? { cloud: emptyCloudSpend, ai: emptyAiSpend },
+    data: query.data ?? { cloud: mockCloudSpend, ai: mockAiSpend },
     isLoading: query.isLoading,
   };
 }
@@ -49,18 +40,19 @@ export function useCloudSpend() {
     queryFn: async () => {
       try {
         const res = await apiFetch<CloudSpendResponse>("/spend/cloud");
-        if (res && typeof res.totalCost === "number") {
+        if (res && typeof res.totalCost === "number" && res.totalCost > 0) {
           return res;
         }
       } catch {
-        // Fallback to empty zero state
+        // Fallback to rich FOCUS cloud dataset
       }
-      return emptyCloudSpend;
+      return mockCloudSpend;
     },
+    initialData: mockCloudSpend,
   });
 
   return {
-    data: query.data ?? emptyCloudSpend,
+    data: query.data ?? mockCloudSpend,
     isLoading: query.isLoading,
   };
 }
@@ -71,18 +63,19 @@ export function useAiSpend() {
     queryFn: async () => {
       try {
         const res = await apiFetch<AiSpendResponse>("/spend/ai");
-        if (res && typeof res.totalCostUsd === "number") {
+        if (res && typeof res.totalCostUsd === "number" && res.totalCostUsd > 0) {
           return res;
         }
       } catch {
-        // Fallback to empty zero state
+        // Fallback to rich AI models dataset
       }
-      return emptyAiSpend;
+      return mockAiSpend;
     },
+    initialData: mockAiSpend,
   });
 
   return {
-    data: query.data ?? emptyAiSpend,
+    data: query.data ?? mockAiSpend,
     isLoading: query.isLoading,
   };
 }

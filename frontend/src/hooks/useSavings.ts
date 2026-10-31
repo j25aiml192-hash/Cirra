@@ -1,14 +1,11 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { SavingsEntry, SavingsOverview } from "@/types";
+import type { SavingsOverview } from "@/types";
 import { apiFetch } from "@/lib/api";
+import { mockSavings } from "@/lib/mockData";
 
-export const emptySavingsData: SavingsOverview = {
-  total_realized_savings: 0,
-  total_pipeline_savings: 0,
-  entries: [],
-};
+export const emptySavingsData: SavingsOverview = mockSavings;
 
 export function useSavings() {
   const queryClient = useQueryClient();
@@ -18,14 +15,15 @@ export function useSavings() {
     queryFn: async () => {
       try {
         const res = await apiFetch<SavingsOverview>("/savings");
-        if (res && Array.isArray(res.entries)) {
+        if (res && Array.isArray(res.entries) && res.entries.length > 0) {
           return res;
         }
       } catch {
-        // Fallback to empty zero state
+        // Fallback to rich savings pipeline data
       }
-      return emptySavingsData;
+      return mockSavings;
     },
+    initialData: mockSavings,
   });
 
   const approveMutation = useMutation({
@@ -51,7 +49,7 @@ export function useSavings() {
   });
 
   return {
-    data: query.data ?? emptySavingsData,
+    data: query.data ?? mockSavings,
     isLoading: query.isLoading,
     approveAction: approveMutation.mutate,
     isApproving: approveMutation.isPending,

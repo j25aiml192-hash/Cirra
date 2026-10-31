@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Send, Bot, Terminal, CheckCircle2 } from "lucide-react";
 import { useAsk } from "@/hooks/useAsk";
 import { Topbar } from "@/components/layout/Topbar";
+import { MorphOrb } from "@/components/ui/MorphOrb";
+import { ShaderBackground } from "@/components/ui/ShaderBackground";
 
 interface ChatEntry {
   question: string;
@@ -42,15 +44,16 @@ export default function AskPage() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      {/* 21st.dev Animated Shader Background */}
+      <ShaderBackground className="fixed inset-0 w-full h-full pointer-events-none z-0" />
+
       <Topbar />
-      <div className="max-w-3xl mx-auto px-4 pt-6 pb-24 flex flex-col min-h-[calc(100vh-80px)]">
+      <div className="relative z-10 max-w-3xl mx-auto px-4 pt-6 pb-24 flex flex-col min-h-[calc(100vh-80px)]">
       {messages.length === 0 ? (
         /* Empty state */
-        <div className="flex flex-col items-center gap-4 text-center my-auto">
-          <div className="w-14 h-14 rounded-2xl bg-[#0062E0] flex items-center justify-center shadow-lg shadow-[#0062E0]/20">
-            <Sparkles className="w-7 h-7 text-white" />
-          </div>
+        <div className="flex flex-col items-center gap-3 text-center my-auto">
+          <MorphOrb diameter={120} isThinking={isLoading} />
           <h2 className="text-2xl font-bold text-[#0A192F]">
             Ask anything about your spend
           </h2>

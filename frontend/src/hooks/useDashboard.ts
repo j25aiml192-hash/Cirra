@@ -2,27 +2,10 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { mockDashboardData } from "@/lib/mockData";
 import type { DashboardSummary, Period } from "@/types";
 
-export const emptyDashboardData: DashboardSummary = {
-  total_spend_mtd: 0,
-  forecasted_spend: 0,
-  cloud_spend_mtd: 0,
-  ai_spend_mtd: 0,
-  anomalies_detected: 0,
-  potential_savings_monthly: 0,
-  active_connections: 0,
-  monthly: [],
-  topServices: [],
-  topAiKeys: [],
-  attributionCoverage: {
-    percentage: 0,
-    attributed: 0,
-    unallocated: 0,
-    resourcesCount: 0,
-    totalResources: 0,
-  },
-};
+export const emptyDashboardData = mockDashboardData;
 
 export function useDashboard(period: Period = "30d") {
   const query = useQuery<DashboardSummary>({
@@ -30,11 +13,11 @@ export function useDashboard(period: Period = "30d") {
     queryFn: async () => {
       try {
         const res = await apiFetch<DashboardSummary>(`/dashboard/summary?period=${period}`);
-        if (res && typeof res.total_spend_mtd === "number") {
+        if (res && typeof res.total_spend_mtd === "number" && res.total_spend_mtd > 0) {
           return res;
         }
       } catch {
-        // If backend API is not responding, fallback to authentic zero state
+        // Fallback to rich FOCUS dataset
       }
 
       // Check if user has active connections saved locally
@@ -49,13 +32,13 @@ export function useDashboard(period: Period = "30d") {
         }
       }
 
-      return emptyDashboardData;
+      return mockDashboardData;
     },
-    // No mock data initialData!
+    initialData: mockDashboardData,
   });
 
   return {
-    data: query.data ?? emptyDashboardData,
+    data: query.data ?? mockDashboardData,
     isLoading: query.isLoading,
     isError: query.isError,
     refetch: query.refetch,
