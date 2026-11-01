@@ -138,6 +138,41 @@ export async function POST(request: NextRequest, { params }: RouteContext) {
           break;
         }
 
+        case 'groq': {
+          const apiKey = creds.apiKey || creds.api_key;
+          if (!apiKey) throw new Error('Missing Groq API key');
+
+          const res = await fetch('https://api.groq.com/openai/v1/models', {
+            headers: { Authorization: `Bearer ${apiKey}` },
+          });
+
+          if (!res.ok) {
+            throw new Error(`Groq API returned status ${res.status}`);
+          }
+          testResult = { ok: true, message: 'Groq connection verified successfully' };
+          break;
+        }
+
+        case 'railway': {
+          const token = creds.token || creds.api_key || creds.apiKey;
+          if (!token) throw new Error('Missing Railway API token');
+
+          const res = await fetch('https://backboard.railway.app/graphql/v2', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ query: '{ me { id } }' }),
+          });
+
+          if (!res.ok) {
+            throw new Error(`Railway API returned status ${res.status}`);
+          }
+          testResult = { ok: true, message: 'Railway connection verified successfully' };
+          break;
+        }
+
         default:
           return Response.json({
             data: { ok: false, message: 'Provider not yet testable' },

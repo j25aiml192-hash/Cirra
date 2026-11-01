@@ -1,19 +1,15 @@
-import { createServerSupabaseClient } from '@/lib/supabase'
-import { NextRequest, NextResponse } from 'next/server'
+import { mockUser } from '@/lib/mock-session'
+import { NextRequest } from 'next/server'
 
-export async function getAuthenticatedUser(_request?: NextRequest) {
-  try {
-    const supabase = await createServerSupabaseClient()
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser()
-
-    if (error || !user) return null
-    return user
-  } catch {
-    return null
-  }
+export async function getAuthenticatedUser(_request?: Request | NextRequest) {
+  // TEMPORARY: bypassing auth for demo
+  return Object.assign(
+    { ...mockUser },
+    {
+      user: mockUser,
+      error: null,
+    }
+  )
 }
 
 export function unauthorized() {
@@ -23,5 +19,3 @@ export function unauthorized() {
 export function apiError(message: string, status: number): Response {
   return Response.json({ data: null, error: message, meta: null }, { status })
 }
-
-

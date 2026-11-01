@@ -41,7 +41,7 @@ type ProviderKey =
   | "openai"
   | "anthropic"
   | "bedrock"
-  | "vertex";
+  | "vertex" | "groq" | "railway";
 
 interface ProviderOption {
   key: ProviderKey;
@@ -60,6 +60,8 @@ const providerOptions: ProviderOption[] = [
   { key: "anthropic", name: "Anthropic Claude", category: "AI", letter: "C", color: "#7C3AED" },
   { key: "bedrock", name: "AWS Bedrock", category: "AI", letter: "B", color: "#F97316" },
   { key: "vertex", name: "Google Vertex AI", category: "AI", letter: "V", color: "#6366F1" },
+  { key: "groq", name: "Groq Cloud", category: "AI", letter: "G", color: "#F55036" },
+  { key: "railway", name: "Railway Platform", category: "Infra", letter: "R", color: "#8B5CF6" },
 ];
 
 const initialMembers: TeamMember[] = [
@@ -917,7 +919,7 @@ function SettingsContent({ initialTab = "connections" }: UnifiedSettingsProps) {
                     </>
                   )}
 
-                  {["openai", "anthropic"].includes(selectedProvider) && (
+                  {["openai", "anthropic", "groq"].includes(selectedProvider) && (
                     <div>
                       <label className="text-xs font-semibold text-[#334155] block mb-1">
                         Admin Usage Read-Only API Key
@@ -939,6 +941,19 @@ function SettingsContent({ initialTab = "connections" }: UnifiedSettingsProps) {
                         rows={3}
                         placeholder='{"type": "service_account", ...}'
                         className="w-full p-2.5 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
+                      />
+                    </div>
+                  )}
+
+                  {selectedProvider === "railway" && (
+                    <div>
+                      <label className="text-xs font-semibold text-[#334155] block mb-1">
+                        Railway API Token
+                      </label>
+                      <input
+                        type="password"
+                        placeholder="railway_token_..."
+                        className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
                       />
                     </div>
                   )}

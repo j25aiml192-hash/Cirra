@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { ingestAwsCosts } from '@/lib/connectors/aws';
 import { ingestOpenAiUsage } from '@/lib/connectors/openai';
+import { ingestGroqUsage } from '@/lib/connectors/groq';
+import { ingestRailwayCosts } from '@/lib/connectors/railway';
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +45,10 @@ export async function POST(request: NextRequest) {
           result = await ingestAwsCosts(conn);
         } else if (conn.provider === 'openai') {
           result = await ingestOpenAiUsage(conn);
+        } else if (conn.provider === 'groq') {
+          result = await ingestGroqUsage(conn);
+        } else if (conn.provider === 'railway') {
+          result = await ingestRailwayCosts(conn);
         } else {
           continue;
         }

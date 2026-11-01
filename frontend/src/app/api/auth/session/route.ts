@@ -1,14 +1,8 @@
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { mockUser } from '@/lib/mock-session'
 import { NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const supabase = await createServerSupabaseClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-  return NextResponse.json({ user })
+  return NextResponse.json({ user: mockUser })
 }
-

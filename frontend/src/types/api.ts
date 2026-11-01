@@ -93,7 +93,7 @@ export interface Connection {
   id: string;
   tenant_id: string;
   name: string;
-  provider: 'aws' | 'gcp' | 'azure' | 'kubernetes' | 'openai' | 'anthropic' | 'bedrock' | 'vertex';
+  provider: 'aws' | 'gcp' | 'azure' | 'kubernetes' | 'openai' | 'anthropic' | 'bedrock' | 'vertex' | 'groq' | 'railway';
   status: 'connected' | 'error' | 'syncing' | 'pending';
   last_synced_at?: string;
   errorMessage?: string;
