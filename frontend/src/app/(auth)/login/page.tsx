@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 
+export const dynamic = 'force-dynamic';
+
 // Deterministic blob data to prevent hydration mismatches
 const BLOBS_DATA = [
   { size: 280, left: 12, top: 18, animationDelay: -3, animationDuration: 18 },

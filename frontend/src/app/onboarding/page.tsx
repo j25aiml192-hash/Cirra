@@ -9,6 +9,8 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { apiFetch } from "@/lib/api";
 
+export const dynamic = 'force-dynamic';
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [orgName, setOrgName] = React.useState("");
