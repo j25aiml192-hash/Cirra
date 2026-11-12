@@ -1,6 +1,10 @@
 import asyncio
 import os
 import uuid
+
+# Force mock mode for all test suites to prevent real external calls / SMS / phone calls
+os.environ["INGEST_MOCK"] = "true"
+os.environ["ENVIRONMENT"] = "test"
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -29,6 +33,13 @@ async def client():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
+
+
+@pytest_asyncio.fixture(autouse=True)
+async def cleanup_db_engine():
+    yield
+    from app.core.database import engine
+    await engine.dispose()
 
 
 @pytest.fixture

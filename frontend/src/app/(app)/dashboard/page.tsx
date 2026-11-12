@@ -14,6 +14,7 @@ import { Topbar } from "@/components/layout/Topbar";
 import { useDashboard } from "@/hooks/useDashboard";
 import { PeriodTabs } from "@/components/ui/PeriodTabs";
 import { StatCard } from "@/components/ui/StatCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { SpendBarChart } from "@/components/charts/SpendBarChart";
 import { TopServicesTable } from "@/components/ui/TopServicesTable";
 import { TopAiKeysCard } from "@/components/ui/TopAiKeysCard";
@@ -23,7 +24,21 @@ import type { Period } from "@/types";
 export default function DashboardPage() {
   const [period, setPeriod] = useState<Period>("30d");
   const [selectedProvider, setSelectedProvider] = useState<string>("All");
-  const { data, isLoading } = useDashboard();
+  const { data, isLoading, isError } = useDashboard(period);
+
+  if (isError) {
+    return (
+      <div className="min-h-screen">
+        <Topbar />
+        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+          <EmptyState
+            title="Failed to load dashboard metrics"
+            description="Unable to retrieve multi-cloud and AI usage telemetry. Please check the backend connection and try again."
+          />
+        </main>
+      </div>
+    );
+  }
 
   const totalSpendFormatted = data ? `$${formatNumber(data.total_spend_mtd)}` : "$0";
   const aiSpendFormatted = data ? `$${formatNumber(data.ai_spend_mtd)}` : "$0";

@@ -1,5 +1,5 @@
-from typing import List
-from pydantic import Field
+from typing import List, Optional
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,9 +31,57 @@ class Settings(BaseSettings):
     CIRRA_JWT_ALGORITHM: str = "HS256"
     CIRRA_JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
+    @field_validator("ENCRYPTION_KEY", mode="before")
+    def validate_encryption_key(cls, v):
+        return v if v else "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+
+    @field_validator("CIRRA_JWT_SECRET", mode="before")
+    def validate_jwt_secret(cls, v):
+        return v if v else "cirra-super-secret-jwt-key-2026-very-secure"
+
     # Supabase Auth
     SUPABASE_JWT_SECRET: str = Field(default="supabase-secret-placeholder-for-tests", alias="SUPABASE_JWT_SECRET")
     SUPABASE_URL: str = Field(default="https://cirra.supabase.co", alias="SUPABASE_URL")
+
+    # Investigator Service
+    INVESTIGATOR_URL: str = Field(default="http://localhost:8001", alias="INVESTIGATOR_URL")
+
+    # Action Engine Service
+    ACTION_ENGINE_URL: str = Field(default="http://localhost:8003", alias="ACTION_ENGINE_URL")
+
+    # Telephony & AI Voice
+    TWILIO_ACCOUNT_SID: Optional[str] = Field(default=None, alias="TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN: Optional[str] = Field(default=None, alias="TWILIO_AUTH_TOKEN")
+    TWILIO_FROM_NUMBER: str = Field(default="+17372508034", alias="TWILIO_FROM_NUMBER")
+    PUBLIC_WEBHOOK_URL: str = Field(
+        default="https://almanac-unflawed-gents.ngrok-free.dev",
+        alias="PUBLIC_WEBHOOK_URL"
+    )
+    INTERNAL_SERVICE_KEY: str = Field(default="internal-dev-key", alias="INTERNAL_SERVICE_KEY")
+    API_BASE_URL: str = Field(default="http://localhost:8000", alias="API_BASE_URL")
+    VAPI_ALERT_PHONE_NUMBER: str = Field(default="+918910095002", alias="VAPI_ALERT_PHONE_NUMBER")
+    GROQ_API_KEY: Optional[str] = Field(default=None, alias="GROQ_API_KEY")
+    INGEST_MOCK: bool = Field(default=False, alias="INGEST_MOCK")
+
+    @property
+    def twilio_account_sid(self) -> Optional[str]:
+        return self.TWILIO_ACCOUNT_SID
+
+    @property
+    def twilio_auth_token(self) -> Optional[str]:
+        return self.TWILIO_AUTH_TOKEN
+
+    @property
+    def twilio_from_number(self) -> str:
+        return self.TWILIO_FROM_NUMBER
+
+    @property
+    def public_webhook_url(self) -> str:
+        return self.PUBLIC_WEBHOOK_URL
+
+    @property
+    def internal_service_key(self) -> str:
+        return self.INTERNAL_SERVICE_KEY
 
     # CORS
     CORS_ORIGINS: List[str] = [

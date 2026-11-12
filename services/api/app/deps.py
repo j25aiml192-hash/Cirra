@@ -48,7 +48,7 @@ async def get_db_tenant_session(
     async with async_session_factory() as session:
         async with session.begin():
             await session.execute(
-                text("SET LOCAL app.tenant_id = :tenant_id"),
+                text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
                 {"tenant_id": tenant_id}
             )
             yield session

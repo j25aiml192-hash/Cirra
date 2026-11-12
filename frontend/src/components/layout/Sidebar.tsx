@@ -18,6 +18,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAnomalies } from "@/hooks/useAnomalies";
 
 export interface SidebarProps {
   collapsed: boolean;
@@ -87,6 +88,9 @@ function NavItem({ href, icon, label, badge, badgeColor = "amber", collapsed }: 
 }
 
 export function Sidebar({ collapsed, onToggle }: SidebarProps) {
+  const { data: anomalies } = useAnomalies("open");
+  const openCount = Array.isArray(anomalies) ? anomalies.length : 0;
+
   return (
     <aside
       className="fixed left-0 top-0 bottom-0 z-40 flex flex-col justify-between cirra-sidebar transition-all duration-200 select-none"
@@ -189,8 +193,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             href="/anomalies"
             icon={<AlertTriangle className="w-4 h-4" />}
             label="Anomalies"
-            badge="3"
-            badgeColor="amber"
+            badge={openCount > 0 ? String(openCount) : undefined}
+            badgeColor="rose"
             collapsed={collapsed}
           />
           <NavItem

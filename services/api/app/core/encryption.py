@@ -3,6 +3,7 @@ import json
 import os
 from typing import Any, Dict
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.fernet import Fernet
 from app.core.config import settings
 
 
@@ -11,6 +12,24 @@ def _get_aes_key() -> bytes:
     if len(key_bytes) != 32:
         raise ValueError("ENCRYPTION_KEY must be exactly 32 bytes when base64-decoded.")
     return key_bytes
+
+
+def _get_fernet() -> Fernet:
+    raw_bytes = _get_aes_key()
+    fernet_key = base64.urlsafe_b64encode(raw_bytes)
+    return Fernet(fernet_key)
+
+
+def encrypt_string(plaintext: str) -> str:
+    """Encrypt a plaintext string using Fernet."""
+    f = _get_fernet()
+    return f.encrypt(plaintext.encode("utf-8")).decode("utf-8")
+
+
+def decrypt_string(ciphertext: str) -> str:
+    """Decrypt a Fernet encrypted string."""
+    f = _get_fernet()
+    return f.decrypt(ciphertext.encode("utf-8")).decode("utf-8")
 
 
 def encrypt_credentials(data: Dict[str, Any]) -> str:

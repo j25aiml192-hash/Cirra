@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "/api/v1";
+import { useAuthStore } from "@/store/authStore";
 
 export class ApiError extends Error {
   status: number;
@@ -13,44 +13,40 @@ export class ApiError extends Error {
 }
 
 export async function apiFetch<T>(
-  endpoint: string,
-  options: RequestInit = {}
+  path: string,
+  options?: RequestInit
 ): Promise<T> {
-  const token = typeof window !== "undefined" ? localStorage.getItem("cirra_token") : null;
+  const token =
+    useAuthStore.getState?.()?.token ||
+    (typeof window !== "undefined" ? localStorage.getItem("cirra_token") : null);
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const url = path.startsWith("http")
+    ? path
+    : `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
 
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  const url = endpoint.startsWith("http") ? endpoint : `${BASE_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
-
-  const response = await fetch(url, {
+  const res = await fetch(url, {
     ...options,
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options?.headers,
+    },
   });
 
-  if (!response.ok) {
-    let errorData: unknown;
-    try {
-      errorData = await response.json();
-    } catch {
-      errorData = await response.text();
-    }
-    throw new ApiError(
-      response.status,
-      `API request failed with status ${response.status}`,
-      errorData
-    );
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || `API request failed with status ${res.status}`);
   }
 
-  if (response.status === 204) {
+  if (res.status === 204) {
     return {} as T;
   }
 
-  return response.json() as Promise<T>;
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    return res.json();
+  }
+
+  return (await res.text()) as unknown as T;
 }

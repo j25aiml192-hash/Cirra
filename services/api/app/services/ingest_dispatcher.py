@@ -30,6 +30,14 @@ def dispatch_initial_sync(connection_id: str, provider: str) -> bool:
         task_name = "tasks.ingest_openai_usage"
     elif prov == "anthropic":
         task_name = "tasks.ingest_anthropic_usage"
+    elif prov == "groq":
+        task_name = "tasks.ingest_groq_usage"
+    elif prov == "gemini":
+        task_name = "tasks.ingest_gemini_usage"
+    elif prov == "vercel":
+        task_name = "tasks.ingest_vercel_usage"
+    elif prov == "render":
+        task_name = "tasks.ingest_render_usage"
     else:
         logger.warning(f"No ingest task configured for provider {provider}")
         return False

@@ -6,16 +6,31 @@ import { Topbar } from "@/components/layout/Topbar";
 import { StatCard } from "@/components/ui/StatCard";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { Badge } from "@/components/ui/Badge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useAiSpend } from "@/hooks/useSpend";
 import { formatNumber } from "@/lib/utils";
 import type { AiSpendRecord } from "@/types";
 
 export default function AiSpendPage() {
-  const { data, isLoading } = useAiSpend();
+  const { data, isLoading, isError } = useAiSpend();
   const [activeProvider, setActiveProvider] = useState<string>("all");
 
   const items = data?.items ?? [];
   const modelCosts = data?.modelCosts ?? [];
+
+  if (isError) {
+    return (
+      <div className="min-h-screen">
+        <Topbar />
+        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+          <EmptyState
+            title="Failed to load AI spend"
+            description="Unable to retrieve AI usage telemetry from the API. Please ensure the backend is running and try again."
+          />
+        </main>
+      </div>
+    );
+  }
 
   const filteredItems = items.filter((item) => {
     if (activeProvider === "all") return true;

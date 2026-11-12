@@ -72,6 +72,8 @@ services:
       SUPABASE_JWT_SECRET: your-supabase-jwt-secret
       SUPABASE_URL: https://your-project.supabase.co
       RATE_LIMIT_PER_MINUTE: 120
+      INVESTIGATOR_URL: http://investigator:8001
+      ACTION_ENGINE_URL: http://action-engine:8003
       ENVIRONMENT: development
     ports:
       - "8000:8000"
@@ -101,6 +103,7 @@ services:
       CLICKHOUSE_DATABASE: cirra
       ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
       INGEST_MOCK: "false"
+      COST_MULTIPLIER: "25.0"
       ENVIRONMENT: development
     command: ["celery", "-A", "worker.celery_app", "worker", "--loglevel=info"]
     depends_on:
@@ -123,12 +126,69 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/1
       CELERY_RESULT_BACKEND: redis://redis:6379/2
       ENCRYPTION_KEY: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
+      INGEST_MOCK: "false"
+      COST_MULTIPLIER: "25.0"
       ENVIRONMENT: development
     command: ["celery", "-A", "worker.celery_app", "beat", "--loglevel=info"]
     depends_on:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+
+  sentinel:
+    build: ./services/sentinel
+    container_name: cirra-sentinel
+    env_file: .env
+    depends_on:
+      - postgres
+      - clickhouse
+      - redis
+    restart: unless-stopped
+
+  investigator:
+    build:
+      context: ./services/investigator
+      dockerfile: Dockerfile
+    container_name: cirra-investigator
+    restart: always
+    environment:
+      CLICKHOUSE_HOST: clickhouse
+      CLICKHOUSE_PORT: 8123
+      CLICKHOUSE_USER: cirra_reader
+      CLICKHOUSE_PASSWORD: reader_secure_password
+      CLICKHOUSE_DATABASE: cirra
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      ENVIRONMENT: development
+    ports:
+      - "8001:8001"
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  action-engine:
+    build:
+      context: ./services/action-engine
+      dockerfile: Dockerfile
+    container_name: cirra-action-engine
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://postgres:postgrespassword@postgres:5432/cirra
+      ACTION_ENGINE_PORT: 8003
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_DEMO_REPO_OWNER: ${GITHUB_DEMO_REPO_OWNER:-j25aiml192-hash}
+      GITHUB_DEMO_REPO_NAME: ${GITHUB_DEMO_REPO_NAME:-cirra-demo-infra}
+      OPENAI_ADMIN_KEY: ${OPENAI_ADMIN_KEY}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      ANTHROPIC_ADMIN_KEY: ${ANTHROPIC_ADMIN_KEY}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      GROQ_API_KEY: ${GROQ_API_KEY}
+      INGEST_MOCK: ${INGEST_MOCK:-false}
+      ENVIRONMENT: development
+    ports:
+      - "8003:8003"
+    depends_on:
+      postgres:
         condition: service_healthy
 
 volumes:

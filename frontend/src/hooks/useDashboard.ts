@@ -1,110 +1,71 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { DashboardSummary } from "@/types";
+import { apiFetch } from "@/lib/api";
+import type { DashboardSummary, Period } from "@/types";
 
-const mockDashboardData: DashboardSummary = {
-  total_spend_mtd: 128420.0,
-  forecasted_spend: 156000.0,
-  cloud_spend_mtd: 85530.0,
-  ai_spend_mtd: 42890.0,
-  anomalies_detected: 0,
-  potential_savings_monthly: 34200.0,
-  active_connections: 5,
-  monthly: [
-    { month: "May", aws: 48000, gcp: 24000, openai: 12000, anthropic: 6000 },
-    { month: "Jun", aws: 51000, gcp: 25000, openai: 16500, anthropic: 8500 },
-    { month: "Jul", aws: 49500, gcp: 27000, openai: 21000, anthropic: 11000 },
-    { month: "Aug", aws: 53000, gcp: 29000, openai: 24500, anthropic: 14000 },
-    { month: "Sep", aws: 52000, gcp: 28500, openai: 28000, anthropic: 16200 },
-    { month: "Oct", aws: 54000, gcp: 31530, openai: 26100, anthropic: 16790 },
-  ],
-  topServices: [
-    {
-      name: "Amazon Elastic Compute Cloud (EC2)",
-      provider: "AWS",
-      spend: 34200,
-      change: "+3.2%",
-      changePositive: false,
-      share: 26.6,
-    },
-    {
-      name: "Google Kubernetes Engine (GKE)",
-      provider: "GCP",
-      spend: 21400,
-      change: "-1.8%",
-      changePositive: true,
-      share: 16.7,
-    },
-    {
-      name: "OpenAI GPT-4o API",
-      provider: "OpenAI",
-      spend: 18500,
-      change: "+14.5%",
-      changePositive: false,
-      share: 14.4,
-    },
-    {
-      name: "Amazon Simple Storage Service (S3)",
-      provider: "AWS",
-      spend: 12800,
-      change: "+0.4%",
-      changePositive: false,
-      share: 9.9,
-    },
-    {
-      name: "Anthropic Claude 3.5 Sonnet",
-      provider: "Anthropic",
-      spend: 11200,
-      change: "+22.1%",
-      changePositive: false,
-      share: 8.7,
-    },
-  ],
-  topAiKeys: [
-    {
-      keyName: "prod-copilot-svc",
-      provider: "OpenAI",
-      team: "Core Platform",
-      spend: 14250,
-      tokens: "1.12B tokens",
-    },
-    {
-      keyName: "agentic-workflow-v2",
-      provider: "Anthropic",
-      team: "Autonomous Eng",
-      spend: 9800,
-      tokens: "640M tokens",
-    },
-    {
-      keyName: "rag-embedding-pipeline",
-      provider: "OpenAI",
-      team: "Search & Retrieval",
-      spend: 4250,
-      tokens: "340M tokens",
-    },
-  ],
-  attributionCoverage: {
-    percentage: 84.2,
-    attributed: 108100,
-    unallocated: 20320,
-    resourcesCount: 168,
-    totalResources: 199,
-  },
-};
-
-export function useDashboard() {
+export function useDashboard(period: Period = "30d") {
   const query = useQuery<DashboardSummary>({
-    queryKey: ["dashboard", "summary"],
+    queryKey: ["dashboard", period],
     queryFn: async () => {
-      // In production calls apiFetch, returns mock data for local immediate rendering
-      return mockDashboardData;
+      const res = await apiFetch<any>(`/api/v1/dashboard/summary?period=${period}`);
+
+      const mapped: DashboardSummary = {
+        total_spend_mtd: Number(res?.total_spend_mtd ?? 0),
+        forecasted_spend: Number(res?.forecasted_spend ?? 0),
+        cloud_spend_mtd: Number(res?.cloud_spend_mtd ?? 0),
+        ai_spend_mtd: Number(res?.ai_spend_mtd ?? 0),
+        anomalies_detected: Number(res?.anomalies_detected ?? 0),
+        potential_savings_monthly: Number(res?.potential_savings_monthly ?? 0),
+        active_connections: Number(res?.active_connections ?? 0),
+        monthly: Array.isArray(res?.monthly)
+          ? res.monthly.map((m: any) => ({
+              month: String(m.month ?? ""),
+              aws: Number(m.aws ?? 0),
+              gcp: Number(m.gcp ?? 0),
+              openai: Number(m.openai ?? 0),
+              anthropic: Number(m.anthropic ?? 0),
+            }))
+          : [],
+        topServices: Array.isArray(res?.topServices)
+          ? res.topServices.map((s: any) => ({
+              name: String(s.name ?? ""),
+              provider: s.provider ?? "AWS",
+              spend: Number(s.spend ?? 0),
+              change: String(s.change ?? "+0.0%"),
+              changePositive: Boolean(s.changePositive ?? true),
+              share: Number(s.share ?? 0),
+            }))
+          : [],
+        topAiKeys: Array.isArray(res?.topAiKeys)
+          ? res.topAiKeys.map((k: any) => ({
+              keyName: String(k.keyName ?? ""),
+              provider: k.provider ?? "OpenAI",
+              team: String(k.team ?? ""),
+              spend: Number(k.spend ?? 0),
+              tokens: String(k.tokens ?? "0 tokens"),
+            }))
+          : [],
+        attributionCoverage: {
+          percentage: Number(
+            res?.attributionCoverage?.percentage ?? res?.coverage_score ?? 0
+          ),
+          attributed: Number(res?.attributionCoverage?.attributed ?? 0),
+          unallocated: Number(res?.attributionCoverage?.unallocated ?? 0),
+          resourcesCount: Number(res?.attributionCoverage?.resourcesCount ?? 0),
+          totalResources: Number(res?.attributionCoverage?.totalResources ?? 0),
+        },
+      };
+
+      return mapped;
     },
-    initialData: mockDashboardData,
   });
 
   return {
     data: query.data,
     isLoading: query.isLoading,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
   };
 }

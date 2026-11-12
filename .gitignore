@@ -1,7 +1,8 @@
 node_modules/
 .next/
 .env
-.env.local
+.env.*
+!.env.example
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -11,3 +12,11 @@ dist/
 *.log
 *.tsbuildinfo
 apps/
+.venv/
+*/.venv/
+*.egg-info/
+*/.egg-info/
+user_prompt_*.txt
+*.pem
+secrets/
+scratch_*

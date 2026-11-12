@@ -8,17 +8,32 @@ import {
   SpendVelocityChart,
 } from "@/components/charts/SpendAreaChart";
 import { DataTable, type Column } from "@/components/ui/DataTable";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { useCloudSpend } from "@/hooks/useSpend";
 import { formatNumber } from "@/lib/utils";
 import type { CloudSpendRecord } from "@/types";
 
 export default function CloudSpendPage() {
-  const { data, isLoading } = useCloudSpend();
+  const { data, isLoading, isError } = useCloudSpend();
   const [providerFilter, setProviderFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
 
   const items = data?.items ?? [];
+
+  if (isError) {
+    return (
+      <div className="min-h-screen">
+        <Topbar />
+        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+          <EmptyState
+            title="Failed to load cloud spend"
+            description="Unable to retrieve cloud telemetry from the API. Please ensure the backend is running and try again."
+          />
+        </main>
+      </div>
+    );
+  }
 
   // Filter items dynamically
   const filteredItems = useMemo(() => {

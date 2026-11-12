@@ -7,11 +7,22 @@ from typing import Any, Dict, List, Optional
 from celery import Task
 from worker import celery_app
 from clickhouse_client import ClickHouseClient
-from normalizer import normalize_aws_cost_explorer, normalize_openai_usage
+from normalizer import (
+    normalize_aws_cost_explorer,
+    normalize_openai_usage,
+    normalize_groq_usage,
+    normalize_gemini_usage,
+    normalize_vercel_usage,
+    normalize_render_usage,
+)
 from encryption import decrypt_credentials
 from connectors.aws import AWSCostExplorerConnector
 from connectors.openai_connector import OpenAIConnector
 from connectors.anthropic_connector import AnthropicConnector
+from connectors.groq_connector import GroqConnector
+from connectors.gemini_connector import GeminiConnector
+from connectors.vercel_connector import VercelConnector
+from connectors.render_connector import RenderConnector
 from db import get_connection_by_id, update_connection_status, get_all_active_connections, sanitize_error_message
 from allocator import get_tenant_rules, allocate_facts_inline, allocate_fact
 
@@ -260,6 +271,304 @@ def ingest_anthropic_usage(self, connection_id: str) -> Dict[str, Any]:
     return {"status": "connected", "rows_ingested": 0}
 
 
+@celery_app.task(
+    bind=True,
+    base=BaseIngestTask,
+    max_retries=3,
+    time_limit=600,
+    soft_time_limit=540,
+)
+def ingest_groq_usage(self, connection_id: str) -> Dict[str, Any]:
+    """
+    Ingest Groq organization usage and cost data.
+    - Tenant ID resolved strictly from DB row.
+    - Poll of organization usage, normalized to ai_usage_facts.
+    """
+    logger.info(f"Starting ingest_groq_usage for connection {connection_id}")
+
+    conn = run_async(get_connection_by_id(connection_id))
+    if not conn:
+        logger.error(f"Connection {connection_id} not found")
+        return {"status": "not_found", "rows_ingested": 0}
+
+    tenant_id = conn["tenant_id"]
+
+    try:
+        run_async(update_connection_status(connection_id, status="syncing"))
+
+        creds = decrypt_credentials(conn["credentials_encrypted"])
+        now = datetime.now(timezone.utc)
+
+        last_synced = conn.get("last_synced_at")
+        if last_synced is None:
+            start_date = now - timedelta(days=30)
+        else:
+            if isinstance(last_synced, str):
+                last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+            start_date = max(last_synced - timedelta(days=1), now - timedelta(days=30))
+
+        end_date = now
+
+        connector = GroqConnector(credentials=creds, tenant_id=tenant_id)
+        raw_response = run_async(connector.fetch_usage(start_date=start_date, end_date=end_date))
+
+        facts = normalize_groq_usage(raw=raw_response, tenant_id=tenant_id)
+        rows_inserted = clickhouse.insert_ai_usage_facts(facts)
+
+        run_async(update_connection_status(
+            connection_id=connection_id,
+            status="connected",
+            last_synced_at=now,
+            last_error=None,
+        ))
+
+        logger.info(
+            f"Successfully synced Groq connection {connection_id} for tenant {tenant_id}: "
+            f"{rows_inserted} AI usage facts inserted."
+        )
+        return {"status": "connected", "rows_ingested": rows_inserted}
+
+    except Exception as exc:
+        safe_err = sanitize_error_message(str(exc))
+        logger.warning(f"Error in ingest_groq_usage attempt {self.request.retries + 1}/4: {safe_err}")
+        retry_delay = int((2 ** self.request.retries) * 5 + random.uniform(1, 5))
+        try:
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            run_async(update_connection_status(
+                connection_id=connection_id,
+                status="error",
+                last_error=safe_err,
+            ))
+            raise
+
+
+@celery_app.task(
+    bind=True,
+    base=BaseIngestTask,
+    max_retries=3,
+    time_limit=600,
+    soft_time_limit=540,
+)
+def ingest_gemini_usage(self, connection_id: str) -> Dict[str, Any]:
+    """
+    Ingest Gemini usage and cost data.
+    - Tenant ID resolved strictly from DB row.
+    - Normalized to ai_usage_facts.
+    """
+    logger.info(f"Starting ingest_gemini_usage for connection {connection_id}")
+
+    conn = run_async(get_connection_by_id(connection_id))
+    if not conn:
+        logger.error(f"Connection {connection_id} not found")
+        return {"status": "not_found", "rows_ingested": 0}
+
+    tenant_id = conn["tenant_id"]
+
+    try:
+        run_async(update_connection_status(connection_id, status="syncing"))
+
+        creds = decrypt_credentials(conn["credentials_encrypted"])
+        now = datetime.now(timezone.utc)
+
+        last_synced = conn.get("last_synced_at")
+        if last_synced is None:
+            start_date = now - timedelta(days=30)
+        else:
+            if isinstance(last_synced, str):
+                last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+            start_date = max(last_synced - timedelta(days=1), now - timedelta(days=30))
+
+        end_date = now
+
+        connector = GeminiConnector(credentials=creds, tenant_id=tenant_id)
+        raw_response = run_async(connector.fetch_usage(start_date=start_date, end_date=end_date))
+
+        facts = normalize_gemini_usage(raw=raw_response, tenant_id=tenant_id)
+        rows_inserted = clickhouse.insert_ai_usage_facts(facts)
+
+        run_async(update_connection_status(
+            connection_id=connection_id,
+            status="connected",
+            last_synced_at=now,
+            last_error=None,
+        ))
+
+        logger.info(
+            f"Successfully synced Gemini connection {connection_id} for tenant {tenant_id}: "
+            f"{rows_inserted} AI usage facts inserted."
+        )
+        return {"status": "connected", "rows_ingested": rows_inserted}
+
+    except Exception as exc:
+        safe_err = sanitize_error_message(str(exc))
+        logger.warning(f"Error in ingest_gemini_usage attempt {self.request.retries + 1}/4: {safe_err}")
+        retry_delay = int((2 ** self.request.retries) * 5 + random.uniform(1, 5))
+        try:
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            run_async(update_connection_status(
+                connection_id=connection_id,
+                status="error",
+                last_error=safe_err,
+            ))
+            raise
+
+
+@celery_app.task(
+    bind=True,
+    base=BaseIngestTask,
+    max_retries=3,
+    time_limit=600,
+    soft_time_limit=540,
+)
+def ingest_vercel_usage(self, connection_id: str) -> Dict[str, Any]:
+    """
+    Ingest Vercel platform costs and usage data.
+    - Tenant ID resolved strictly from DB row.
+    - Inline allocation rules applied.
+    """
+    logger.info(f"Starting ingest_vercel_usage for connection {connection_id}")
+
+    conn = run_async(get_connection_by_id(connection_id))
+    if not conn:
+        logger.error(f"Connection {connection_id} not found")
+        return {"status": "not_found", "rows_ingested": 0}
+
+    tenant_id = conn["tenant_id"]
+
+    try:
+        run_async(update_connection_status(connection_id, status="syncing"))
+
+        creds = decrypt_credentials(conn["credentials_encrypted"])
+        now = datetime.now(timezone.utc)
+
+        last_synced = conn.get("last_synced_at")
+        if last_synced is None:
+            start_date = now - timedelta(days=30)
+        else:
+            if isinstance(last_synced, str):
+                last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+            start_date = max(last_synced - timedelta(days=2), now - timedelta(days=30))
+
+        end_date = now
+
+        connector = VercelConnector(credentials=creds, tenant_id=tenant_id)
+        raw_response = run_async(connector.fetch_usage(start_date=start_date, end_date=end_date))
+
+        facts = normalize_vercel_usage(raw=raw_response, tenant_id=tenant_id)
+
+        # Apply allocation rules inline
+        rules = run_async(get_tenant_rules(tenant_id))
+        allocate_facts_inline(facts, rules)
+
+        rows_inserted = clickhouse.insert_cost_facts(facts)
+
+        run_async(update_connection_status(
+            connection_id=connection_id,
+            status="connected",
+            last_synced_at=now,
+            last_error=None,
+        ))
+
+        logger.info(
+            f"Successfully synced Vercel connection {connection_id} for tenant {tenant_id}: "
+            f"{rows_inserted} facts inserted."
+        )
+        return {"status": "connected", "rows_ingested": rows_inserted}
+
+    except Exception as exc:
+        safe_err = sanitize_error_message(str(exc))
+        logger.warning(f"Error in ingest_vercel_usage attempt {self.request.retries + 1}/4: {safe_err}")
+        retry_delay = int((2 ** self.request.retries) * 5 + random.uniform(1, 5))
+        try:
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            run_async(update_connection_status(
+                connection_id=connection_id,
+                status="error",
+                last_error=safe_err,
+            ))
+            raise
+
+
+@celery_app.task(
+    bind=True,
+    base=BaseIngestTask,
+    max_retries=3,
+    time_limit=600,
+    soft_time_limit=540,
+)
+def ingest_render_usage(self, connection_id: str) -> Dict[str, Any]:
+    """
+    Ingest Render platform service costs.
+    - Tenant ID resolved strictly from DB row.
+    - Inline allocation rules applied.
+    """
+    logger.info(f"Starting ingest_render_usage for connection {connection_id}")
+
+    conn = run_async(get_connection_by_id(connection_id))
+    if not conn:
+        logger.error(f"Connection {connection_id} not found")
+        return {"status": "not_found", "rows_ingested": 0}
+
+    tenant_id = conn["tenant_id"]
+
+    try:
+        run_async(update_connection_status(connection_id, status="syncing"))
+
+        creds = decrypt_credentials(conn["credentials_encrypted"])
+        now = datetime.now(timezone.utc)
+
+        last_synced = conn.get("last_synced_at")
+        if last_synced is None:
+            start_date = now - timedelta(days=30)
+        else:
+            if isinstance(last_synced, str):
+                last_synced = datetime.fromisoformat(last_synced.replace("Z", "+00:00"))
+            start_date = max(last_synced - timedelta(days=2), now - timedelta(days=30))
+
+        end_date = now
+
+        connector = RenderConnector(credentials=creds, tenant_id=tenant_id)
+        raw_response = run_async(connector.fetch_usage(start_date=start_date, end_date=end_date))
+
+        facts = normalize_render_usage(raw=raw_response, tenant_id=tenant_id)
+
+        # Apply allocation rules inline
+        rules = run_async(get_tenant_rules(tenant_id))
+        allocate_facts_inline(facts, rules)
+
+        rows_inserted = clickhouse.insert_cost_facts(facts)
+
+        run_async(update_connection_status(
+            connection_id=connection_id,
+            status="connected",
+            last_synced_at=now,
+            last_error=None,
+        ))
+
+        logger.info(
+            f"Successfully synced Render connection {connection_id} for tenant {tenant_id}: "
+            f"{rows_inserted} facts inserted."
+        )
+        return {"status": "connected", "rows_ingested": rows_inserted}
+
+    except Exception as exc:
+        safe_err = sanitize_error_message(str(exc))
+        logger.warning(f"Error in ingest_render_usage attempt {self.request.retries + 1}/4: {safe_err}")
+        retry_delay = int((2 ** self.request.retries) * 5 + random.uniform(1, 5))
+        try:
+            raise self.retry(exc=exc, countdown=retry_delay)
+        except self.MaxRetriesExceededError:
+            run_async(update_connection_status(
+                connection_id=connection_id,
+                status="error",
+                last_error=safe_err,
+            ))
+            raise
+
+
 @celery_app.task
 def sync_all_cloud_connections() -> Dict[str, int]:
     """Celery Beat task: triggers cloud cost sync every 4 hours."""
@@ -268,6 +577,12 @@ def sync_all_cloud_connections() -> Dict[str, int]:
     for conn in connections:
         if conn["provider"] == "aws":
             ingest_cost_explorer.delay(conn["id"])
+            dispatched += 1
+        elif conn["provider"] == "vercel":
+            ingest_vercel_usage.delay(conn["id"])
+            dispatched += 1
+        elif conn["provider"] == "render":
+            ingest_render_usage.delay(conn["id"])
             dispatched += 1
     logger.info(f"Beat scheduled {dispatched} cloud cost sync tasks")
     return {"dispatched": dispatched}
@@ -284,6 +599,12 @@ def sync_all_ai_connections() -> Dict[str, int]:
             dispatched += 1
         elif conn["provider"] == "anthropic":
             ingest_anthropic_usage.delay(conn["id"])
+            dispatched += 1
+        elif conn["provider"] == "groq":
+            ingest_groq_usage.delay(conn["id"])
+            dispatched += 1
+        elif conn["provider"] == "gemini":
+            ingest_gemini_usage.delay(conn["id"])
             dispatched += 1
     logger.info(f"Beat scheduled {dispatched} AI usage sync tasks")
     return {"dispatched": dispatched}

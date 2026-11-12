@@ -12,7 +12,24 @@ from app.middleware.error_handler import (
     validation_exception_handler,
     unhandled_exception_handler,
 )
-from app.routers import auth, connections, team, health, dashboard, spend, allocation
+from app.middleware.onboarding_guard import OnboardingGuard
+from app.routers import (
+    auth,
+    connections,
+    team,
+    health,
+    dashboard,
+    spend,
+    allocation,
+    anomalies,
+    ask,
+    actions,
+    savings,
+    voice,
+    voice_webhooks,
+    settings as settings_router,
+    onboarding,
+)
 
 
 @asynccontextmanager
@@ -41,6 +58,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(OnboardingGuard)
 
 # Custom error handlers for consistent error response format: {error: {code, message}}
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
@@ -57,3 +75,16 @@ app.include_router(team.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dashboard.router, prefix=settings.API_V1_PREFIX)
 app.include_router(spend.router, prefix=settings.API_V1_PREFIX)
 app.include_router(allocation.router, prefix=settings.API_V1_PREFIX)
+app.include_router(anomalies.router, prefix=settings.API_V1_PREFIX)
+app.include_router(ask.router, prefix=settings.API_V1_PREFIX)
+app.include_router(ask.router)
+app.include_router(actions.router, prefix=settings.API_V1_PREFIX)
+app.include_router(actions.router)
+app.include_router(savings.router, prefix=settings.API_V1_PREFIX)
+app.include_router(savings.router)
+app.include_router(voice.router)
+app.include_router(voice_webhooks.router)
+app.include_router(settings_router.router, prefix=settings.API_V1_PREFIX)
+app.include_router(settings_router.router)
+app.include_router(onboarding.router, prefix=settings.API_V1_PREFIX)
+app.include_router(onboarding.router)

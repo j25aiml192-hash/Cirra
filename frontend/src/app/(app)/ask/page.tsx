@@ -1,43 +1,60 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Bot, Terminal, CheckCircle2 } from "lucide-react";
-import { useAsk } from "@/hooks/useAsk";
+import { Sparkles, Send, Bot, Terminal } from "lucide-react";
+import { useAskCirra } from "@/hooks/useAsk";
+import { formatNumber } from "@/lib/utils";
 
 interface ChatEntry {
   question: string;
   answer: string;
-  sql?: string;
-  rows?: Array<Record<string, unknown>>;
-  confidence?: number;
+  sql_used?: string;
+  execution_time_ms?: number;
+  row_count?: number;
+  columns?: string[];
+  rows?: any[];
 }
 
 export default function AskPage() {
   const [messages, setMessages] = useState<ChatEntry[]>([]);
   const [input, setInput] = useState("");
-  const { ask, isLoading } = useAsk();
+  const askCirra = useAskCirra();
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isLoading]);
+  }, [messages, askCirra.isPending]);
 
   const handleAsk = async (queryText?: string) => {
     const q = (queryText ?? input).trim();
-    if (!q || isLoading) return;
+    if (!q || askCirra.isPending) return;
 
     setInput("");
-    const res = await ask(q);
-    setMessages((prev) => [
-      ...prev,
-      {
-        question: q,
-        answer: res.answer,
-        sql: res.sql,
-        rows: res.rows,
-        confidence: res.confidence,
-      },
-    ]);
+    try {
+      const res = await askCirra.mutateAsync(q);
+      setMessages((prev) => [
+        ...prev,
+        {
+          question: q,
+          answer: res.answer,
+          sql_used: res.sql_used || res.sql,
+          execution_time_ms: res.execution_time_ms,
+          row_count: res.row_count ?? (res.rows ? res.rows.length : 0),
+          columns: res.columns,
+          rows: res.rows,
+        },
+      ]);
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          question: q,
+          answer:
+            err?.message ||
+            "Unable to generate response at this time. Please try again.",
+        },
+      ]);
+    }
   };
 
   return (
@@ -74,74 +91,157 @@ export default function AskPage() {
       ) : (
         /* Response area */
         <div className="flex-1 space-y-6 overflow-y-auto pr-2 pb-6">
-          {messages.map((entry, index) => (
-            <div key={index} className="space-y-4">
-              {/* User question bubble */}
-              <div className="flex justify-end">
-                <div
-                  style={{
-                    background: "#0062E0",
-                    color: "white",
-                    borderRadius: "16px 16px 4px 16px",
-                    padding: "12px 18px",
-                    fontSize: 14,
-                    maxWidth: "80%",
-                    boxShadow: "0 2px 10px rgba(0, 98, 224, 0.2)",
-                  }}
-                >
-                  {entry.question}
-                </div>
-              </div>
+          {messages.map((entry, index) => {
+            const sqlQuery = entry.sql_used;
+            const rowCount = entry.row_count ?? (entry.rows ? entry.rows.length : 0);
+            const columns =
+              entry.columns && entry.columns.length > 0
+                ? entry.columns
+                : entry.rows && entry.rows.length > 0 && typeof entry.rows[0] === "object" && !Array.isArray(entry.rows[0])
+                ? Object.keys(entry.rows[0])
+                : [];
 
-              {/* AI answer bubble & query proof */}
-              <div className="flex justify-start">
-                <div
-                  style={{
-                    background: "#FFFFFF",
-                    border: "1px solid #D6E4F5",
-                    borderRadius: "16px 16px 16px 4px",
-                    padding: "16px 20px",
-                    maxWidth: "92%",
-                    boxShadow: "0 4px 24px -4px rgba(12, 48, 96, 0.06)",
-                  }}
-                  className="space-y-3.5"
-                >
-                  <div className="flex items-center justify-between text-xs pb-1 border-b border-[#EBF2FA]">
-                    <div className="flex items-center gap-1.5 font-semibold text-[#334155]">
-                      <Bot className="w-4 h-4 text-[#0062E0]" />
-                      <span>Cirra Verified Response</span>
+            return (
+              <div key={index} className="space-y-4">
+                {/* User question bubble */}
+                <div className="flex justify-end">
+                  <div
+                    style={{
+                      background: "#0062E0",
+                      color: "white",
+                      borderRadius: "16px 16px 4px 16px",
+                      padding: "12px 18px",
+                      fontSize: 14,
+                      maxWidth: "80%",
+                      boxShadow: "0 2px 10px rgba(0, 98, 224, 0.2)",
+                    }}
+                  >
+                    {entry.question}
+                  </div>
+                </div>
+
+                {/* AI answer bubble & query proof */}
+                <div className="flex justify-start">
+                  <div
+                    style={{
+                      background: "#FFFFFF",
+                      border: "1px solid #D6E4F5",
+                      borderRadius: "16px 16px 16px 4px",
+                      padding: "16px 20px",
+                      maxWidth: "92%",
+                      boxShadow: "0 4px 24px -4px rgba(12, 48, 96, 0.06)",
+                    }}
+                    className="space-y-3.5 w-full sm:w-auto"
+                  >
+                    <div className="flex items-center justify-between text-xs pb-1 border-b border-[#EBF2FA] gap-4">
+                      <div className="flex items-center gap-1.5 font-semibold text-[#334155]">
+                        <Bot className="w-4 h-4 text-[#0062E0]" />
+                        <span>Cirra Verified Response</span>
+                      </div>
+                      {entry.execution_time_ms !== undefined && (
+                        <span className="text-[#64748B] font-mono text-[11px] whitespace-nowrap">
+                          Query ran in {Math.round(entry.execution_time_ms)}ms
+                        </span>
+                      )}
                     </div>
-                    {entry.confidence && (
-                      <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        {(entry.confidence * 100).toFixed(0)}% deterministic
-                      </span>
+
+                    <p className="text-sm text-[#0F1E36] leading-relaxed font-normal">
+                      {entry.answer}
+                    </p>
+
+                    {/* Collapsible SQL code block */}
+                    {sqlQuery && (
+                      <details className="group rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] p-3 text-xs text-[#334155] font-mono overflow-x-auto">
+                        <summary className="flex items-center justify-between cursor-pointer list-none text-[#64748B] text-[11px] font-sans font-medium select-none">
+                          <div className="flex items-center gap-2">
+                            <Terminal className="w-3.5 h-3.5" />
+                            <span>Executed SQL against FOCUS ClickHouse</span>
+                          </div>
+                          <span className="text-[10px] text-[#0062E0] group-open:hidden">
+                            Show SQL
+                          </span>
+                          <span className="text-[10px] text-[#0062E0] hidden group-open:inline">
+                            Hide SQL
+                          </span>
+                        </summary>
+                        <pre className="mt-2 text-xs font-mono text-[#334155] whitespace-pre-wrap break-all pt-2 border-t border-[#D6E4F5]/60">
+                          <code>{sqlQuery}</code>
+                        </pre>
+                      </details>
+                    )}
+
+                    {/* Row results table if row_count > 0 */}
+                    {rowCount > 0 && entry.rows && entry.rows.length > 0 && (
+                      <div className="rounded-xl border border-[#D6E4F5] overflow-hidden mt-3">
+                        <div className="overflow-x-auto max-h-60">
+                          <table className="w-full text-xs text-left border-collapse">
+                            <thead className="bg-[#F0F5FD] text-[#475569] border-b border-[#D6E4F5] sticky top-0">
+                              <tr>
+                                {columns.map((col, cIdx) => (
+                                  <th
+                                    key={cIdx}
+                                    className="px-3 py-2 font-semibold whitespace-nowrap"
+                                  >
+                                    {col}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-[#EBF2FA] bg-white">
+                              {entry.rows.slice(0, 15).map((row, rIdx) => (
+                                <tr key={rIdx} className="hover:bg-[#F8FAFD]">
+                                  {columns.map((col, cIdx) => {
+                                    const cellVal = Array.isArray(row)
+                                      ? row[cIdx]
+                                      : (row as Record<string, unknown>)[col];
+                                    return (
+                                      <td
+                                        key={cIdx}
+                                        className="px-3 py-2 font-mono text-[#334155] whitespace-nowrap"
+                                      >
+                                        {typeof cellVal === "number"
+                                          ? formatNumber(cellVal)
+                                          : String(cellVal ?? "")}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                        {entry.rows.length > 15 && (
+                          <div className="text-[11px] text-[#64748B] px-3 py-1.5 bg-[#F8FAFD] border-t border-[#D6E4F5] text-center">
+                            Showing first 15 of {rowCount} rows
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
-
-                  <p className="text-sm text-[#0F1E36] leading-relaxed font-normal">
-                    {entry.answer}
-                  </p>
-
-                  {entry.sql && (
-                    <div className="rounded-xl bg-[#F8FAFD] border border-[#D6E4F5] p-3 text-xs text-[#334155] font-mono overflow-x-auto">
-                      <div className="flex items-center gap-2 text-[#64748B] text-[11px] mb-1 font-sans">
-                        <Terminal className="w-3.5 h-3.5" />
-                        <span>Executed SQL against FOCUS ClickHouse</span>
-                      </div>
-                      <code>{entry.sql}</code>
-                    </div>
-                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          {isLoading && (
+          {/* Typing indicator (matching existing AiChatWidget loading state) */}
+          {askCirra.isPending && (
             <div className="flex justify-start">
-              <div className="bg-white border border-[#D6E4F5] rounded-2xl px-4 py-3 text-xs text-[#475569] flex items-center gap-2 shadow-sm">
-                <Sparkles className="w-4 h-4 text-[#0062E0] animate-spin" />
-                <span>Synthesizing deterministic database query...</span>
+              <div
+                style={{
+                  background: "#FFFFFF",
+                  border: "1px solid #F1F5F9",
+                  borderRadius: "16px 16px 16px 4px",
+                  padding: "8px 14px",
+                  fontSize: 12,
+                  color: "#64748B",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
+                }}
+              >
+                <Bot className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+                <span>Checking FOCUS query data...</span>
               </div>
             </div>
           )}
@@ -164,7 +264,7 @@ export default function AskPage() {
           <button
             type="button"
             onClick={() => handleAsk()}
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || askCirra.isPending}
             className="absolute right-2.5 w-10 h-10 rounded-full bg-[#0062E0] flex items-center justify-center hover:bg-[#0052C2] disabled:opacity-40 transition-colors shadow-md"
           >
             <Send className="w-4 h-4 text-white" />

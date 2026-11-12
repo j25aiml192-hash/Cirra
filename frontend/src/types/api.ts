@@ -127,26 +127,41 @@ export type AnomalySeverity = 'critical' | 'high' | 'medium' | 'low';
 
 export interface Anomaly {
   id: string;
+  tenant_id?: string;
   series_key: string;
-  serviceName: string;
+  provider?: string;
+  api_key_id?: string | null;
+  serviceName?: string;
   detected_at: string;
   severity: AnomalySeverity;
-  status: 'open' | 'dismissed' | 'resolved';
+  status: 'open' | 'dismissed' | 'resolved' | 'acknowledged' | 'snoozed';
+  baseline_value?: number | string | null;
+  actual_value?: number | string | null;
+  deviation_pct?: number | string | null;
   surgePercent?: string;
   currentCost?: number;
   expectedCost?: number;
   explanation?: {
     summary?: string;
     root_cause?: string;
-  };
+  } | string | null;
+  alert_sent?: boolean;
+  call_triggered?: boolean;
+  resolved_at?: string | null;
+  created_at?: string;
 }
 
 export interface AskResponse {
   answer: string;
-  sql: string;
-  rows: Array<Record<string, unknown>>;
-  confidence: number;
+  sql?: string;
+  sql_used?: string;
+  row_count?: number;
+  columns?: string[];
+  rows?: any[];
+  confidence?: number;
   warning?: string;
+  injected_tenant_filter?: boolean;
+  execution_time_ms?: number;
 }
 
 export interface SavingsEntry {
@@ -157,7 +172,7 @@ export interface SavingsEntry {
   realized_cost: number;
   savings_amount: number;
   confidence_badge: string;
-  status: 'realized' | 'approved' | 'pending_approval' | 'identified';
+  status: 'realized' | 'approved' | 'pending_approval' | 'identified' | 'executing' | 'verified';
   date: string;
 }
 
