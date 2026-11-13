@@ -179,16 +179,21 @@ class SavingsLedgerEngine:
 
             if st == "identified":
                 identified_total += baseline
+                e["savings_amount"] = float(baseline)
             elif st == "approved":
                 approved_total += baseline
+                e["savings_amount"] = float(baseline)
             elif st in ("verified", "realized"):
                 # Net verified savings
                 net = max(Decimal("0.00"), baseline - realized) if realized > 0 else baseline
                 verified_total += net
+                e["savings_amount"] = float(net)
 
         return {
             "identified_total": round(identified_total, 2),
             "approved_total": round(approved_total, 2),
             "verified_total": round(verified_total, 2),
+            "total_realized_savings": float(round(verified_total, 2)),
+            "total_pipeline_savings": float(round(identified_total + approved_total, 2)),
             "entries": entries,
         }
