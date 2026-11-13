@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     # Supabase Auth
     SUPABASE_JWT_SECRET: str = Field(default="supabase-secret-placeholder-for-tests", alias="SUPABASE_JWT_SECRET")
     SUPABASE_URL: str = Field(default="https://cirra.supabase.co", alias="SUPABASE_URL")
+    SUPABASE_ANON_KEY: Optional[str] = Field(default=None, alias="SUPABASE_ANON_KEY")
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = Field(default=None, alias="SUPABASE_SERVICE_ROLE_KEY")
 
     # Investigator Service
     INVESTIGATOR_URL: str = Field(default="http://localhost:8001", alias="INVESTIGATOR_URL")

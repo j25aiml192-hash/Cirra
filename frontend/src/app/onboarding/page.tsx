@@ -241,7 +241,7 @@ export default function OnboardingWizardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F0F5FD] to-[#FFFFFF] flex flex-col justify-between text-[#0A192F]">
+    <div className="min-h-screen flex flex-col justify-between text-[#0A192F]">
       {/* Top Header */}
       <header className="px-6 py-4 flex items-center justify-between border-b border-[#E2E8F0] bg-white/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">

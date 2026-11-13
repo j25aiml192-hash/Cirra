@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className={`min-h-screen ${
           isAskPage
             ? "bg-gradient-to-b from-[#C2E3FD] via-[#DBEFFF] via-40% via-[#ECF6FE] to-[#F6FBFF] text-[#0A192F]"
-            : "cirra-bg-canvas text-[#0F1E36]"
+            : "text-[#0F1E36]"
         }`}
       >
         {/* Floating Sidebar elevated on top (z-50) */}

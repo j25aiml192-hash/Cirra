@@ -25,6 +25,39 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
+      // 1. Direct registration through Cirra API (creates tenant, provisions DB & auto-confirms Supabase)
+      const sessionRes = await apiFetch<{
+        access_token: string;
+        token_type: string;
+        tenant_id: string;
+        user_id: string;
+        role: string;
+      }>("/api/v1/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          company_name: organization.trim(),
+        }),
+      });
+
+      if (sessionRes?.access_token) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("cirra_token", sessionRes.access_token);
+        }
+        useAuthStore.getState().setToken(sessionRes.access_token);
+        useAuthStore.getState().setUser({
+          id: sessionRes.user_id,
+          email: email.trim(),
+          role: sessionRes.role,
+          tenantId: sessionRes.tenant_id,
+        });
+
+        router.push("/onboarding");
+        return;
+      }
+
+      // 2. Client fallback via Supabase if needed
       const { data, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -41,7 +74,7 @@ export default function SignupPage() {
 
       const accessToken = data.session?.access_token;
       if (accessToken) {
-        const sessionRes = await apiFetch<{
+        const exchangeRes = await apiFetch<{
           access_token: string;
           token_type: string;
           tenant_id: string;
@@ -52,16 +85,16 @@ export default function SignupPage() {
           body: JSON.stringify({ supabase_token: accessToken }),
         });
 
-        if (sessionRes?.access_token) {
+        if (exchangeRes?.access_token) {
           if (typeof window !== "undefined") {
-            localStorage.setItem("cirra_token", sessionRes.access_token);
+            localStorage.setItem("cirra_token", exchangeRes.access_token);
           }
-          useAuthStore.getState().setToken(sessionRes.access_token);
+          useAuthStore.getState().setToken(exchangeRes.access_token);
           useAuthStore.getState().setUser({
-            id: sessionRes.user_id,
+            id: exchangeRes.user_id,
             email,
-            role: sessionRes.role,
-            tenantId: sessionRes.tenant_id,
+            role: exchangeRes.role,
+            tenantId: exchangeRes.tenant_id,
           });
         }
         router.push("/onboarding");
@@ -87,8 +120,8 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md my-auto">
         <CardHeader className="text-center">
           <img
             src="/cirra-logo.png"

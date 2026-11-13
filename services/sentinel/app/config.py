@@ -1,6 +1,6 @@
 from typing import Optional
 from pathlib import Path
-from pydantic import Field, AliasChoices
+from pydantic import Field, AliasChoices, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -104,9 +104,17 @@ class SentinelSettings(BaseSettings):
         validation_alias=AliasChoices("API_BASE_URL", "api_base_url"),
     )
     internal_service_key: str = Field(
-        default="internal-dev-key",
+        ...,
         validation_alias=AliasChoices("INTERNAL_SERVICE_KEY", "internal_service_key"),
+        description="Internal service key for inter-service communication. Must be set in environment.",
     )
+
+    @field_validator("internal_service_key")
+    @classmethod
+    def validate_internal_service_key(cls, v: Optional[str]) -> str:
+        if not v or not v.strip():
+            raise ValueError("INTERNAL_SERVICE_KEY must be set in environment variables (no fallback allowed)")
+        return v.strip()
 
     # Legacy / compatibility properties
     TWILIO_ACCOUNT_SID: Optional[str] = None

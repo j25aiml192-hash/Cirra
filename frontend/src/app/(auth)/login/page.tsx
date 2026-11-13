@@ -23,6 +23,42 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      // 1. Try direct API login first
+      try {
+        const sessionRes = await apiFetch<{
+          access_token: string;
+          token_type: string;
+          tenant_id: string;
+          user_id: string;
+          role: string;
+        }>("/api/v1/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: email.trim(),
+            password,
+          }),
+        });
+
+        if (sessionRes?.access_token) {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("cirra_token", sessionRes.access_token);
+          }
+          useAuthStore.getState().setToken(sessionRes.access_token);
+          useAuthStore.getState().setUser({
+            id: sessionRes.user_id,
+            email: email.trim(),
+            role: sessionRes.role,
+            tenantId: sessionRes.tenant_id,
+          });
+
+          router.push("/dashboard");
+          return;
+        }
+      } catch (directErr: any) {
+        // Fall back to client Supabase sign in if direct login encounters issue
+      }
+
+      // 2. Client Supabase fallback
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -79,6 +115,41 @@ export default function LoginPage() {
     }
   };
 
+  const handleDemoLogin = async () => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      const sessionRes = await apiFetch<{
+        access_token: string;
+        token_type: string;
+        tenant_id: string;
+        user_id: string;
+        role: string;
+      }>("/api/v1/auth/demo-login", {
+        method: "POST",
+        body: JSON.stringify({ user_email: "hiten@cirra.dev" }),
+      });
+
+      if (sessionRes?.access_token) {
+        if (typeof window !== "undefined") {
+          localStorage.setItem("cirra_token", sessionRes.access_token);
+        }
+        useAuthStore.getState().setToken(sessionRes.access_token);
+        useAuthStore.getState().setUser({
+          id: sessionRes.user_id,
+          email: "hiten@cirra.dev",
+          role: sessionRes.role,
+          tenantId: sessionRes.tenant_id,
+        });
+        router.push("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err?.message || "Failed to launch demo session.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     try {
       setError(null);
@@ -89,8 +160,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md my-auto">
         <CardHeader className="text-center">
           <img
             src="/cirra-logo.png"
@@ -169,7 +240,19 @@ export default function LoginPage() {
             Sign in with Google
           </Button>
 
-          <div className="mt-6 text-center text-xs text-[#64748B]">
+          <div className="mt-4 pt-4 border-t border-[#D6E4F5]">
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full text-xs font-semibold bg-[#EBF3FE] text-[#0062E0] border-[#BCD9FC] hover:bg-[#DCEBFC]"
+              onClick={handleDemoLogin}
+              disabled={isLoading}
+            >
+              ⚡ Quick Demo Login: Tenant Zero (hiten@cirra.dev)
+            </Button>
+          </div>
+
+          <div className="mt-4 text-center text-xs text-[#64748B]">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-brand-600 hover:underline">
               Create an account

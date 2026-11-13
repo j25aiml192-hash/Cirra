@@ -55,11 +55,14 @@ const config: Config = {
         sans: [
           "-apple-system",
           "BlinkMacSystemFont",
-          "Plus Jakarta Sans",
-          "SF Pro Text",
-          "Inter",
-          "system-ui",
+          '"Segoe UI"',
+          "Roboto",
+          '"Helvetica Neue"',
+          "Arial",
           "sans-serif",
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
         ],
       },
       borderRadius: {

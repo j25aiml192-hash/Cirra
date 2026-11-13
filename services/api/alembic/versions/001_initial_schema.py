@@ -75,12 +75,28 @@ def upgrade() -> None:
     for table in tenant_tables:
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY;")
         op.execute(f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY;")
-        op.execute(f"""
-            CREATE POLICY tenant_isolation_{table} ON {table}
-            AS RESTRICTIVE
-            USING (tenant_id = current_setting('app.tenant_id')::uuid)
-            WITH CHECK (tenant_id = current_setting('app.tenant_id')::uuid);
-        """)
+        if table == "users":
+            op.execute(f"""
+                CREATE POLICY tenant_isolation_{table} ON {table}
+                AS RESTRICTIVE
+                USING (
+                    NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+                    OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
+                    OR tenant_id = current_setting('app.tenant_id', true)::uuid
+                )
+                WITH CHECK (
+                    NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+                    OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
+                    OR tenant_id = current_setting('app.tenant_id', true)::uuid
+                );
+            """)
+        else:
+            op.execute(f"""
+                CREATE POLICY tenant_isolation_{table} ON {table}
+                AS RESTRICTIVE
+                USING (tenant_id = current_setting('app.tenant_id')::uuid)
+                WITH CHECK (tenant_id = current_setting('app.tenant_id')::uuid);
+            """)
 
 
 def downgrade() -> None:
