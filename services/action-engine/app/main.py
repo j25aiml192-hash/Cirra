@@ -7,7 +7,7 @@ import uuid
 
 from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, AliasChoices
 
 from app.config import settings
 from app.db import close_db_pool, get_db_connection, init_db_pool
@@ -64,11 +64,11 @@ app.add_middleware(
 
 class ProposeActionRequest(BaseModel):
     anomaly_id: Optional[str] = Field(None, description="UUID of linked anomaly")
-    action_type: str = Field(..., description="Action type: kill_switch, spend_cap, github_pr, scheduled_shutdown")
+    action_type: str = Field(..., validation_alias=AliasChoices("action_type", "type"), description="Action type: kill_switch, spend_cap, github_pr, scheduled_shutdown")
     provider: Optional[str] = Field(None, description="Provider name (e.g. openai, anthropic, groq, gemini)")
     target_key_id: Optional[str] = Field(None, description="Target API key or resource identifier")
     tenant_id: str = Field(..., description="Tenant UUID")
-    proposal_details: Optional[Dict[str, Any]] = Field(None, description="Extra context for proposal")
+    proposal_details: Optional[Dict[str, Any]] = Field(None, validation_alias=AliasChoices("proposal_details", "proposal_json"), description="Extra context for proposal")
 
 
 class ApproveActionRequest(BaseModel):

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     # Groq LLM Configuration
     GROQ_API_KEY: Optional[str] = Field(default=None, alias="GROQ_API_KEY")
-    GROQ_MODEL: str = Field(default="llama3-8b-8192", alias="GROQ_MODEL")
+    GROQ_MODEL: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")
     GROQ_FALLBACK_MODELS: List[str] = [
         "openai/gpt-oss-120b",
         "openai/gpt-oss-20b",

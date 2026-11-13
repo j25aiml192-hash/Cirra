@@ -35,10 +35,16 @@ class PRResult:
 
 class GitHubPREngine:
     def __init__(self):
-        self.token = settings.GITHUB_TOKEN
+        self.token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
         self.repo_owner = settings.GITHUB_DEMO_REPO_OWNER
         self.repo_name = settings.GITHUB_DEMO_REPO_NAME
         self.g = Github(self.token) if self.token else None
+
+    def _ensure_client(self):
+        if not self.token or not self.g:
+            self.token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
+            if self.token:
+                self.g = Github(self.token)
 
     async def create_anomaly_pr(
         self,
@@ -62,6 +68,7 @@ class GitHubPREngine:
         branch_name = f"cirra/anomaly-remediation-{short_id}-{int(time.time())}"
         file_path = f"terraform/anomaly-reports/{anomaly_id}.md"
 
+        self._ensure_client()
         is_mock = settings.INGEST_MOCK or not self.token or not self.g
         if is_mock:
             logger.info(

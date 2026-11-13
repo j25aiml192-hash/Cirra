@@ -1,5 +1,6 @@
 import json
 import logging
+import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from typing import List, Optional, Tuple
@@ -39,7 +40,9 @@ def _decimal_default(obj):
         return float(obj)
     if isinstance(obj, datetime):
         return obj.isoformat()
-    raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+    if isinstance(obj, uuid.UUID) or "UUID" in type(obj).__name__:
+        return str(obj)
+    return str(obj)
 
 
 async def generate_llm_explanation(
