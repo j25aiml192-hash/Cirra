@@ -41,7 +41,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         togglePin: () => setPinned((p) => !p),
       }}
     >
-      <div className={`min-h-screen ${isAskPage ? "bg-[#05070E] text-white" : "cirra-bg-canvas text-[#0F1E36]"}`}>
+      <div
+        className={`min-h-screen ${
+          isAskPage
+            ? "bg-gradient-to-b from-[#0284C7] via-[#38BDF8] via-40% via-[#7DD3FC] to-[#E0F2FE] text-[#0A192F]"
+            : "cirra-bg-canvas text-[#0F1E36]"
+        }`}
+      >
         {/* Floating Sidebar elevated on top (z-50) */}
         <Sidebar
           pinned={pinned}
@@ -51,7 +57,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
         {/* Page Content dynamically reacting to sidebar expansion/hover */}
         <div
-          className="transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen pt-14"
+          className={`transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen ${
+            isAskPage ? "pt-4 sm:pt-6" : "pt-14"
+          }`}
           style={{ marginLeft: isExpanded ? 260 : 88 }}
         >
           {children}
