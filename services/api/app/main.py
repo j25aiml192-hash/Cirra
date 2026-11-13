@@ -30,6 +30,7 @@ from app.routers import (
     settings as settings_router,
     onboarding,
     dev,
+    demo,
 )
 
 
@@ -91,3 +92,4 @@ app.include_router(onboarding.router, prefix=settings.API_V1_PREFIX)
 app.include_router(onboarding.router)
 app.include_router(dev.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dev.router)
+app.include_router(demo.router, prefix="/demo")

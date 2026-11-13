@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import logging
 import re
 from typing import Any, Dict, List, Optional
@@ -8,6 +10,18 @@ from app.config import settings
 from app.schema_context import SCHEMA_CONTEXT
 
 logger = logging.getLogger("cirra.investigator.sql_generator")
+
+
+def _run_sync(coro):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop and loop.is_running():
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result(timeout=15.0)
+    else:
+        return asyncio.run(coro)
 
 
 class SQLGenerator:
@@ -67,8 +81,50 @@ class SQLGenerator:
     ) -> str:
         """
         Generate SQL for the given natural language question.
-        Attempts Groq API first; falls back cleanly to deterministic template generator if Groq fails.
+        Attempts LLM Router first; falls back cleanly to deterministic template generator if LLM router fails.
         """
+        system_prompt = (
+            f"{SCHEMA_CONTEXT}\n\n"
+            "CRITICAL INSTRUCTIONS:\n"
+            "- Generate ONLY a ClickHouse SQL SELECT query that directly answers the question.\n"
+            f"- The query MUST filter by tenant_id = '{tenant_id}'.\n"
+            "- Do NOT return explanations, commentary, or markdown text outside the SQL.\n"
+            "- Only return the raw SQL statement.\n"
+        )
+
+        messages: List[Dict[str, str]] = [
+            {"role": "system", "content": system_prompt}
+        ]
+
+        if conversation_history:
+            for msg in conversation_history[-4:]:
+                role = msg.get("role", "user")
+                content = msg.get("content", "")
+                if role in ("user", "assistant") and content:
+                    messages.append({"role": role, "content": str(content)})
+
+        messages.append({"role": "user", "content": question})
+
+        try:
+            from app.llm_router import llm_router
+            coro = llm_router.complete(
+                task_type="text_to_sql",
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+            llm_resp = _run_sync(coro)
+            cleaned_sql = self._strip_markdown(llm_resp.content)
+            if cleaned_sql and "SELECT" in cleaned_sql.upper():
+                logger.info(
+                    "Generated SQL using LLM router: provider=%s, model=%s",
+                    llm_resp.provider,
+                    llm_resp.model,
+                )
+                return cleaned_sql
+        except Exception as e:
+            logger.warning("LLM router text_to_sql generation failed: %s", e)
+
         client = self._get_groq_client()
         if client:
             # Try primary model, then fallback models if decommissioned/not found

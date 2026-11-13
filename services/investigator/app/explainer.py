@@ -1,3 +1,5 @@
+import asyncio
+import concurrent.futures
 import logging
 from typing import Any, Dict, List, Optional
 from groq import Groq
@@ -5,6 +7,18 @@ from groq import Groq
 from app.config import settings
 
 logger = logging.getLogger("cirra.investigator.explainer")
+
+
+def _run_sync(coro):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop and loop.is_running():
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result(timeout=15.0)
+    else:
+        return asyncio.run(coro)
 
 
 class ResultExplainer:
@@ -48,19 +62,48 @@ class ResultExplainer:
         if not rows:
             return "No cost or usage data was found for this query."
 
+        prompt = (
+            f"User Question: {question}\n\n"
+            f"Query Result Columns: {columns}\n"
+            f"Query Result Rows (up to 20): {rows[:20]}\n\n"
+            "Instructions:\n"
+            "- Provide a concise, clear, professional answer answering the user's question in plain English.\n"
+            "- STRICT RULE: You MUST cite only the exact numbers, currency, and categories present in the Query Result Rows above.\n"
+            "- Do NOT extrapolate, hallucinate, or invent numbers.\n"
+            "- If a currency or dollar amount is present, format it nicely (e.g. $45.31).\n"
+        )
+        messages = [
+            {
+                "role": "system",
+                "content": "You are Ask Cirra, a cloud cost intelligence assistant.",
+            },
+            {"role": "user", "content": prompt},
+        ]
+
+        # 1. Try LLM router first
+        try:
+            from app.llm_router import llm_router
+            coro = llm_router.complete(
+                task_type="result_explanation",
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+            )
+            llm_resp = _run_sync(coro)
+            if llm_resp.content:
+                logger.info(
+                    "Explained query results using LLM router: provider=%s, model=%s",
+                    llm_resp.provider,
+                    llm_resp.model,
+                )
+                return llm_resp.content
+        except Exception as exc:
+            logger.warning("LLM router result_explanation failed: %s", exc)
+
+        # 2. Try direct Groq fallback
         client = self._get_groq_client()
         if client:
             models_to_try = [self.model] + [m for m in self.fallback_models if m != self.model]
-            prompt = (
-                f"User Question: {question}\n\n"
-                f"Query Result Columns: {columns}\n"
-                f"Query Result Rows (up to 20): {rows[:20]}\n\n"
-                "Instructions:\n"
-                "- Provide a concise, clear, professional answer answering the user's question in plain English.\n"
-                "- STRICT RULE: You MUST cite only the exact numbers, currency, and categories present in the Query Result Rows above.\n"
-                "- Do NOT extrapolate, hallucinate, or invent numbers.\n"
-                "- If a currency or dollar amount is present, format it nicely (e.g. $45.31).\n"
-            )
 
             for m in models_to_try:
                 try:

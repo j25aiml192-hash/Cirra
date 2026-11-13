@@ -14,12 +14,30 @@ class Settings(BaseSettings):
     # Groq LLM Configuration
     GROQ_API_KEY: Optional[str] = Field(default=None, alias="GROQ_API_KEY")
     GROQ_MODEL: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")
+    GROQ_BASE_URL: str = Field(default="https://api.groq.com/openai/v1", alias="GATEWAY_GROQ_BASE_URL")
     GROQ_FALLBACK_MODELS: List[str] = [
+        "qwen/qwen3.8-27b",
         "openai/gpt-oss-120b",
         "openai/gpt-oss-20b",
-        "qwen/qwen3.8-27b",
         "llama-3.1-8b-instant",
     ]
+
+    # Google Gemini Configuration
+    GEMINI_API_KEY: Optional[str] = Field(default=None, alias="GEMINI_API_KEY")
+    GEMINI_BASE_URL: str = Field(
+        default="https://generativelanguage.googleapis.com/v1beta/openai/",
+        alias="GEMINI_BASE_URL",
+    )
+
+    # NVIDIA NIM Configuration
+    NVIDIA_NIM_API_KEY: Optional[str] = Field(default=None, alias="NVIDIA_NIM_API_KEY")
+    NVIDIA_NIM_BASE_URL: str = Field(
+        default="https://integrate.api.nvidia.com/v1",
+        alias="NVIDIA_NIM_BASE_URL",
+    )
+
+    # Internal service authentication
+    INTERNAL_SERVICE_KEY: str = Field(default="internal-dev-key", alias="INTERNAL_SERVICE_KEY")
 
     # ClickHouse Reader Configuration
     CLICKHOUSE_HOST: str = Field(default="localhost", alias="CLICKHOUSE_HOST")

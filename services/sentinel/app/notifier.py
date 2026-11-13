@@ -37,12 +37,14 @@ class AlertNotifier:
         anomaly: DetectedAnomaly,
         explanation: str,
         anomaly_db_id: str,
+        tier: int = 3,
     ) -> bool:
         """
-        POST to SLACK_WEBHOOK_URL with specified blocks payload:
-        Header, fields (provider, severity, baseline, actual, deviation, key), explanation, view/kill buttons.
+        POST to SLACK_WEBHOOK_URL formatted according to tier:
+        - Tier 2: simple text message, no action buttons
+        - Tier 3: full block kit with "View in Cirra" button
+        - Tier 4 & 5: @channel mention + urgent block kit with kill switch button
         Returns True if HTTP 200, False otherwise.
-        Logs delivery attempt and result. If webhook URL is missing/dummy, gracefully simulate and return True or False.
         """
         webhook_url = settings.slack_webhook_url
         # Check for missing or placeholder webhook URL
@@ -55,7 +57,7 @@ class AlertNotifier:
         if is_dummy:
             logger.info(
                 f"[SIMULATION] Slack webhook URL is missing or dummy. "
-                f"Simulating delivery for anomaly '{anomaly_db_id}'."
+                f"Simulating delivery for anomaly '{anomaly_db_id}' (tier {tier})."
             )
             self.last_status_codes["slack"] = 200
             return True
@@ -69,54 +71,154 @@ class AlertNotifier:
         target_key = anomaly.api_key_id or anomaly.series_key
         kill_url = f"{dashboard_base}/actions?target={target_key}&type=kill_switch"
 
-        payload = {
-            "text": f"🚨 CIRRA ALERT: {anomaly.severity.upper()} Spend Anomaly on {anomaly.provider}",
-            "blocks": [
-                {
-                    "type": "header",
-                    "text": {
-                        "type": "plain_text",
-                        "text": f"🚨 Cirra Alert: {anomaly.severity.upper()} Spend Anomaly",
-                        "emoji": True,
+        # Attempt to get LLM narrative for Slack alert from Investigator router
+        slack_explanation = explanation
+        investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or "http://localhost:8001").rstrip("/")
+        try:
+            async with httpx.AsyncClient(timeout=6.0) as http_client:
+                llm_resp = await http_client.post(
+                    f"{investigator_url}/llm/complete",
+                    json={
+                        "task_type": "anomaly_explanation",
+                        "messages": [
+                            {
+                                "role": "system",
+                                "content": "You are Cirra Sentinel. Explain this cost anomaly in 2 concise sentences for a team Slack alert.",
+                            },
+                            {
+                                "role": "user",
+                                "content": (
+                                    f"Provider: {anomaly.provider}\n"
+                                    f"Severity: {anomaly.severity}\n"
+                                    f"Baseline: ${float(anomaly.baseline_value):.2f}\n"
+                                    f"Actual: ${float(anomaly.actual_value):.2f}\n"
+                                    f"Deviation: +{float(anomaly.deviation_pct):.1f}%\n"
+                                    f"Context: {explanation}"
+                                ),
+                            },
+                        ],
+                        "temperature": 0.2,
+                        "max_tokens": 200,
                     },
-                },
-                {
-                    "type": "section",
-                    "fields": [
-                        {"type": "mrkdwn", "text": f"*Provider:*\n{anomaly.provider}"},
-                        {"type": "mrkdwn", "text": f"*Severity:*\n{anomaly.severity.upper()}"},
-                        {"type": "mrkdwn", "text": f"*Baseline:*\n${float(anomaly.baseline_value):.2f}"},
-                        {"type": "mrkdwn", "text": f"*Actual:*\n${float(anomaly.actual_value):.2f}"},
-                        {"type": "mrkdwn", "text": f"*Deviation:*\n+{float(anomaly.deviation_pct):.1f}%"},
-                        {"type": "mrkdwn", "text": f"*Key:*\n`{target_key}`"},
-                    ],
-                },
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": f"*Explanation:*\n{explanation}",
+                    headers={"X-Internal-Service": getattr(settings, "INTERNAL_SERVICE_KEY", "internal-dev-key")},
+                )
+                if llm_resp.status_code == 200:
+                    gen_exp = llm_resp.json().get("content")
+                    if gen_exp and len(gen_exp) > 10:
+                        slack_explanation = gen_exp
+        except Exception as e:
+            logger.debug("LLM Slack explanation generation notice: %s", e)
+
+        if tier == 2:
+            # TIER 2: Simple text message, no action buttons
+            payload = {
+                "text": (
+                    f"ℹ️ *Cirra Spend Alert:* `{anomaly.provider}` spend increased by "
+                    f"+{float(anomaly.deviation_pct):.1f}% over baseline.\n"
+                    f"{slack_explanation}"
+                )
+            }
+        elif tier == 3:
+            # TIER 3: Full block kit with "View in Cirra" button
+            payload = {
+                "text": f"🚨 CIRRA ALERT: {anomaly.severity.upper()} Spend Anomaly on {anomaly.provider}",
+                "blocks": [
+                    {
+                        "type": "header",
+                        "text": {
+                            "type": "plain_text",
+                            "text": f"🚨 Cirra Alert: {anomaly.severity.upper()} Spend Anomaly",
+                            "emoji": True,
+                        },
                     },
-                },
-                {
-                    "type": "actions",
-                    "elements": [
-                        {
-                            "type": "button",
-                            "text": {"type": "plain_text", "text": "🔍 View Anomaly", "emoji": True},
-                            "url": anomaly_url,
-                            "style": "primary",
+                    {
+                        "type": "section",
+                        "fields": [
+                            {"type": "mrkdwn", "text": f"*Provider:*\n{anomaly.provider}"},
+                            {"type": "mrkdwn", "text": f"*Severity:*\n{anomaly.severity.upper()}"},
+                            {"type": "mrkdwn", "text": f"*Baseline:*\n${float(anomaly.baseline_value):.2f}"},
+                            {"type": "mrkdwn", "text": f"*Actual:*\n${float(anomaly.actual_value):.2f}"},
+                            {"type": "mrkdwn", "text": f"*Deviation:*\n+{float(anomaly.deviation_pct):.1f}%"},
+                            {"type": "mrkdwn", "text": f"*Key:*\n`{target_key}`"},
+                        ],
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*Explanation:*\n{slack_explanation}",
                         },
-                        {
-                            "type": "button",
-                            "text": {"type": "plain_text", "text": "🛑 Kill Key / Quarantine", "emoji": True},
-                            "url": kill_url,
-                            "style": "danger",
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {"type": "plain_text", "text": "🔍 View in Cirra", "emoji": True},
+                                "url": anomaly_url,
+                                "style": "primary",
+                            },
+                        ],
+                    },
+                ],
+            }
+        else:
+            # TIER 4 & 5: Slack with @channel mention + urgent block kit with kill switch button
+            payload = {
+                "text": f"<!channel> 🚨 CIRRA CRITICAL ALERT: {anomaly.severity.upper()} spend anomaly on {anomaly.provider} ({target_key})",
+                "blocks": [
+                    {
+                        "type": "header",
+                        "text": {
+                            "type": "plain_text",
+                            "text": f"🚨 CRITICAL CIRRA ALERT <!channel>: {anomaly.provider.upper()}",
+                            "emoji": True,
                         },
-                    ],
-                },
-            ],
-        }
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"<!channel> *CRITICAL INCIDENT:* Severe spend spike (+{float(anomaly.deviation_pct):.1f}%) detected on *{anomaly.provider}*.",
+                        },
+                    },
+                    {
+                        "type": "section",
+                        "fields": [
+                            {"type": "mrkdwn", "text": f"*Provider:*\n{anomaly.provider}"},
+                            {"type": "mrkdwn", "text": f"*Severity:*\n{anomaly.severity.upper()}"},
+                            {"type": "mrkdwn", "text": f"*Baseline:*\n${float(anomaly.baseline_value):.2f}"},
+                            {"type": "mrkdwn", "text": f"*Actual:*\n${float(anomaly.actual_value):.2f}"},
+                            {"type": "mrkdwn", "text": f"*Deviation:*\n+{float(anomaly.deviation_pct):.1f}%"},
+                            {"type": "mrkdwn", "text": f"*Key:*\n`{target_key}`"},
+                        ],
+                    },
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*Explanation:*\n{slack_explanation}",
+                        },
+                    },
+                    {
+                        "type": "actions",
+                        "elements": [
+                            {
+                                "type": "button",
+                                "text": {"type": "plain_text", "text": "🛑 Kill Key / Quarantine", "emoji": True},
+                                "url": kill_url,
+                                "style": "danger",
+                            },
+                            {
+                                "type": "button",
+                                "text": {"type": "plain_text", "text": "🔍 View in Cirra", "emoji": True},
+                                "url": anomaly_url,
+                                "style": "primary",
+                            },
+                        ],
+                    },
+                ],
+            }
 
         try:
             logger.info(f"Delivering Slack alert for anomaly '{anomaly_db_id}' to webhook...")
@@ -143,11 +245,18 @@ class AlertNotifier:
         anomaly: DetectedAnomaly,
         explanation: str,
         anomaly_db_id: str,
+        priority: Optional[str] = None,
+        tier: Optional[int] = None,
     ) -> bool:
         """
-        POST to NTFY_TOPIC_URL (default: https://ntfy.sh/cirra-alerts) with:
+        POST to NTFY_TOPIC_URL with:
         Headers: Title, Priority, Tags, Click, Actions.
         Body: explanation, baseline, actual, extra spend.
+        Priority tiers:
+          - Tier 1: low (brief, informational)
+          - Tier 2: default
+          - Tier 3: high
+          - Tier 5: urgent
         Returns True if HTTP 200.
         """
         topic_url = settings.ntfy_topic_url or "https://ntfy.sh/cirra-alerts"
@@ -157,7 +266,7 @@ class AlertNotifier:
         if is_dummy:
             logger.info(
                 f"[SIMULATION] ntfy topic URL is missing or dummy. "
-                f"Simulating delivery for anomaly '{anomaly_db_id}'."
+                f"Simulating delivery for anomaly '{anomaly_db_id}' (tier {tier}, priority {priority})."
             )
             self.last_status_codes["ntfy"] = 200
             return True
@@ -171,29 +280,69 @@ class AlertNotifier:
         target_key = anomaly.api_key_id or anomaly.series_key
         kill_url = f"{dashboard_base}/actions?target={target_key}&type=kill_switch"
 
-        priority = "urgent" if anomaly.severity.lower() == "critical" else "high"
+        if not priority:
+            if tier == 1:
+                priority = "low"
+            elif tier == 2:
+                priority = "default"
+            elif tier == 3:
+                priority = "high"
+            elif tier == 5 or anomaly.severity.lower() == "critical":
+                priority = "urgent"
+            else:
+                priority = "high"
+
+        if tier == 1 or priority == "low":
+            # Tier 1: brief, informational
+            title = f"Cirra Spend Nudge: {anomaly.provider}"
+            tags = f"information_source,{anomaly.provider.lower()}"
+            body = (
+                f"{explanation}\n\n"
+                f"Provider: {anomaly.provider}\n"
+                f"Baseline: ${float(anomaly.baseline_value):.2f} | Actual: ${float(anomaly.actual_value):.2f} (+{float(anomaly.deviation_pct):.1f}%)\n"
+                f"Informational notice only — normal variance."
+            )
+        elif tier == 5 or priority == "urgent":
+            title = f"🚨 CATASTROPHIC: Leaked Key on {anomaly.provider}"
+            tags = f"rotating_light,fire,{anomaly.provider.lower()}"
+            extra_spend = (
+                float(anomaly.actual_value - anomaly.baseline_value)
+                if anomaly.actual_value is not None and anomaly.baseline_value is not None
+                else 0.0
+            )
+            body = (
+                f"{explanation}\n\n"
+                f"CRITICAL COMPROMISE DETECTED\n"
+                f"Baseline: ${float(anomaly.baseline_value):.2f}\n"
+                f"Actual: ${float(anomaly.actual_value):.2f}\n"
+                f"Extra spend: ${extra_spend:.2f}\n"
+                f"Deviation: +{float(anomaly.deviation_pct):.1f}%\n"
+                f"Key: {target_key}"
+            )
+        else:
+            title = f"Cirra Alert: {anomaly.severity.upper()} spend anomaly on {anomaly.provider}"
+            tags = f"warning,rotating_light,{anomaly.provider.lower()}"
+            extra_spend = (
+                float(anomaly.actual_value - anomaly.baseline_value)
+                if anomaly.actual_value is not None and anomaly.baseline_value is not None
+                else 0.0
+            )
+            body = (
+                f"{explanation}\n\n"
+                f"Baseline: ${float(anomaly.baseline_value):.2f}\n"
+                f"Actual: ${float(anomaly.actual_value):.2f}\n"
+                f"Extra spend: ${extra_spend:.2f}\n"
+                f"Deviation: +{float(anomaly.deviation_pct):.1f}%\n"
+                f"Series: {anomaly.series_key}"
+            )
+
         headers = {
-            "Title": f"Cirra Alert: {anomaly.severity.upper()} spend anomaly on {anomaly.provider}",
+            "Title": title,
             "Priority": priority,
-            "Tags": f"warning,rotating_light,{anomaly.provider.lower()}",
+            "Tags": tags,
             "Click": anomaly_url,
             "Actions": f"view, View Anomaly, {anomaly_url}; view, Action Center, {kill_url}",
         }
-
-        extra_spend = (
-            float(anomaly.actual_value - anomaly.baseline_value)
-            if anomaly.actual_value is not None and anomaly.baseline_value is not None
-            else 0.0
-        )
-
-        body = (
-            f"{explanation}\n\n"
-            f"Baseline: ${float(anomaly.baseline_value):.2f}\n"
-            f"Actual: ${float(anomaly.actual_value):.2f}\n"
-            f"Extra spend: ${extra_spend:.2f}\n"
-            f"Deviation: +{float(anomaly.deviation_pct):.1f}%\n"
-            f"Series: {anomaly.series_key}"
-        )
 
         try:
             logger.info(f"Delivering ntfy push notification for anomaly '{anomaly_db_id}' to {topic_url}...")

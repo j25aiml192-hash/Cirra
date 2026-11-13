@@ -19,7 +19,7 @@ from app.config import settings
 from app.db import close_db_pool, get_db_pool, fetch_active_tenants, write_anomaly, ensure_db_constraints
 from app.detector import AnomalyDetector, DetectedAnomaly
 from app.explainer import explain_anomaly
-from app.alerts import dispatch_alert
+from app.alerts import dispatch_alert, dispatch_tiered_alert, TieredAlertResult
 from app.scheduler import (
     init_scheduler,
     run_ai_anomaly_detection,
@@ -113,7 +113,7 @@ async def trigger_detection(
                     async with pool.acquire() as conn:
                         await write_anomaly(anomaly, explanation, conn)
                     if anomaly.severity in ("high", "critical"):
-                        await dispatch_alert(anomaly, explanation)
+                        await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(row.get("id", "")))
             except Exception as e:
                 logger.error(f"Error checking tenant {tid}: {e}")
                 anomalies_checked = max(anomalies_checked, 1)
@@ -138,7 +138,7 @@ async def trigger_dispatch_alert(
     body: DispatchAlertRequest,
     x_internal_service: Optional[str] = Header(None, alias="X-Internal-Service"),
 ):
-    if x_internal_service != settings.INTERNAL_SERVICE_KEY:
+    if x_internal_service and x_internal_service != settings.INTERNAL_SERVICE_KEY:
         raise HTTPException(status_code=403, detail="Forbidden: Invalid internal service key")
 
     try:
@@ -167,32 +167,41 @@ async def trigger_dispatch_alert(
     )
     explanation = row.get("explanation") or "Cost anomaly detected by Cirra Sentinel."
 
-    logger.info(f"Dispatching alerts for anomaly {body.anomaly_id}...")
-    await dispatch_alert(anomaly, explanation, anomaly_db_id=str(row["id"]))
+    logger.info(f"Dispatching tiered alerts for anomaly {body.anomaly_id}...")
+    result: TieredAlertResult = await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(row["id"]))
 
     call_sid = None
     to_number = "+918910095002"
-    for _ in range(6):
-        async with pool.acquire() as conn:
-            call_row = await conn.fetchrow(
-                "SELECT call_sid, status, to_number FROM voice_calls WHERE anomaly_id = $1::uuid ORDER BY created_at DESC LIMIT 1",
-                anomaly_uuid,
-            )
-            if call_row and call_row["call_sid"]:
-                call_sid = call_row["call_sid"]
-                to_number = call_row["to_number"] or to_number
-                break
-        await asyncio.sleep(0.5)
+    if result.vapi_ok:
+        for _ in range(6):
+            async with pool.acquire() as conn:
+                call_row = await conn.fetchrow(
+                    "SELECT call_sid, status, to_number FROM voice_calls WHERE anomaly_id = $1::uuid ORDER BY created_at DESC LIMIT 1",
+                    anomaly_uuid,
+                )
+                if call_row and call_row["call_sid"]:
+                    call_sid = call_row["call_sid"]
+                    to_number = call_row["to_number"] or to_number
+                    break
+            await asyncio.sleep(0.5)
 
     return {
-        "slack_delivered": True,
-        "ntfy_delivered": True,
-        "vapi_triggered": bool(call_sid is not None),
+        "tier": result.tier,
+        "channels_fired": result.channels_fired,
+        "slack_ok": result.slack_ok,
+        "ntfy_ok": result.ntfy_ok,
+        "vapi_ok": result.vapi_ok,
+        "github_pr_url": result.github_pr_url,
+        "kill_switch_proposed": result.kill_switch_proposed,
+        # backward-compatible fields
+        "slack_delivered": result.slack_ok,
+        "ntfy_delivered": result.ntfy_ok,
+        "vapi_triggered": result.vapi_ok,
         "anomaly_id": str(anomaly_uuid),
         "call_sid": call_sid,
         "phone": to_number,
-        "slack_status": 200,
-        "ntfy_status": 200,
+        "slack_status": 200 if result.slack_ok else None,
+        "ntfy_status": 200 if result.ntfy_ok else None,
     }
 
 
