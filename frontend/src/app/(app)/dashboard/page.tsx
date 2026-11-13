@@ -192,6 +192,16 @@ export default function DashboardPage() {
                   {data?.anomalies_detected ?? 0} active
                 </span>
               </Link>
+
+              {/* Quick Jump to Live Scenario Engine */}
+              <a
+                href="#live-scenario-engine"
+                title="Jump down to Live Scenario Engine"
+                className="inline-flex items-center gap-1.5 bg-[#FAF5FF] border border-[#E9D5FF] hover:border-[#C084FC] hover:bg-[#F3E8FF] px-2.5 py-1 rounded-xl text-xs transition-all cursor-pointer group"
+              >
+                <span className="text-xs">🔥</span>
+                <span className="font-extrabold text-[#7C3AED] text-[11px]">Live Scenarios</span>
+              </a>
             </div>
 
             {/* Provider Filter Tabs */}
@@ -577,7 +587,7 @@ function LiveScenarioPanel() {
   };
 
   return (
-    <div className="cirra-card p-6 border border-[#D6E4F5] bg-white rounded-2xl shadow-sm space-y-5">
+    <div id="live-scenario-engine" className="cirra-card p-6 border border-[#D6E4F5] bg-white rounded-2xl shadow-sm space-y-5 scroll-mt-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EBF2FA] pb-4">
         <div>
