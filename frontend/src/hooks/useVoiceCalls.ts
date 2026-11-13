@@ -36,13 +36,17 @@ export function useVoiceCalls(limit: number = 50) {
   const query = useQuery<VoiceCallItem[]>({
     queryKey: ["voice-calls", limit],
     queryFn: async () => {
-      const res = await apiFetch<any>(`/api/v1/voice/calls?limit=${limit}`);
-      const list = Array.isArray(res) ? res : res?.calls || res?.data || [];
-      return list.map((item: any) => ({
-        ...item,
-        transcript: typeof item.transcript === "string" ? JSON.parse(item.transcript) : (item.transcript || []),
-        anomaly_snapshot: typeof item.anomaly_snapshot === "string" ? JSON.parse(item.anomaly_snapshot) : item.anomaly_snapshot,
-      }));
+      try {
+        const res = await apiFetch<any>(`/api/v1/voice/calls?limit=${limit}`);
+        const list = Array.isArray(res) ? res : res?.calls || res?.data || [];
+        return list.map((item: any) => ({
+          ...item,
+          transcript: typeof item.transcript === "string" ? JSON.parse(item.transcript) : (item.transcript || []),
+          anomaly_snapshot: typeof item.anomaly_snapshot === "string" ? JSON.parse(item.anomaly_snapshot) : item.anomaly_snapshot,
+        }));
+      } catch {
+        return [];
+      }
     },
     refetchInterval: 15000,
   });
@@ -71,18 +75,22 @@ export function useVoiceCalls(limit: number = 50) {
 }
 
 export function useVoiceCallDetail(callId: string | null) {
-  return useQuery<VoiceCallItem>({
+  return useQuery<VoiceCallItem | null>({
     queryKey: ["voice-call", callId],
     queryFn: async () => {
-      if (!callId) throw new Error("No call ID provided");
-      const res = await apiFetch<any>(`/api/v1/voice/calls/${callId}`);
-      return {
-        ...res,
-        transcript: typeof res.transcript === "string" ? JSON.parse(res.transcript) : (res.transcript || []),
-        anomaly_snapshot: typeof res.anomaly_snapshot === "string" ? JSON.parse(res.anomaly_snapshot) : res.anomaly_snapshot,
-      };
+      if (!callId) return null;
+      try {
+        const res = await apiFetch<any>(`/api/v1/voice/calls/${callId}`);
+        if (!res) return null;
+        return {
+          ...res,
+          transcript: typeof res.transcript === "string" ? JSON.parse(res.transcript) : (res.transcript || []),
+          anomaly_snapshot: typeof res.anomaly_snapshot === "string" ? JSON.parse(res.anomaly_snapshot) : res.anomaly_snapshot,
+        };
+      } catch {
+        return null;
+      }
     },
     enabled: !!callId,
   });
 }
-

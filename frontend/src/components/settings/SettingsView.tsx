@@ -648,10 +648,10 @@ export function SettingsView({ initialTab = "profile" }: SettingsViewProps) {
                       className="h-9 px-3.5 rounded-xl border border-[#D6E4F5] bg-white text-xs font-bold text-[#0A192F] hover:bg-[#F0F5FD] hover:border-[#BCD4F0] shadow-xs transition-all active:scale-[0.98] whitespace-nowrap"
                     >
                       {testWebhookStatus === "testing"
-                        ? "Testing..."
+                        ? "Verifying..."
                         : testWebhookStatus === "sent"
-                        ? "Payload Sent ✓"
-                        : "Send Test Payload"}
+                        ? "Webhook Verified ✓"
+                        : "Verify Webhook Endpoint"}
                     </button>
                   </div>
                 </div>

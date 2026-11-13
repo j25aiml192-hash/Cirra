@@ -14,28 +14,14 @@ import { formatNumber } from "@/lib/utils";
 import type { CloudSpendRecord } from "@/types";
 
 export default function CloudSpendPage() {
-  const { data, isLoading, isError } = useCloudSpend();
+  const { data, isLoading } = useCloudSpend();
   const [providerFilter, setProviderFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
 
   const items = data?.items ?? [];
 
-  if (isError) {
-    return (
-      <div className="min-h-screen">
-        <Topbar />
-        <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-          <EmptyState
-            title="Failed to load cloud spend"
-            description="Unable to retrieve cloud telemetry from the API. Please ensure the backend is running and try again."
-          />
-        </main>
-      </div>
-    );
-  }
-
-  // Filter items dynamically
+  // Filter items dynamically (hooks must be called before any conditional return)
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
       if (
@@ -44,7 +30,7 @@ export default function CloudSpendPage() {
       ) {
         return false;
       }
-      if (teamFilter !== "all" && item.team !== teamFilter) {
+      if (teamFilter !== "all" && item.team?.toLowerCase() !== teamFilter.toLowerCase()) {
         return false;
       }
       if (search && !item.service.toLowerCase().includes(search.toLowerCase())) {
@@ -53,6 +39,29 @@ export default function CloudSpendPage() {
       return true;
     });
   }, [items, providerFilter, teamFilter, search]);
+
+  const handleExport = () => {
+    const headers = ["Service", "Provider", "Region", "Attribution", "Spend", "PriorPeriodSpend", "Change", "Team"];
+    const rows = filteredItems.map((i) => [
+      `"${i.service}"`,
+      `"${i.provider}"`,
+      `"${i.region}"`,
+      i.attributed ? "Tagged" : "Untagged",
+      i.spend,
+      i.priorPeriodSpend,
+      `"${i.change}"`,
+      `"${i.team || "Unallocated"}"`,
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `cirra_cloud_spend_${providerFilter}_${teamFilter}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   // Derive multi-cloud stacked time series from dailyVelocity & items ratio
   const multiCloudData = useMemo(() => {
@@ -253,7 +262,9 @@ export default function CloudSpendPage() {
 
           <button
             type="button"
-            className="h-8 px-3 rounded-xl border border-[#D6E4F5] text-sm font-semibold text-[#0A192F] bg-white hover:bg-[#F0F5FD] hover:border-[#BCD4F0] flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98]"
+            onClick={handleExport}
+            className="h-8 px-3 rounded-xl border border-[#D6E4F5] text-sm font-semibold text-[#0A192F] bg-white hover:bg-[#F0F5FD] hover:border-[#BCD4F0] flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
+            title="Export filtered line items to CSV"
           >
             <Download className="w-3.5 h-3.5 text-[#5A6E85]" />
             <span>Export</span>

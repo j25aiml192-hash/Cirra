@@ -254,10 +254,10 @@ export default function ConnectionsSettingsPage() {
                       {testingId === conn.id ? (
                         <>
                           <RefreshCw className="w-3 h-3 animate-spin" />
-                          <span>Testing...</span>
+                          <span>Verifying...</span>
                         </>
                       ) : (
-                        <span>Test</span>
+                        <span>Verify</span>
                       )}
                     </button>
                     <button
@@ -435,17 +435,17 @@ export default function ConnectionsSettingsPage() {
                       {testStatus === "testing" ? (
                         <>
                           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Testing handshake...</span>
+                          <span>Verifying handshake...</span>
                         </>
                       ) : (
-                        <span>Test Connection Handshake</span>
+                        <span>Verify Connection Handshake</span>
                       )}
                     </button>
 
                     {testStatus === "success" && (
                       <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-200 flex items-center gap-1.5">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Connection test successful! Ready to save.</span>
+                        <span>Connection verified successfully! Ready to save.</span>
                       </div>
                     )}
                   </div>

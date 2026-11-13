@@ -131,7 +131,7 @@ export default function VoiceCallsPage() {
           <Phone className="w-10 h-10 text-slate-300 mx-auto mb-3" />
           <h3 className="text-base font-bold text-slate-700">No voice calls recorded yet</h3>
           <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
-            When a critical anomaly occurs, or when you trigger a test call from Settings, full conversational transcripts and telemetry will appear here.
+            When a critical spend anomaly occurs, real-time conversational transcripts and response telemetry will appear here.
           </p>
         </div>
       ) : (

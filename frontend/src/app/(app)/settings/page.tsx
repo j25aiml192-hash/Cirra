@@ -398,9 +398,9 @@ export default function UnifiedSettingsPage() {
                               onClick={() => handleTestConnection(c.id)}
                               disabled={isTesting}
                               className="px-2.5 py-1 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 font-semibold transition-colors"
-                              title="Test API Key Ping"
+                              title="Verify API Key Ping"
                             >
-                              Test
+                              Verify
                             </button>
                             <button
                               type="button"
@@ -630,14 +630,14 @@ export default function UnifiedSettingsPage() {
             </button>
           </div>
 
-          {/* Interactive Test Triggers Card */}
+          {/* Live Alert Verification Card */}
           <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/60 to-purple-50/60 border border-[#BCD9FC] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div>
               <div className="text-xs font-bold uppercase tracking-wider text-[#0062E0]">
                 Integration Health Diagnostics
               </div>
               <div className="text-xs text-slate-600 mt-0.5">
-                Dispatch live test payloads directly to your phone, Slack channel, and push subscription.
+                Verify live notification delivery directly to your phone, Slack channel, and push subscription.
               </div>
             </div>
 
@@ -653,7 +653,7 @@ export default function UnifiedSettingsPage() {
                 ) : (
                   <Phone className="w-3.5 h-3.5" />
                 )}
-                Trigger Test Voice Call
+                Dispatch Voice Call
               </button>
 
               <button
@@ -667,7 +667,7 @@ export default function UnifiedSettingsPage() {
                 ) : (
                   <Send className="w-3.5 h-3.5" />
                 )}
-                Test Slack Webhook
+                Verify Slack Webhook
               </button>
 
               <button
@@ -681,7 +681,7 @@ export default function UnifiedSettingsPage() {
                 ) : (
                   <Bell className="w-3.5 h-3.5" />
                 )}
-                Test ntfy Push
+                Verify ntfy Push
               </button>
             </div>
           </div>

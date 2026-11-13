@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -7,15 +9,29 @@ import type { Anomaly } from "@/types";
 export function useAnomalies(status: string = "open") {
   return useQuery<Anomaly[]>({
     queryKey: ["anomalies", status],
-    queryFn: () => apiFetch<Anomaly[]>(`/api/v1/anomalies?status=${status}&limit=50`),
+    queryFn: async () => {
+      try {
+        const res = await apiFetch<Anomaly[]>(`/api/v1/anomalies?status=${status}&limit=50`);
+        return Array.isArray(res) ? res : [];
+      } catch {
+        return [];
+      }
+    },
     refetchInterval: 30_000,
   });
 }
 
 export function useAnomalyDetail(id: string) {
-  return useQuery<Anomaly>({
+  return useQuery<Anomaly | null, Error>({
     queryKey: ["anomaly", id],
-    queryFn: () => apiFetch<Anomaly>(`/api/v1/anomalies/${id}`),
+    queryFn: async (): Promise<Anomaly | null> => {
+      try {
+        const res = await apiFetch<Anomaly>(`/api/v1/anomalies/${id}`);
+        return res || null;
+      } catch {
+        return null;
+      }
+    },
     enabled: !!id,
   });
 }
@@ -23,10 +39,11 @@ export function useAnomalyDetail(id: string) {
 export function useAcknowledgeAnomaly() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<Anomaly>(`/api/v1/anomalies/${id}/acknowledge`, {
+    mutationFn: async (id: string) => {
+      return apiFetch<Anomaly>(`/api/v1/anomalies/${id}/acknowledge`, {
         method: "POST",
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["anomalies"] });
     },
@@ -36,10 +53,11 @@ export function useAcknowledgeAnomaly() {
 export function useResolveAnomaly() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) =>
-      apiFetch<Anomaly>(`/api/v1/anomalies/${id}/resolve`, {
+    mutationFn: async (id: string) => {
+      return apiFetch<Anomaly>(`/api/v1/anomalies/${id}/resolve`, {
         method: "POST",
-      }),
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["anomalies"] });
     },

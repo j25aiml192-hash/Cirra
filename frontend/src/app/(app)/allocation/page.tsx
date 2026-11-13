@@ -11,26 +11,16 @@ import { apiFetch } from "@/lib/api";
 import { formatNumber } from "@/lib/utils";
 import type { AllocationRule, AllocationCoverage, SuggestedRule } from "@/types";
 
-const fallbackSuggestions: SuggestedRule[] = [
-  {
-    id: "sug-1",
-    pattern: "AWS NAT Gateway in us-east-1 (vpc-084a92)",
-    suggestedTeam: "Core Platform",
-    confidence: 0.94,
-    estimatedSpend: 7530,
-  },
-  {
-    id: "sug-2",
-    pattern: "Anthropic Claude calls with key 'agentic-workflow-v2'",
-    suggestedTeam: "Autonomous Eng",
-    confidence: 0.98,
-    estimatedSpend: 9800,
-  },
-];
+const DEFAULT_COVERAGE: AllocationCoverage = {
+  totalSpend: 0,
+  attributedSpend: 0,
+  unallocatedSpend: 0,
+  coveragePercentage: 0,
+};
 
 export default function AllocationPage() {
   const queryClient = useQueryClient();
-  const [suggestions, setSuggestions] = useState<SuggestedRule[]>(fallbackSuggestions);
+  const [suggestions, setSuggestions] = useState<SuggestedRule[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [newMatchType, setNewMatchType] = useState<"tag" | "prefix" | "regex" | "service">("tag");
   const [newMatchValue, setNewMatchValue] = useState("");
@@ -41,17 +31,22 @@ export default function AllocationPage() {
   const rulesQuery = useQuery<AllocationRule[]>({
     queryKey: ["allocation", "rules"],
     queryFn: async () => {
-      const res = await apiFetch<any[]>("/api/v1/allocation/rules");
-      return (res ?? []).map((r: any) => ({
-        id: String(r.id),
-        priority: Number(r.priority ?? 1),
-        match_type: r.match_type ?? "tag",
-        match_value: String(r.match_value ?? ""),
-        assign_team: r.assign_team ?? "",
-        assign_customer: r.assign_customer,
-        assign_feature: r.assign_feature,
-        spendAttributed: Number(r.spendAttributed ?? 0),
-      }));
+      try {
+        const res = await apiFetch<any[]>("/api/v1/allocation/rules");
+        if (!Array.isArray(res)) return [];
+        return res.map((r: any) => ({
+          id: String(r.id),
+          priority: Number(r.priority ?? 1),
+          match_type: r.match_type ?? "tag",
+          match_value: String(r.match_value ?? ""),
+          assign_team: r.assign_team ?? "",
+          assign_customer: r.assign_customer,
+          assign_feature: r.assign_feature,
+          spendAttributed: Number(r.spendAttributed ?? 0),
+        }));
+      } catch {
+        return [];
+      }
     },
   });
 
@@ -59,13 +54,18 @@ export default function AllocationPage() {
   const coverageQuery = useQuery<AllocationCoverage>({
     queryKey: ["allocation", "coverage"],
     queryFn: async () => {
-      const res = await apiFetch<any>("/api/v1/allocation/coverage");
-      return {
-        totalSpend: Number(res?.totalSpend ?? res?.total_spend ?? 0),
-        attributedSpend: Number(res?.attributedSpend ?? res?.attributed_spend ?? 0),
-        unallocatedSpend: Number(res?.unallocatedSpend ?? res?.unallocated_spend ?? 0),
-        coveragePercentage: Number(res?.coveragePercentage ?? res?.coverage_percentage ?? 0),
-      };
+      try {
+        const res = await apiFetch<any>("/api/v1/allocation/coverage");
+        if (!res) return DEFAULT_COVERAGE;
+        return {
+          totalSpend: Number(res?.totalSpend ?? res?.total_spend ?? 0),
+          attributedSpend: Number(res?.attributedSpend ?? res?.attributed_spend ?? 0),
+          unallocatedSpend: Number(res?.unallocatedSpend ?? res?.unallocated_spend ?? 0),
+          coveragePercentage: Number(res?.coveragePercentage ?? res?.coverage_percentage ?? 0),
+        };
+      } catch {
+        return DEFAULT_COVERAGE;
+      }
     },
   });
 
@@ -177,25 +177,11 @@ export default function AllocationPage() {
     }
   };
 
-  if (rulesQuery.isError || coverageQuery.isError) {
-    return (
-      <div className="min-h-screen">
-        <Topbar />
-        <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
-          <EmptyState
-            title="Failed to load allocation data"
-            description="Unable to connect to the allocation rules and coverage telemetry API. Please check your connection and try again."
-          />
-        </main>
-      </div>
-    );
-  }
-
-  const coverage = coverageQuery.data;
-  const coveragePct = coverage?.coveragePercentage ?? 84.2;
+  const coverage = coverageQuery.data ?? DEFAULT_COVERAGE;
+  const coveragePct = coverage?.coveragePercentage ?? 0;
   const unallocatedPct = Math.max(0, 100 - coveragePct).toFixed(1);
-  const attributedSpend = coverage?.attributedSpend ?? 108100;
-  const unallocatedSpend = coverage?.unallocatedSpend ?? 20320;
+  const attributedSpend = coverage?.attributedSpend ?? 0;
+  const unallocatedSpend = coverage?.unallocatedSpend ?? 0;
   const rules = rulesQuery.data ?? [];
 
   return (

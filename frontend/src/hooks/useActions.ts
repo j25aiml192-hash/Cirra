@@ -36,13 +36,17 @@ export function useActions(statusFilter?: string) {
   const query = useQuery<ActionItem[]>({
     queryKey: ["actions", statusFilter, tenantId],
     queryFn: async () => {
-      const url = tenantId ? `/api/v1/actions?tenant_id=${tenantId}` : "/api/v1/actions";
-      const res = await apiFetch<any>(url);
-      const items: any[] = Array.isArray(res) ? res : res?.actions || res?.data || [];
-      if (statusFilter && statusFilter !== "all") {
-        return items.filter((a) => a.status?.toLowerCase() === statusFilter.toLowerCase());
+      try {
+        const url = tenantId ? `/api/v1/actions?tenant_id=${tenantId}` : "/api/v1/actions";
+        const res = await apiFetch<any>(url);
+        const items: ActionItem[] = Array.isArray(res) ? res : res?.actions || res?.data || [];
+        if (statusFilter && statusFilter !== "all") {
+          return items.filter((a) => a.status?.toLowerCase() === statusFilter.toLowerCase());
+        }
+        return items;
+      } catch {
+        return [];
       }
-      return items;
     },
     refetchInterval: 15000,
   });
@@ -74,8 +78,13 @@ export function useActions(statusFilter?: string) {
     },
   });
 
+  const rawActions = query.data || [];
+  const filteredActions = statusFilter && statusFilter !== "all"
+    ? rawActions.filter((a) => a.status?.toLowerCase() === statusFilter.toLowerCase())
+    : rawActions;
+
   return {
-    actions: query.data || [],
+    actions: filteredActions,
     isLoading: query.isLoading,
     isError: query.isError,
     error: query.error,
@@ -86,4 +95,3 @@ export function useActions(statusFilter?: string) {
     isRollingBack: rollbackMutation.isPending,
   };
 }
-

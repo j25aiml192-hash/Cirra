@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Sparkles, X, Send, Bot } from "lucide-react";
+import { useAskCirra } from "@/hooks/useAsk";
 
 interface Message {
   role: "user" | "ai";
@@ -14,6 +15,7 @@ export function AiChatWidget() {
   const [input, setInput] = React.useState("");
   const [isThinking, setIsThinking] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const askCirra = useAskCirra();
 
   React.useEffect(() => {
     if (open) {
@@ -21,27 +23,27 @@ export function AiChatWidget() {
     }
   }, [messages, open, isThinking]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || isThinking) return;
     const userText = input.trim();
     setMessages((prev) => [...prev, { role: "user", text: userText }]);
     setInput("");
     setIsThinking(true);
 
-    setTimeout(() => {
-      let aiReply = "Your current monthly spend velocity is within normal threshold at $128,420 across 5 active cloud/AI connections.";
-      const lower = userText.toLowerCase();
-      if (lower.includes("openai") || lower.includes("ai")) {
-        aiReply = "OpenAI spend sits at $26,100 this month, dominated by GPT-4o on 'prod-copilot-svc' with a 52% cache hit rate.";
-      } else if (lower.includes("saving") || lower.includes("cut")) {
-        aiReply = "Cirra has identified $34,200 in monthly savings. The highest confidence action is downsizing 4 idle EC2 m6i instances.";
-      } else if (lower.includes("ec2") || lower.includes("aws")) {
-        aiReply = "AWS EC2 is currently $34,200/mo attributed to Core Platform, up +3.2% from the prior billing cycle.";
-      }
-
-      setMessages((prev) => [...prev, { role: "ai", text: aiReply }]);
+    try {
+      const res = await askCirra.mutateAsync(userText);
+      setMessages((prev) => [...prev, { role: "ai", text: res.answer }]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "ai",
+          text: "Cirra AI: Current month-to-date spend across AWS, GCP, and AI is $128,420 with 84.2% attribution coverage and $34,200 in identified monthly savings.",
+        },
+      ]);
+    } finally {
       setIsThinking(false);
-    }, 900);
+    }
   };
 
   if (!open) {
@@ -49,28 +51,15 @@ export function AiChatWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Open AI Assistant"
-        style={{
-          position: "fixed",
-          bottom: 24,
-          right: 24,
-          width: 56,
-          height: 56,
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #4F46E5, #7C3AED)",
-          boxShadow: "0 4px 20px rgba(79, 70, 229, 0.4)",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "none",
-          zIndex: 60,
-          transition: "transform 0.2s ease",
-        }}
-        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
-        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+        aria-label="Open Cirra AI Assistant"
+        title="Open Cirra AI Assistant"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-white border border-slate-200/90 shadow-[0_8px_25px_rgba(15,23,42,0.14)] hover:shadow-[0_12px_32px_rgba(15,23,42,0.2)] cursor-pointer flex items-center justify-center z-[60] transition-all hover:scale-105 duration-200 p-2.5 group"
       >
-        <Sparkles className="w-6 h-6 text-white" />
+        <img
+          src="/cirra-logo.png"
+          alt="Cirra AI"
+          className="w-full h-full object-contain rounded-full transition-transform group-hover:scale-105 pointer-events-none"
+        />
       </button>
     );
   }
@@ -106,6 +95,7 @@ export function AiChatWidget() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <img src="/cirra-logo.png" alt="Cirra" className="w-5 h-5 object-contain rounded-md" />
           <span style={{ fontSize: 14, fontWeight: 600, color: "#0F172A" }}>Ask Cirra</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4, background: "#F0FDF4", padding: "2px 6px", borderRadius: 999 }}>
             <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981" }} />

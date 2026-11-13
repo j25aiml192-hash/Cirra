@@ -31,6 +31,16 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("cirra:toggle-sidebar", handleToggle);
   }, []);
 
+  useEffect(() => {
+    if (isAskPage) {
+      document.body.classList.remove("cirra-bg-canvas");
+      document.body.style.backgroundColor = "#CFE7FD";
+    } else {
+      document.body.classList.add("cirra-bg-canvas");
+      document.body.style.backgroundColor = "";
+    }
+  }, [isAskPage]);
+
   const isExpanded = pinned || isHovered;
 
   return (
@@ -44,7 +54,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div
         className={`min-h-screen ${
           isAskPage
-            ? "bg-gradient-to-b from-[#C2E3FD] via-[#DBEFFF] via-40% via-[#ECF6FE] to-[#F6FBFF] text-[#0A192F]"
+            ? "bg-gradient-to-b from-[#BEE0FD] via-[#D5ECFE] via-30% via-[#E5F3FE] via-65% via-[#F0F8FF] to-[#FAFDFE] text-[#0A192F]"
             : "text-[#0F1E36]"
         }`}
       >

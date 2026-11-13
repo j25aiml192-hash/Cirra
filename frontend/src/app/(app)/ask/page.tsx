@@ -108,7 +108,7 @@ export default function AskPage() {
       {/* =========================================================================
           LIGHT SKY BLUE CANVAS WITH REAL FLUFFY CUMULUS CLOUDS & WHITE MIST
          ========================================================================= */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {/* Soft, light morning sky blue gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#BEE0FD] via-[#D5ECFE] via-30% via-[#E5F3FE] via-65% via-[#F0F8FF] to-[#FAFDFE]" />
 
@@ -213,83 +213,60 @@ export default function AskPage() {
 
       {/* =========================================================================
           MAIN INTERACTIVE CHAT CONTENT
-         ========================================================================= */}
+         ========================================================= */}
       <div className="relative z-10 max-w-3xl w-full mx-auto px-4 pt-6 pb-12 flex flex-col flex-1">
         {messages.length === 0 ? (
-          /* Empty State: Cirra Logo in Frosted Squircle, Clear Heading, & Frosted Query Pills */
-          <div className="flex flex-col items-center gap-4 text-center my-auto py-4">
-            {/* CIRRA LOGO replacing the sparkle icon */}
-            <div className="w-20 h-20 rounded-2xl bg-white/95 backdrop-blur-xl border border-white shadow-[0_12px_32px_rgba(2,106,162,0.16)] p-3 flex items-center justify-center transition-transform hover:scale-105 duration-200">
+          /* Empty State: Cirra Logo, Heading, & 3 Query Pills in 2 Rows */
+          <div className="flex flex-col items-center gap-4 text-center my-auto py-8">
+            {/* CIRRA LOGO in squircle */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgba(2,106,162,0.12)] p-3 sm:p-3.5 flex items-center justify-center transition-transform hover:scale-105 duration-200">
               <img
                 src="/cirra-logo.png"
                 alt="Cirra Logo"
-                className="w-full h-full object-contain rounded-xl shadow-xs"
+                className="w-full h-full object-contain rounded-xl"
               />
             </div>
 
-            {/* Main Heading with Crisp Stripe-Grade Contrast */}
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0A2540] tracking-tight drop-shadow-[0_1px_2px_rgba(255,255,255,0.9)]">
+            {/* Main Heading */}
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0A2540] tracking-tight">
               Ask anything about your spend
             </h2>
 
             {/* Descriptive Subtitle */}
-            <p className="text-[#335372] font-medium text-sm sm:text-base max-w-md drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)] leading-relaxed">
-              Cirra queries your live multi-cloud data — every number comes from ClickHouse FOCUS, never guessed
+            <p className="text-[#475569] font-medium text-sm sm:text-base max-w-md leading-relaxed">
+              Cirra queries your live data — every number comes from the database, never guessed
             </p>
 
-            {/* Restructured Prompt Suggestion Cards (Balanced 3-Column Glass Grid) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl mt-4 text-left">
-              {[
-                {
-                  category: "Anomaly Spike",
-                  icon: TrendingUp,
-                  query: "Why did OpenAI spend spike last week?",
-                  desc: "Detect LLM token surge & drift",
-                },
-                {
-                  category: "Attribution",
-                  icon: Server,
-                  query: "Which team spent most on EC2 this month?",
-                  desc: "Multi-cloud compute by team",
-                },
-                {
-                  category: "Governance",
-                  icon: Layers,
-                  query: "What's our unallocated spend?",
-                  desc: "Inspect orphan & untagged spend",
-                },
-              ].map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.query}
-                    type="button"
-                    onClick={() => handleAsk(item.query)}
-                    className="group relative flex flex-col justify-between p-3.5 sm:p-4 rounded-2xl bg-white/90 hover:bg-white border border-white shadow-[0_6px_20px_rgba(2,106,162,0.08)] hover:shadow-[0_12px_28px_rgba(2,106,162,0.16)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 cursor-pointer text-left overflow-hidden"
-                  >
-                    <div>
-                      <div className="flex items-center gap-1.5 text-[#0284C7] font-bold text-[11px] uppercase tracking-wider mb-2">
-                        <span className="w-5 h-5 rounded-lg bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center flex-shrink-0 group-hover:bg-[#0062E0] group-hover:text-white transition-colors">
-                          <Icon className="w-3 h-3" />
-                        </span>
-                        <span className="truncate">{item.category}</span>
-                      </div>
-                      <p className="text-xs sm:text-[13px] font-semibold text-[#0A2540] group-hover:text-[#0062E0] transition-colors leading-snug">
-                        {item.query}
-                      </p>
-                    </div>
+            {/* Suggestion Pills in 2 Rows matching reference design */}
+            <div className="flex flex-col items-center gap-2.5 w-full mt-4">
+              {/* Row 1: Two Pills */}
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleAsk("Why did OpenAI spend spike last week?")}
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                >
+                  Why did OpenAI spend spike last week?
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAsk("Which team spent most on EC2 this month?")}
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                >
+                  Which team spent most on EC2 this month?
+                </button>
+              </div>
 
-                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100/80">
-                      <span className="text-[10px] text-[#64748B] font-medium truncate">
-                        {item.desc}
-                      </span>
-                      <span className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-[#0062E0] text-slate-400 group-hover:text-white flex items-center justify-center flex-shrink-0 transition-all text-[10px]">
-                        →
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+              {/* Row 2: One Centered Pill */}
+              <div className="flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => handleAsk("What's our unallocated spend?")}
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                >
+                  What&apos;s our unallocated spend?
+                </button>
+              </div>
             </div>
           </div>
         ) : (

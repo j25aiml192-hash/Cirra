@@ -65,7 +65,7 @@ export function HeroTile() {
                 href="/dashboard"
                 className="inline-flex items-center justify-center text-[14px] sm:text-[15px] font-medium text-[#0062E0] bg-white/80 hover:bg-[#EBF3FE] border border-[#BCD9FC] px-6 sm:px-7 py-2.5 sm:py-3 rounded-full apple-btn-active transition-all backdrop-blur-sm shadow-sm"
               >
-                Explore Live Demo
+                Get Started
               </Link>
             </div>
           </div>
