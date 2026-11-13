@@ -5,9 +5,9 @@
 @tailwind utilities;
 
 :root {
-  --bg-gradient-start: #E8F1FC;
-  --bg-gradient-mid:   #F1F6FD;
-  --bg-gradient-end:   #F8FAFE;
+  --bg-gradient-start: #DBE6E7;
+  --bg-gradient-mid:   #DBE6E7;
+  --bg-gradient-end:   #DBE6E7;
 
   --card-bg:           #FFFFFF;
   --card-border:       #D6E4F5;
@@ -36,9 +36,13 @@
   --shadow-card-hover: 0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 70px;
+}
+
 body {
-  background: linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
-  background-attachment: fixed;
+  background: #DBE6E7;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
   color: var(--text-primary);
   min-height: 100vh;
@@ -46,14 +50,16 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background ambient radial gradients for subtle realistic depth */
+/* Background canvas for all pages */
 .cirra-bg-canvas {
-  background: 
-    radial-gradient(circle at 12% 8%, rgba(186, 218, 255, 0.5) 0%, transparent 45%),
-    radial-gradient(circle at 88% 18%, rgba(200, 227, 255, 0.4) 0%, transparent 40%),
-    radial-gradient(circle at 50% 65%, rgba(215, 235, 255, 0.3) 0%, transparent 50%),
-    linear-gradient(180deg, #E8F1FC 0%, #F1F6FD 30%, #F8FAFE 100%);
+  background-color: #FAFAFC;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.95)),
+    url('/bg-pattern.svg');
+  background-repeat: repeat;
+  background-size: auto, 160px 100px;
   background-attachment: fixed;
+  min-height: 100vh;
 }
 
 /* Premium Card with subtle blue border and soft depth */
@@ -70,12 +76,13 @@ body {
   box-shadow: 0 8px 30px -6px rgba(12, 48, 96, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
-/* Frosted sidebar */
+/* Terminal Tree sidebar */
 .cirra-sidebar {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-right: 1px solid #D6E4F5;
+  background: #F8FAFC;
+  border-right: 1px solid #CBD5E1;
+  color: #0F172A;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.06);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 /* Metric typography */
@@ -84,3 +91,162 @@ body {
   letter-spacing: -0.03em;
   color: #0A192F;
 }
+
+/* Animated Moving Border & Floating Motion */
+@keyframes border-beam-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-border-beam {
+  animation: border-beam-spin 3.2s linear infinite;
+}
+
+.animate-float-gentle {
+  animation: float-gentle 3.5s ease-in-out infinite;
+}
+
+/* Continuous Marquee & Border Shimmer Animations */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes border-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 24s linear infinite;
+}
+
+.animate-border-shimmer {
+  animation: border-shimmer 3.5s linear infinite;
+}
+
+/* Rhythmic Flashing Line Animation */
+@keyframes flash-line {
+  0%, 100% {
+    opacity: 0;
+    filter: drop-shadow(0 0 0px rgba(56, 189, 248, 0));
+  }
+  45%, 55% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.95)) drop-shadow(0 0 18px rgba(0, 98, 224, 0.8));
+  }
+}
+
+.animate-flash-line {
+  animation: flash-line 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Floating Cloud Continuous Drifting Animations for Action Center (Edge to Card) */
+@keyframes float-cloud-left-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(46px, -12px) rotate(0.8deg);
+  }
+  50% {
+    transform: translate(94px, -4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(46px, 10px) rotate(-0.8deg);
+  }
+}
+
+@keyframes float-cloud-left-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(48px, 14px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translate(98px, 4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(48px, -10px) rotate(0.8deg);
+  }
+}
+
+@keyframes float-cloud-right-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(-46px, -12px) rotate(-0.8deg);
+  }
+  50% {
+    transform: translate(-94px, -4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-46px, 10px) rotate(0.8deg);
+  }
+}
+
+@keyframes float-cloud-right-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) rotate(0deg);
+  }
+  25% {
+    transform: translate(-48px, 14px) rotate(0.8deg);
+  }
+  50% {
+    transform: translate(-98px, 4px) rotate(0deg);
+  }
+  75% {
+    transform: translate(-48px, -10px) rotate(-0.8deg);
+  }
+}
+
+.animate-float-cloud-left-1 {
+  animation: float-cloud-left-1 6.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-float-cloud-left-2 {
+  animation: float-cloud-left-2 7.5s ease-in-out infinite 0.8s;
+  will-change: transform;
+}
+
+.animate-float-cloud-right-1 {
+  animation: float-cloud-right-1 6.8s ease-in-out infinite 0.4s;
+  will-change: transform;
+}
+
+.animate-float-cloud-right-2 {
+  animation: float-cloud-right-2 7.2s ease-in-out infinite 1.2s;
+  will-change: transform;
+}
+
+
+
+
+
+

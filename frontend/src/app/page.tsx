@@ -1,6 +1,6 @@
 import { AppleGlobalNav } from "@/components/landing/AppleGlobalNav";
 import { HeroTile } from "@/components/landing/HeroTile";
-import { SentinelTile } from "@/components/landing/SentinelTile";
+import { AboutTile } from "@/components/landing/AboutTile";
 import { ActionCenterTile } from "@/components/landing/ActionCenterTile";
 import { SavingsLedgerTile } from "@/components/landing/SavingsLedgerTile";
 import { ConnectorsGrid } from "@/components/landing/ConnectorsGrid";
@@ -16,10 +16,10 @@ export default function HomePage() {
       <AppleGlobalNav />
 
       {/* 2. Alternating Full-Bleed Product Tiles */}
-      <main className="flex-1">
+      <main className="flex-1 relative z-10 shadow-2xl">
         <HeroTile />
 
-        <SentinelTile />
+        <AboutTile />
 
         <ActionCenterTile />
 

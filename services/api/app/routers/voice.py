@@ -3,7 +3,7 @@ import logging
 import uuid
 from datetime import datetime, timezone, timedelta
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -54,6 +54,7 @@ class VoiceCallResponse(BaseModel):
 
 
 async def resolve_auth_context(
+    request: Request,
     x_internal_service: Optional[str] = Header(None, alias="X-Internal-Service"),
     auth_credentials=Depends(security_bearer),
 ) -> Dict[str, Any]:
@@ -61,10 +62,11 @@ async def resolve_auth_context(
     Supports both internal service authentication and user Bearer JWT authentication.
     """
     if x_internal_service and x_internal_service == settings.INTERNAL_SERVICE_KEY:
-        return {"auth_type": "internal", "role": "admin"}
+        tenant_id = request.headers.get("x-tenant-id") or request.headers.get("X-Tenant-ID") or "00000000-0000-0000-0000-000000000001"
+        return {"auth_type": "internal", "role": "admin", "tenant_id": tenant_id}
 
     if auth_credentials:
-        claims = await get_current_user_claims(auth_credentials)
+        claims = await get_current_user_claims(request, auth_credentials)
         return {"auth_type": "user", "claims": claims, "tenant_id": claims.get("tenant_id")}
 
     raise HTTPException(

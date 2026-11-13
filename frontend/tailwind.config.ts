@@ -9,7 +9,14 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        page: "#F0F5FD",
+        foreground: "#0A192F",
+        background: "#050B18",
+        border: "rgba(255, 255, 255, 0.12)",
+        primary: "#0A192F",
+        secondary: "#38BDF8",
+        destructive: "#EF4444",
+        "muted-foreground": "#475569",
+        page: "#DBE6E7",
         surface: "#FFFFFF",
         navy: {
           DEFAULT: "#0A192F",
@@ -64,6 +71,20 @@ const config: Config = {
         card: "0 4px 24px -4px rgba(12, 48, 96, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02)",
         "card-hover": "0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03)",
         soft: "0 2px 10px -2px rgba(12, 45, 90, 0.04)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },
