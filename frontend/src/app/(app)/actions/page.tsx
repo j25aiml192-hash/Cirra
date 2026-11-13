@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useActions, type ActionItem, type DryRunResult } from "@/hooks/useActions";
 import { useAuthStore } from "@/store/authStore";
+import { Topbar } from "@/components/layout/Topbar";
 
 export default function ActionsPage() {
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
@@ -88,7 +89,9 @@ export default function ActionsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 text-[#0A192F]">
+    <div>
+      <Topbar />
+      <div className="p-8 max-w-7xl mx-auto space-y-6 text-[#0A192F]">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -324,6 +327,7 @@ export default function ActionsPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }
 

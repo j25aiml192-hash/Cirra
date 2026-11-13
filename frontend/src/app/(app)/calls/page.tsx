@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useVoiceCalls, type VoiceCallItem } from "@/hooks/useVoiceCalls";
+import { Topbar } from "@/components/layout/Topbar";
 
 export default function VoiceCallsPage() {
   const [selectedCallId, setSelectedCallId] = React.useState<string | null>(null);
@@ -69,7 +70,9 @@ export default function VoiceCallsPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6 text-[#0A192F]">
+    <div>
+      <Topbar />
+      <div className="p-8 max-w-7xl mx-auto space-y-6 text-[#0A192F]">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -344,6 +347,7 @@ export default function VoiceCallsPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }
 
