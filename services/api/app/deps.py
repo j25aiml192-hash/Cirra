@@ -58,11 +58,14 @@ async def get_db_tenant_session(
     """Database session with SET LOCAL app.tenant_id = :tenant_id inside an open transaction."""
     tenant_id = claims["tenant_id"]
     async with async_session_factory() as session:
-        async with session.begin():
-            await session.execute(
-                text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
-                {"tenant_id": tenant_id}
-            )
+        try:
+            async with session.begin():
+                await session.execute(
+                    text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+                    {"tenant_id": tenant_id}
+                )
+                yield session
+        except Exception:
             yield session
 
 

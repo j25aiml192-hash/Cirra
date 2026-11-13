@@ -20,7 +20,12 @@ export async function apiFetch<T>(
     useAuthStore.getState?.()?.token ||
     (typeof window !== "undefined" ? localStorage.getItem("cirra_token") : null);
 
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  // In browser, use relative path so Next.js rewrites (/api/v1/:path*) proxy requests to FastAPI,
+  // completely avoiding browser cross-origin (CORS) preflight blocks.
+  const baseUrl =
+    typeof window !== "undefined"
+      ? ""
+      : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000");
   const url = path.startsWith("http")
     ? path
     : `${baseUrl}${path.startsWith("/") ? "" : "/"}${path}`;
@@ -35,8 +40,42 @@ export async function apiFetch<T>(
   });
 
   if (!res.ok) {
+    let errorData: any = null;
     const errorText = await res.text();
-    throw new Error(errorText || `API request failed with status ${res.status}`);
+    try {
+      errorData = JSON.parse(errorText);
+    } catch {
+      errorData = { message: errorText };
+    }
+
+    if (typeof window !== "undefined") {
+      const currentPath = window.location.pathname;
+
+      // Handle onboarding required
+      if (
+        (res.status === 403 && (errorData?.error === "onboarding_required" || errorData?.detail?.error === "onboarding_required")) ||
+        errorData?.redirect === "/onboarding"
+      ) {
+        if (!currentPath.startsWith("/onboarding")) {
+          window.location.href = "/onboarding";
+        }
+      }
+
+      // Handle unauthorized
+      if (res.status === 401 && !currentPath.startsWith("/login") && !currentPath.startsWith("/signup")) {
+        useAuthStore.getState?.()?.logout?.();
+        window.location.href = "/login";
+      }
+    }
+
+    const message =
+      errorData?.message ||
+      errorData?.detail?.message ||
+      errorData?.detail ||
+      errorText ||
+      `API request failed with status ${res.status}`;
+
+    throw new ApiError(res.status, typeof message === "string" ? message : JSON.stringify(message), errorData);
   }
 
   if (res.status === 204) {

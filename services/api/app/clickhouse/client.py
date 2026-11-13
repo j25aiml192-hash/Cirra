@@ -2,6 +2,9 @@ import os
 import logging
 from typing import Any, Dict, List, Optional
 import clickhouse_connect
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger("cirra.api.clickhouse")
 
@@ -21,11 +24,13 @@ class ClickHouseReaderClient:
         password: Optional[str] = None,
         database: Optional[str] = None,
     ):
-        self.host = host or os.getenv("CLICKHOUSE_HOST", "localhost")
-        self.port = port or int(os.getenv("CLICKHOUSE_PORT", "8123"))
-        # Read-only user only for API
-        self.user = user or os.getenv("CLICKHOUSE_USER", "cirra_reader")
-        self.password = password or os.getenv("CLICKHOUSE_PASSWORD", "reader_secure_password")
+        raw_host = host or os.getenv("CLICKHOUSE_HOST", "localhost")
+        self.secure = "https://" in raw_host or str(os.getenv("CLICKHOUSE_PORT", "8123")) == "8443"
+        self.host = raw_host.replace("https://", "").replace("http://", "").strip().rstrip("/")
+        self.port = port or int(os.getenv("CLICKHOUSE_PORT", "8443" if self.secure else "8123"))
+        # Read-only user or default user
+        self.user = user or os.getenv("CLICKHOUSE_READER_USER") or os.getenv("CLICKHOUSE_USER", "default")
+        self.password = password or os.getenv("CLICKHOUSE_READER_PASSWORD") or os.getenv("CLICKHOUSE_PASSWORD", "")
         self.database = database or os.getenv("CLICKHOUSE_DATABASE", "cirra")
         self._client = None
 
@@ -37,6 +42,7 @@ class ClickHouseReaderClient:
                 username=self.user,
                 password=self.password,
                 database=self.database,
+                secure=self.secure,
                 connect_timeout=10,
                 send_receive_timeout=30,
             )
@@ -50,10 +56,14 @@ class ClickHouseReaderClient:
         if "tenant_id" not in parameters:
             raise ValueError("Security violation: ClickHouse query must include 'tenant_id' parameter.")
 
-        client = self.get_client()
-        result = client.query(query, parameters=parameters)
-        cols = result.column_names
-        return [dict(zip(cols, row)) for row in result.result_rows]
+        try:
+            client = self.get_client()
+            result = client.query(query, parameters=parameters)
+            cols = result.column_names
+            return [dict(zip(cols, row)) for row in result.result_rows]
+        except Exception as e:
+            logger.warning("ClickHouse query error: %s", e)
+            return []
 
 
 # Default singleton client instance for API

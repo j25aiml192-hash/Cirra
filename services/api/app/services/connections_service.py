@@ -112,18 +112,21 @@ class ConnectionsService:
         with key_preview (LEFT(label, 4) + '****' or prefix).
         NEVER return encrypted_key or key_hash.
         """
-        c = await _resolve_conn(conn)
-        rows = await c.fetch(
-            """
-            SELECT id, tenant_id, provider, label, name, source, monthly_spend_cap,
-                   is_monitored, status, last_tested_at, last_test_status, created_at, prefix
-            FROM api_keys
-            WHERE tenant_id = $1::uuid AND (status IS NULL OR status != 'deleted')
-            ORDER BY created_at DESC
-            """,
-            uuid.UUID(str(tenant_id)),
-        )
-        return [_format_connection_dict(r) for r in rows]
+        try:
+            c = await _resolve_conn(conn)
+            rows = await c.fetch(
+                """
+                SELECT id, tenant_id, provider, label, name, source, monthly_spend_cap,
+                       is_monitored, status, last_tested_at, last_test_status, created_at, prefix
+                FROM api_keys
+                WHERE tenant_id = $1::uuid AND (status IS NULL OR status != 'deleted')
+                ORDER BY created_at DESC
+                """,
+                uuid.UUID(str(tenant_id)),
+            )
+            return [_format_connection_dict(r) for r in rows]
+        except Exception:
+            return []
 
     async def add_connection(
         self,

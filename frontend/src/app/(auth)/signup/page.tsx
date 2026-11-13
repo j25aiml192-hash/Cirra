@@ -16,6 +16,7 @@ export default function SignupPage() {
   const [password, setPassword] = React.useState("");
   const [organization, setOrganization] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,9 +64,12 @@ export default function SignupPage() {
             tenantId: sessionRes.tenant_id,
           });
         }
+        router.push("/onboarding");
+      } else {
+        setSuccessMsg(
+          `Verification email sent to ${email}! Please check your inbox and confirm your address, then sign in.`
+        );
       }
-
-      router.push("/onboarding");
     } catch (err: any) {
       setError(err?.message || "Failed to create account. Please try again.");
     } finally {
@@ -95,6 +99,18 @@ export default function SignupPage() {
           <CardDescription>Start cutting wasted cloud & AI spend in under 5 minutes</CardDescription>
         </CardHeader>
         <CardContent>
+          {successMsg && (
+            <div className="mb-4 rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 flex flex-col gap-2">
+              <span>{successMsg}</span>
+              <Link
+                href="/login"
+                className="font-bold underline text-emerald-900"
+              >
+                Proceed to Sign In &rarr;
+              </Link>
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 rounded-lg bg-red-50 border border-red-200 p-3 text-xs text-red-700">
               {error}

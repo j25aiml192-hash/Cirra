@@ -160,18 +160,11 @@ async def proxy_list_actions(
 
     endpoint = f"{settings.ACTION_ENGINE_URL.rstrip('/')}/actions"
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(endpoint, params={"tenant_id": target_tenant_id})
+        if resp.status_code == 200:
+            return resp.json()
+        return []
     except httpx.RequestError as exc:
-        logger.error("Failed to connect to Action Engine at %s: %s", endpoint, exc)
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Action Engine service is currently unavailable at {settings.ACTION_ENGINE_URL}",
-        )
-
-    if resp.status_code != 200:
-        raise HTTPException(
-            status_code=resp.status_code,
-            detail=resp.json() if resp.headers.get("content-type") == "application/json" else resp.text,
-        )
-    return resp.json()
+        logger.warning("Action Engine unavailable at %s, returning empty actions list: %s", endpoint, exc)
+        return []

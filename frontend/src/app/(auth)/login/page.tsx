@@ -29,12 +29,22 @@ export default function LoginPage() {
       });
 
       if (authError) {
+        if (
+          authError.message?.toLowerCase().includes("email not confirmed") ||
+          authError.message?.toLowerCase().includes("not confirmed")
+        ) {
+          throw new Error(
+            "Your email address has not been confirmed yet. Please check your inbox (and spam folder) for the Supabase confirmation link and click it before logging in."
+          );
+        }
         throw authError;
       }
 
       const accessToken = data.session?.access_token;
       if (!accessToken) {
-        throw new Error("No access token returned from Supabase authentication");
+        throw new Error(
+          "No active session found. Please verify your email via the confirmation link sent to your inbox."
+        );
       }
 
       const sessionRes = await apiFetch<{

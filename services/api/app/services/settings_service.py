@@ -112,19 +112,22 @@ class SettingsService:
         SELECT from tenant_settings. If not found, return defaults.
         Mask webhook URLs (first 20 chars + '...').
         """
-        c = await _resolve_conn(conn)
-        row = await c.fetchrow(
-            """
-            SELECT id, tenant_id, alert_phone, slack_webhook_url, ntfy_topic_url,
-                   spend_cap_usd, quiet_hours_start, quiet_hours_end, quiet_hours_tz,
-                   voice_calls_enabled, slack_enabled, ntfy_enabled, email_enabled,
-                   alert_email, min_severity_voice, min_severity_slack,
-                   anomaly_cooldown_minutes, created_at, updated_at
-            FROM tenant_settings
-            WHERE tenant_id = $1::uuid
-            """,
-            uuid.UUID(str(tenant_id)),
-        )
+        try:
+            c = await _resolve_conn(conn)
+            row = await c.fetchrow(
+                """
+                SELECT id, tenant_id, alert_phone, slack_webhook_url, ntfy_topic_url,
+                       spend_cap_usd, quiet_hours_start, quiet_hours_end, quiet_hours_tz,
+                       voice_calls_enabled, slack_enabled, ntfy_enabled, email_enabled,
+                       alert_email, min_severity_voice, min_severity_slack,
+                       anomaly_cooldown_minutes, created_at, updated_at
+                FROM tenant_settings
+                WHERE tenant_id = $1::uuid
+                """,
+                uuid.UUID(str(tenant_id)),
+            )
+        except Exception:
+            row = None
 
         if not row:
             data = dict(DEFAULT_SETTINGS)

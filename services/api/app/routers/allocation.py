@@ -65,8 +65,11 @@ async def list_allocation_rules(
         .where(AllocationRule.tenant_id == tenant_id)
         .order_by(AllocationRule.priority.asc())
     )
-    result = await db.execute(stmt)
-    rules = result.scalars().all()
+    try:
+        result = await db.execute(stmt)
+        rules = result.scalars().all()
+    except Exception:
+        rules = []
 
     return [
         AllocationRuleResponse(

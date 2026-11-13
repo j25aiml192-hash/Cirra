@@ -74,6 +74,28 @@ export function useConnections() {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async ({
+      id,
+      label,
+      monthly_spend_cap,
+      is_monitored,
+    }: {
+      id: string;
+      label?: string;
+      monthly_spend_cap?: number;
+      is_monitored?: boolean;
+    }) => {
+      return apiFetch<any>(`/api/v1/connections/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ label, monthly_spend_cap, is_monitored }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+  });
+
   return {
     data: query.data,
     isLoading: query.isLoading,
@@ -83,6 +105,9 @@ export function useConnections() {
     createConnection: createMutation.mutateAsync,
     isCreating: createMutation.isPending,
     createMutation,
+    updateConnection: updateMutation.mutateAsync,
+    isUpdating: updateMutation.isPending,
+    updateMutation,
     deleteConnection: deleteMutation.mutateAsync,
     isDeleting: deleteMutation.isPending,
     deleteMutation,

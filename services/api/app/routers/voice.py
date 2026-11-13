@@ -190,25 +190,28 @@ async def list_calls(
         # Default to tenant zero if internal service without explicit tenant
         tenant_id = "00000000-0000-0000-0000-000000000001"
 
-    async with async_session_factory() as session:
-        await session.execute(text("SELECT set_config('app.tenant_id', :tenant_id, true)"), {"tenant_id": tenant_id})
-        res = await session.execute(
-            text(
-                """
-                SELECT id::text, tenant_id::text, anomaly_id::text, call_sid, provider, status,
-                       to_number, from_number, duration_seconds, turn_count, transcript,
-                       anomaly_snapshot, outcome, initiated_at, answered_at, ended_at,
-                       retry_count, error_message
-                FROM voice_calls
-                WHERE tenant_id = CAST(:tenant_id AS UUID)
-                ORDER BY initiated_at DESC
-                LIMIT :limit
-                """
-            ),
-            {"tenant_id": tenant_id, "limit": limit},
-        )
-        rows = [dict(r) for r in res.mappings().all()]
-        return rows
+    try:
+        async with async_session_factory() as session:
+            await session.execute(text("SELECT set_config('app.tenant_id', :tenant_id, true)"), {"tenant_id": tenant_id})
+            res = await session.execute(
+                text(
+                    """
+                    SELECT id::text, tenant_id::text, anomaly_id::text, call_sid, provider, status,
+                           to_number, from_number, duration_seconds, turn_count, transcript,
+                           anomaly_snapshot, outcome, initiated_at, answered_at, ended_at,
+                           retry_count, error_message
+                    FROM voice_calls
+                    WHERE tenant_id = CAST(:tenant_id AS UUID)
+                    ORDER BY initiated_at DESC
+                    LIMIT :limit
+                    """
+                ),
+                {"tenant_id": tenant_id, "limit": limit},
+            )
+            rows = [dict(r) for r in res.mappings().all()]
+            return rows
+    except Exception:
+        return []
 
 
 @router.get("/calls/{call_id}", response_model=VoiceCallResponse)

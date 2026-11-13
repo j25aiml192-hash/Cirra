@@ -48,18 +48,21 @@ async def proxy_list_savings(
 
     endpoint = f"{settings.ACTION_ENGINE_URL.rstrip('/')}/savings"
     try:
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(endpoint, params={"tenant_id": target_tenant_id})
+        if resp.status_code == 200:
+            return resp.json()
+        return {
+            "identified_total": 0.0,
+            "approved_total": 0.0,
+            "verified_total": 0.0,
+            "entries": [],
+        }
     except httpx.RequestError as exc:
-        logger.error("Failed to connect to Action Engine at %s: %s", endpoint, exc)
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Action Engine service is currently unavailable at {settings.ACTION_ENGINE_URL}",
-        )
-
-    if resp.status_code != 200:
-        raise HTTPException(
-            status_code=resp.status_code,
-            detail=resp.json() if resp.headers.get("content-type") == "application/json" else resp.text,
-        )
-    return resp.json()
+        logger.warning("Action Engine unavailable at %s, returning default savings: %s", endpoint, exc)
+        return {
+            "identified_total": 0.0,
+            "approved_total": 0.0,
+            "verified_total": 0.0,
+            "entries": [],
+        }

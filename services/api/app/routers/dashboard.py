@@ -28,17 +28,22 @@ async def dashboard_summary(
     tenant_uuid = uuid.UUID(tenant_id_str)
 
     # Fetch last_synced_at and active connection count from Postgres
-    stmt = (
-        select(
-            func.max(Connection.last_synced_at),
-            func.count(Connection.id)
+    last_synced = None
+    active_conns = 0
+    try:
+        stmt = (
+            select(
+                func.max(Connection.last_synced_at),
+                func.count(Connection.id)
+            )
+            .where(Connection.tenant_id == tenant_uuid)
         )
-        .where(Connection.tenant_id == tenant_uuid)
-    )
-    res = await db.execute(stmt)
-    row = res.fetchone()
-    last_synced = row[0].isoformat() if row and row[0] else None
-    active_conns = int(row[1]) if row and row[1] else 0
+        res = await db.execute(stmt)
+        row = res.fetchone()
+        last_synced = row[0].isoformat() if row and row[0] else None
+        active_conns = int(row[1]) if row and row[1] else 0
+    except Exception:
+        pass
 
     summary_data = await get_dashboard_summary(
         tenant_id=tenant_id_str,

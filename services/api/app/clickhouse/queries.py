@@ -536,14 +536,20 @@ def get_ai_spend(
     elif valid_group_by == "customer":
         group_col = "tags['customer']"
 
+    model_sel = "group_val AS model" if group_col == "model" else "any(model) AS model"
+    provider_sel = "group_val AS provider" if group_col == "provider" else "any(provider) AS provider"
+    api_key_sel = "group_val AS api_key_id" if group_col == "api_key_id" else "any(api_key_id) AS api_key_id"
+    team_sel = "group_val AS team" if group_col == "tags['team']" else "any(tags['team']) AS team"
+    customer_sel = "group_val AS customer" if group_col == "tags['customer']" else "any(tags['customer']) AS customer"
+
     items_query = f"""
     SELECT
         {group_col} AS group_val,
-        any(model) AS model,
-        any(provider) AS provider,
-        any(api_key_id) AS api_key_id,
-        any(tags['team']) AS team,
-        any(tags['customer']) AS customer,
+        {model_sel},
+        {provider_sel},
+        {api_key_sel},
+        {team_sel},
+        {customer_sel},
         sum(input_tokens) AS input_tokens,
         sum(output_tokens) AS output_tokens,
         sum(cached_tokens) AS cached_tokens,

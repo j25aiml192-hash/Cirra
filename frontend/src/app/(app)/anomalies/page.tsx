@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { AlertTriangle, ShieldAlert, CheckCircle, Clock, Eye, X } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { StatCard } from "@/components/ui/StatCard";
@@ -259,14 +260,13 @@ export default function AnomaliesPage() {
                     >
                       Dismiss
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAnomaly(anomaly)}
+                    <Link
+                      href={`/anomalies/${anomaly.id}`}
                       className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#0062E0] text-white hover:bg-[#0052C2] transition-colors flex items-center gap-1.5 shadow-sm"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>View Details</span>
-                    </button>
+                    </Link>
                   </div>
                 </div>
               );

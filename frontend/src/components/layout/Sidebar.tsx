@@ -11,6 +11,8 @@ import {
   GitBranch,
   AlertTriangle,
   TrendingDown,
+  CheckSquare,
+  Phone,
   Plug,
   Users,
   Settings,
@@ -203,25 +205,25 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
             label="Savings"
             collapsed={collapsed}
           />
+          <NavItem
+            href="/actions"
+            icon={<CheckSquare className="w-4 h-4" />}
+            label="Actions"
+            collapsed={collapsed}
+          />
+          <NavItem
+            href="/calls"
+            icon={<Phone className="w-4 h-4" />}
+            label="Voice Calls"
+            collapsed={collapsed}
+          />
         </div>
       </div>
 
       {/* Bottom: Settings & User Profile */}
       <div className="p-3 border-t border-[#D6E4F5] space-y-1 bg-white/60">
         <NavItem
-          href="/settings/connections"
-          icon={<Plug className="w-4 h-4" />}
-          label="Connections"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/settings/team"
-          icon={<Users className="w-4 h-4" />}
-          label="Team"
-          collapsed={collapsed}
-        />
-        <NavItem
-          href="/settings/profile"
+          href="/settings"
           icon={<Settings className="w-4 h-4" />}
           label="Settings"
           collapsed={collapsed}

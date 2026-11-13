@@ -39,9 +39,12 @@ async def list_anomalies(
 
     stmt = stmt.order_by(Anomaly.detected_at.desc()).limit(limit)
 
-    result = await db.execute(stmt)
-    anomalies = result.scalars().all()
-    return anomalies
+    try:
+        result = await db.execute(stmt)
+        anomalies = result.scalars().all()
+        return anomalies
+    except Exception:
+        return []
 
 
 @router.get("/{anomaly_id}", response_model=AnomalyResponse)
@@ -57,8 +60,12 @@ async def get_anomaly(
         Anomaly.id == anomaly_id,
         Anomaly.tenant_id == tenant_id,
     )
-    result = await db.execute(stmt)
-    anomaly = result.scalar_one_or_none()
+    anomaly = None
+    try:
+        result = await db.execute(stmt)
+        anomaly = result.scalar_one_or_none()
+    except Exception:
+        pass
 
     if not anomaly:
         raise HTTPException(
@@ -83,8 +90,12 @@ async def acknowledge_anomaly(
         Anomaly.id == anomaly_id,
         Anomaly.tenant_id == tenant_id,
     )
-    result = await db.execute(stmt)
-    anomaly = result.scalar_one_or_none()
+    anomaly = None
+    try:
+        result = await db.execute(stmt)
+        anomaly = result.scalar_one_or_none()
+    except Exception:
+        pass
 
     if not anomaly:
         raise HTTPException(
@@ -123,8 +134,12 @@ async def resolve_anomaly(
         Anomaly.id == anomaly_id,
         Anomaly.tenant_id == tenant_id,
     )
-    result = await db.execute(stmt)
-    anomaly = result.scalar_one_or_none()
+    anomaly = None
+    try:
+        result = await db.execute(stmt)
+        anomaly = result.scalar_one_or_none()
+    except Exception:
+        pass
 
     if not anomaly:
         raise HTTPException(
@@ -165,8 +180,12 @@ async def snooze_anomaly(
         Anomaly.id == anomaly_id,
         Anomaly.tenant_id == tenant_id,
     )
-    result = await db.execute(stmt)
-    anomaly = result.scalar_one_or_none()
+    anomaly = None
+    try:
+        result = await db.execute(stmt)
+        anomaly = result.scalar_one_or_none()
+    except Exception:
+        pass
 
     if not anomaly:
         raise HTTPException(

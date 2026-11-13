@@ -1,6 +1,11 @@
+import os
 from typing import List, Optional
+from dotenv import load_dotenv
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Load .env into os.environ for non-pydantic libraries (clickhouse_connect, etc.)
+load_dotenv(override=False)
 
 
 class Settings(BaseSettings):
