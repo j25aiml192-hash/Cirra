@@ -244,10 +244,13 @@ export default function AnomalyDetailPage() {
           <Sparkles className="w-4 h-4" /> AI Incident Analysis & Explanation
         </div>
         <p className="text-sm text-slate-700 leading-relaxed bg-[#F8FAFD] p-4 rounded-xl border border-[#E2E8F0]">
-          {anomaly.explanation ||
-            `Cirra Sentinel identified a ${deviation.toFixed(1)}% spike on ${anomaly.provider.toUpperCase()} at ${new Date(
-              anomaly.detected_at
-            ).toLocaleTimeString()}. The actual cost ($${actual.toFixed(2)}) significantly exceeds the established baseline ($${baseline.toFixed(2)}), triggering autonomous alerts.`}
+          {typeof anomaly.explanation === "string"
+            ? anomaly.explanation
+            : typeof anomaly.explanation === "object" && anomaly.explanation !== null
+            ? (anomaly.explanation.summary || anomaly.explanation.root_cause || JSON.stringify(anomaly.explanation))
+            : `Cirra Sentinel identified a ${deviation.toFixed(1)}% spike on ${(anomaly.provider || "").toUpperCase()} at ${new Date(
+                anomaly.detected_at
+              ).toLocaleTimeString()}. The actual cost ($${actual.toFixed(2)}) significantly exceeds the established baseline ($${baseline.toFixed(2)}), triggering autonomous alerts.`}
         </p>
       </div>
 

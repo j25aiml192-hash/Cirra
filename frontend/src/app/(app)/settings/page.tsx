@@ -380,7 +380,7 @@ export default function UnifiedSettingsPage() {
                         <td className="py-3 px-4">
                           <span
                             className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                              c.status === "active" || c.status === "connected"
+                              (c.status as string) === "active" || c.status === "connected"
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : "bg-slate-100 text-slate-600 border-slate-200"
                             }`}

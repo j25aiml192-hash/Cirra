@@ -95,6 +95,7 @@ export interface Connection {
   last_synced_at?: string;
   errorMessage?: string;
   created_at?: string;
+  credentials?: Record<string, any>;
 }
 
 export interface AllocationRule {
