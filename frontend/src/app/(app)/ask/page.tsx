@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Send, Bot, Terminal } from "lucide-react";
+import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp } from "lucide-react";
 import { useAskCirra } from "@/hooks/useAsk";
 import { formatNumber } from "@/lib/utils";
 
@@ -18,18 +18,44 @@ interface ChatEntry {
 export default function AskPage() {
   const [messages, setMessages] = useState<ChatEntry[]>([]);
   const [input, setInput] = useState("");
-  const askCirra = useAskCirra();
+  const [citationEnabled, setCitationEnabled] = useState(true);
+  const [writingStyle, setWritingStyle] = useState("Writing Styles");
+  const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
+  const [attachedFile, setAttachedFile] = useState<string | null>(null);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const styleMenuRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatBottomRef = useRef<HTMLDivElement>(null);
+
+  const askCirra = useAskCirra();
 
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, askCirra.isPending]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (styleMenuRef.current && !styleMenuRef.current.contains(e.target as Node)) {
+        setStyleDropdownOpen(false);
+      }
+    };
+    if (styleDropdownOpen) {
+      document.addEventListener("mousedown", handleOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, [styleDropdownOpen]);
 
   const handleAsk = async (queryText?: string) => {
     const q = (queryText ?? input).trim();
     if (!q || askCirra.isPending) return;
 
     setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
     try {
       const res = await askCirra.mutateAsync(q);
       setMessages((prev) => [
@@ -57,6 +83,26 @@ export default function AskPage() {
     }
   };
 
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 180)}px`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleAsk();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAttachedFile(file.name);
+    }
+  };
+
   return (
     <div className="relative min-h-[calc(100vh-2rem)] flex flex-col justify-between overflow-hidden select-none">
       {/* =========================================================================
@@ -71,7 +117,7 @@ export default function AskPage() {
 
         {/* ==================== FLUFFY CUMULUS CLOUDS ==================== */}
 
-        {/* Cloud 1: Top-Left Floating Cumulus (Shape A) */}
+        {/* Cloud 1: Top-Left Floating Cumulus */}
         <div className="absolute top-6 -left-12 w-[340px] sm:w-[420px] h-[160px] animate-float-cloud-left-1 opacity-95">
           <svg viewBox="0 0 320 120" className="w-full h-full drop-shadow-[0_16px_30px_rgba(10,50,90,0.08)] drop-shadow-[0_4px_10px_rgba(2,132,199,0.06)]">
             <defs>
@@ -90,7 +136,7 @@ export default function AskPage() {
           </svg>
         </div>
 
-        {/* Cloud 2: Top-Right Billowing Cloud (Shape B) */}
+        {/* Cloud 2: Top-Right Billowing Cloud */}
         <div className="absolute top-12 -right-16 w-[360px] sm:w-[460px] h-[180px] animate-float-cloud-right-1 opacity-90">
           <svg viewBox="0 0 280 130" className="w-full h-full drop-shadow-[0_18px_34px_rgba(10,50,90,0.09)] drop-shadow-[0_6px_12px_rgba(2,132,199,0.07)]">
             <defs>
@@ -109,7 +155,7 @@ export default function AskPage() {
           </svg>
         </div>
 
-        {/* Cloud 3: Mid-Left Soft Cumulus (Shape C) */}
+        {/* Cloud 3: Mid-Left Soft Cumulus */}
         <div className="absolute top-[42%] -left-20 w-[380px] sm:w-[480px] h-[170px] animate-float-cloud-left-2 opacity-85">
           <svg viewBox="0 0 360 110" className="w-full h-full drop-shadow-[0_14px_28px_rgba(10,50,90,0.07)]">
             <defs>
@@ -128,7 +174,7 @@ export default function AskPage() {
           </svg>
         </div>
 
-        {/* Cloud 4: Mid-Right Drifting Fluffy Cloud (Shape A reversed) */}
+        {/* Cloud 4: Mid-Right Drifting Fluffy Cloud */}
         <div className="absolute top-[38%] -right-14 w-[320px] sm:w-[400px] h-[150px] animate-float-cloud-right-2 opacity-80 scale-x-[-1]">
           <svg viewBox="0 0 320 120" className="w-full h-full drop-shadow-[0_12px_24px_rgba(10,50,90,0.06)]">
             <path
@@ -140,7 +186,7 @@ export default function AskPage() {
           </svg>
         </div>
 
-        {/* Ambient Soft Smoke / Cloud Wisps Layer (Connecting the scene) */}
+        {/* Ambient Soft Smoke / Cloud Wisps Layer */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-t from-white/70 via-white/40 to-transparent rounded-full blur-[90px]" />
 
         {/* Horizon Bed of White Fluffy Clouds across the Bottom */}
@@ -168,13 +214,17 @@ export default function AskPage() {
       {/* =========================================================================
           MAIN INTERACTIVE CHAT CONTENT
          ========================================================================= */}
-      <div className="relative z-10 max-w-3xl w-full mx-auto px-4 pt-8 pb-16 flex flex-col flex-1">
+      <div className="relative z-10 max-w-3xl w-full mx-auto px-4 pt-6 pb-12 flex flex-col flex-1">
         {messages.length === 0 ? (
-          /* Empty State: Centered Sparkle, Clear Heading, & Frosted Query Pills */
-          <div className="flex flex-col items-center gap-4 text-center my-auto py-6">
-            {/* Sparkle Icon Squircle in Frosted Glass */}
-            <div className="w-16 h-16 rounded-2xl bg-white/90 backdrop-blur-xl border border-white shadow-[0_12px_32px_rgba(2,106,162,0.14)] flex items-center justify-center transition-transform hover:scale-105 duration-200">
-              <Sparkles className="w-8 h-8 text-[#0284C7]" />
+          /* Empty State: Cirra Logo in Frosted Squircle, Clear Heading, & Frosted Query Pills */
+          <div className="flex flex-col items-center gap-4 text-center my-auto py-4">
+            {/* CIRRA LOGO replacing the sparkle icon */}
+            <div className="w-20 h-20 rounded-2xl bg-white/95 backdrop-blur-xl border border-white shadow-[0_12px_32px_rgba(2,106,162,0.16)] p-3 flex items-center justify-center transition-transform hover:scale-105 duration-200">
+              <img
+                src="/cirra-logo.png"
+                alt="Cirra Logo"
+                className="w-full h-full object-contain rounded-xl shadow-xs"
+              />
             </div>
 
             {/* Main Heading with Crisp Stripe-Grade Contrast */}
@@ -188,7 +238,7 @@ export default function AskPage() {
             </p>
 
             {/* Quick Prompt Pills in Pristine Frosted Cloud Glass */}
-            <div className="flex flex-wrap gap-2.5 justify-center mt-3 max-w-xl">
+            <div className="flex flex-wrap gap-2.5 justify-center mt-2 max-w-xl">
               {[
                 "Why did OpenAI spend spike last week?",
                 "Which team spent most on EC2 this month?",
@@ -207,7 +257,7 @@ export default function AskPage() {
           </div>
         ) : (
           /* Response Area: User & Assistant Bubble Stream */
-          <div className="flex-1 space-y-6 overflow-y-auto pr-2 pb-6 max-h-[calc(100vh-220px)]">
+          <div className="flex-1 space-y-6 overflow-y-auto pr-2 pb-6 max-h-[calc(100vh-250px)]">
             {messages.map((entry, index) => {
               const sqlQuery = entry.sql_used;
               const rowCount = entry.row_count ?? (entry.rows ? entry.rows.length : 0);
@@ -231,8 +281,8 @@ export default function AskPage() {
                   <div className="flex justify-start">
                     <div className="bg-white/95 backdrop-blur-2xl border border-white rounded-[18px_18px_18px_4px] p-5 max-w-[92%] shadow-[0_12px_40px_rgba(2,106,162,0.12)] space-y-3.5 w-full sm:w-auto text-[#0A192F]">
                       <div className="flex items-center justify-between text-xs pb-2 border-b border-[#E2E8F0] gap-4">
-                        <div className="flex items-center gap-1.5 font-bold text-[#0F1E36]">
-                          <Bot className="w-4 h-4 text-[#0062E0]" />
+                        <div className="flex items-center gap-2 font-bold text-[#0F1E36]">
+                          <img src="/cirra-logo.png" alt="Cirra" className="w-4 h-4 object-contain rounded" />
                           <span>Cirra Verified Response</span>
                         </div>
                         {entry.execution_time_ms !== undefined && (
@@ -246,13 +296,13 @@ export default function AskPage() {
                         {entry.answer}
                       </p>
 
-                      {/* Collapsible SQL Code Block */}
-                      {sqlQuery && (
-                        <details className="group rounded-xl bg-[#F4F9FE] border border-[#BAE6FD] p-3 text-xs text-[#0F1E36] font-mono overflow-x-auto">
+                      {/* Collapsible SQL Code Block (respecting Citation toggle) */}
+                      {citationEnabled && sqlQuery && (
+                        <details open className="group rounded-xl bg-[#F4F9FE] border border-[#BAE6FD] p-3 text-xs text-[#0F1E36] font-mono overflow-x-auto">
                           <summary className="flex items-center justify-between cursor-pointer list-none text-[#026AA2] text-[11px] font-sans font-semibold select-none">
                             <div className="flex items-center gap-2">
                               <Terminal className="w-3.5 h-3.5" />
-                              <span>Executed SQL against FOCUS ClickHouse</span>
+                              <span>ClickHouse FOCUS SQL Citation</span>
                             </div>
                             <span className="text-[10px] text-[#0062E0] group-open:hidden">
                               Show SQL
@@ -333,29 +383,142 @@ export default function AskPage() {
           </div>
         )}
 
-        {/* Input Bar: Pristine Frosted Glass Pill */}
-        <div className="w-full mt-auto relative pt-4">
-          <div className="relative flex items-center">
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleAsk()}
-              placeholder="Ask anything about your spend..."
-              className="w-full h-14 pl-6 pr-16 rounded-full bg-white/95 backdrop-blur-2xl
-                         border-2 border-white text-[#0A192F] placeholder:text-[#64748B] text-sm sm:text-base
-                         shadow-[0_12px_40px_rgba(2,106,162,0.12)]
-                         focus:outline-none focus:border-[#0062E0] focus:ring-4 focus:ring-[#38BDF8]/40 transition-all font-medium"
-            />
-            <button
-              type="button"
-              onClick={() => handleAsk()}
-              disabled={!input.trim() || askCirra.isPending}
-              className="absolute right-2.5 w-10 h-10 rounded-full bg-gradient-to-tr from-[#0062E0] to-[#0284C7] hover:from-[#0052C2] hover:to-[#0369A1] flex items-center justify-center disabled:opacity-40 transition-all shadow-md hover:scale-105 active:scale-95 cursor-pointer"
-            >
-              <Send className="w-4 h-4 text-white" />
-            </button>
+        {/* =========================================================================
+            PROMPT INPUT CARD (MATCHING USER'S IMAGE SPECIFICATION)
+           ========================================================================= */}
+        <div className="w-full mt-auto relative pt-2">
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {/* Frosted Modern Prompt Card */}
+          <div className="w-full rounded-[22px] bg-white/95 backdrop-blur-2xl border border-slate-200/90 shadow-[0_14px_45px_rgba(2,106,162,0.14)] p-3.5 sm:p-4 transition-all focus-within:ring-2 focus-within:ring-[#0062E0]/20 focus-within:border-[#0062E0]/40">
+            {/* Attached file tag if any */}
+            {attachedFile && (
+              <div className="mb-2 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-lg w-max">
+                <Paperclip className="w-3 h-3" />
+                <span className="truncate max-w-[200px] font-mono">{attachedFile}</span>
+                <button
+                  type="button"
+                  onClick={() => setAttachedFile(null)}
+                  className="text-blue-500 hover:text-blue-900 ml-1 font-bold"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {/* Top Text Input Row */}
+            <div className="flex items-start gap-2.5">
+              <Sparkles className="w-4 h-4 text-slate-800 mt-1 flex-shrink-0" />
+              <textarea
+                ref={textareaRef}
+                rows={1}
+                value={input}
+                onChange={handleTextareaInput}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask AI a question or make a request..."
+                className="w-full bg-transparent text-[#0A192F] placeholder:text-slate-500 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[28px] max-h-[160px]"
+              />
+            </div>
+
+            {/* Bottom Controls Toolbar */}
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 flex-wrap gap-2">
+              {/* Left Buttons: Attach & Writing Styles */}
+              <div className="flex items-center gap-2">
+                {/* Attach Button */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-8 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                  title="Attach file or logs"
+                >
+                  <Paperclip className="w-3.5 h-3.5 text-slate-600" />
+                  <span>Attach</span>
+                </button>
+
+                {/* Writing Styles Dropdown */}
+                <div className="relative" ref={styleMenuRef}>
+                  <button
+                    type="button"
+                    onClick={() => setStyleDropdownOpen((prev) => !prev)}
+                    className="h-8 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                  >
+                    <span>{writingStyle}</span>
+                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {styleDropdownOpen && (
+                    <div className="absolute left-0 bottom-10 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+                      {[
+                        "Writing Styles",
+                        "Deterministic FOCUS SQL",
+                        "Executive Summary",
+                        "Anomaly Root-Cause",
+                      ].map((style) => (
+                        <button
+                          key={style}
+                          type="button"
+                          onClick={() => {
+                            setWritingStyle(style);
+                            setStyleDropdownOpen(false);
+                          }}
+                          className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
+                            writingStyle === style
+                              ? "bg-blue-50 text-[#0062E0] font-bold"
+                              : "text-slate-700 hover:bg-slate-50"
+                          }`}
+                        >
+                          {style}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Controls: Citation Toggle Switch & Send Button */}
+              <div className="flex items-center gap-3">
+                {/* Citation Toggle */}
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  {/* Purple Pill Toggle Switch matching Image 2 */}
+                  <div
+                    onClick={() => setCitationEnabled((p) => !p)}
+                    className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer flex items-center ${
+                      citationEnabled ? "bg-[#7C3AED]" : "bg-slate-300"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
+                        citationEnabled ? "translate-x-4" : "translate-x-0"
+                      }`}
+                    >
+                      {citationEnabled && <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]" />}
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-slate-700">Citation</span>
+                </label>
+
+                {/* Dark Send Button with Up Arrow matching Image 2 */}
+                <button
+                  type="button"
+                  onClick={() => handleAsk()}
+                  disabled={!input.trim() || askCirra.isPending}
+                  className="w-8 h-8 rounded-lg bg-[#0F172A] hover:bg-black disabled:opacity-40 text-white flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                  title="Send request"
+                >
+                  <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                </button>
+              </div>
+            </div>
           </div>
-          <p className="text-center text-xs font-semibold text-[#335372] mt-2.5 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
+
+          <p className="text-center text-xs font-semibold text-[#335372] mt-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
             Every number is sourced from your database — no hallucinated figures
           </p>
         </div>
