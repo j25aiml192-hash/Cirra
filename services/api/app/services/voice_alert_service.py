@@ -3,9 +3,9 @@ import logging
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 import asyncpg
-from groq import AsyncGroq
+import httpx
 
 from app.core.config import settings
 from app.integrations.telephony.base import CallRequest, CallResult
@@ -14,6 +14,14 @@ from app.integrations.telephony.twilio_provider import TwilioProvider
 from app.services.twiml_builder import TwiMLBuilder
 
 logger = logging.getLogger("cirra.voice.alert_service")
+
+FALLBACK_CALL_SCRIPT = (
+    "Alert. This is an automated message from Cirra. "
+    "A cost anomaly has been detected on your account. "
+    "Please check your Cirra dashboard immediately "
+    "for details and required actions. "
+    "This call was generated automatically."
+)
 
 CIRRA_CALL_SYSTEM_PROMPT = """You are Cirra's AI monitoring assistant on a phone call with a user whose API key is behaving abnormally.
 
@@ -45,12 +53,68 @@ def _decimal_default(obj):
     return str(obj)
 
 
+async def _call_llm_router(
+    messages: list[dict],
+    temperature: float = 0.3,
+    max_tokens: int = 300,
+) -> str:
+    """
+    Calls investigator's LLM router for call script
+    generation. Falls back to empty string on failure
+    so voice calls still fire even if LLM is down.
+    """
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                "http://localhost:8001/llm/complete",
+                headers={"X-Internal-Service": "internal-dev-key"},
+                json={
+                    "task_type": "call_script_generation",
+                    "messages": messages,
+                    "temperature": temperature,
+                    "max_tokens": max_tokens,
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("text") or data.get("content") or ""
+    except Exception as e:
+        logger.warning(
+            f"LLM router unavailable for call script: {e}. "
+            f"Using fallback script."
+        )
+        return ""  # caller uses hardcoded fallback
+
+
+async def generate_call_script(anomaly: dict) -> str:
+    """
+    Generate call script for voice alerts. Uses LLM router with fallback script.
+    """
+    provider = anomaly.get("provider", "cloud")
+    dev_pct = anomaly.get("deviation_pct", 300)
+    messages = [
+        {
+            "role": "system",
+            "content": "You generate urgent but professional AI voice call scripts. Under 60 words.",
+        },
+        {
+            "role": "user",
+            "content": f"Generate a call script for: {provider} spend is {dev_pct}% above baseline. Possible runaway process. Immediate action needed.",
+        },
+    ]
+    script = await _call_llm_router(messages, temperature=0.3, max_tokens=150)
+    if not script.strip():
+        script = FALLBACK_CALL_SCRIPT
+    return script
+
+
 async def generate_llm_explanation(
-  anomaly: dict, 
-  groq_client: Optional[AsyncGroq]
+    anomaly: dict, 
+    groq_client: Optional[Any] = None,
 ) -> str:
     """
     Generates a 1-2 sentence natural language explanation of the anomaly.
+    Routes through the unified LLM router with fallback.
     """
     provider = anomaly.get("provider", "cloud")
     dev_pct = anomaly.get("deviation_pct", 300)
@@ -61,23 +125,14 @@ async def generate_llm_explanation(
         "Do not include dollar amounts (they are stated separately). Be direct and factual. Max 30 words."
     )
 
-    if groq_client:
-        for model_name in ("qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"):
-            try:
-                resp = await groq_client.chat.completions.create(
-                    model=model_name,
-                    messages=[
-                        {"role": "system", "content": "You are Cirra's cloud cost analyst. Return only the requested explanation."},
-                        {"role": "user", "content": prompt},
-                    ],
-                    temperature=0.2,
-                    max_tokens=60,
-                )
-                text = resp.choices[0].message.content
-                if text:
-                    return text.strip().replace('"', "")
-            except Exception as e:
-                logger.warning(f"Groq explanation failed with model {model_name}: {e}")
+    messages = [
+        {"role": "system", "content": "You are Cirra's cloud cost analyst. Return only the requested explanation."},
+        {"role": "user", "content": prompt},
+    ]
+
+    script = await _call_llm_router(messages, temperature=0.2, max_tokens=60)
+    if script and script.strip():
+        return script.strip().replace('"', "")
 
     # Fallback deterministic explanation
     return f"This sudden {dev_pct}% surge on {provider} deviates drastically from your 7-day median baseline and indicates possible credential leakage or runaway loops."
@@ -87,11 +142,11 @@ async def generate_turn_response(
     speech_result: str,
     anomaly_snapshot: dict,
     turn_history: list,
-    groq_client: Optional[AsyncGroq],
+    groq_client: Optional[Any] = None,
 ) -> Tuple[str, str]:
     """
-    Sends user speech transcript to Groq with full context.
-    Returns (groq_reply_text, detected_outcome).
+    Sends user speech transcript to LLM router with full context.
+    Returns (reply_text, detected_outcome).
     """
     text_clean = (speech_result or "").strip().lower()
 
@@ -124,20 +179,9 @@ async def generate_turn_response(
 
     messages.append({"role": "user", "content": speech_result})
 
-    if groq_client:
-        for model_name in ("qwen/qwen3.8-27b", "llama-3.3-70b-versatile", "llama-3.1-8b-instant"):
-            try:
-                resp = await groq_client.chat.completions.create(
-                    model=model_name,
-                    messages=messages,
-                    temperature=0.3,
-                    max_tokens=100,
-                )
-                reply = resp.choices[0].message.content
-                if reply:
-                    return reply.strip(), outcome
-            except Exception as e:
-                logger.warning(f"Groq turn response failed on {model_name}: {e}")
+    reply = await _call_llm_router(messages, temperature=0.3, max_tokens=100)
+    if reply and reply.strip():
+        return reply.strip(), outcome
 
     # Fallback conversational responses
     if outcome == "acknowledged":
@@ -165,10 +209,7 @@ class VoiceAlertService:
             self.provider = MockTelephonyProvider()
 
         self.twiml = TwiMLBuilder(webhook_base_url=settings.PUBLIC_WEBHOOK_URL)
-        if settings.GROQ_API_KEY:
-            self.groq = AsyncGroq(api_key=settings.GROQ_API_KEY)
-        else:
-            self.groq = None
+        self.groq = None
 
     async def trigger_alert_call(
         self,
