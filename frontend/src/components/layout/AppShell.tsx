@@ -44,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div
         className={`min-h-screen ${
           isAskPage
-            ? "bg-gradient-to-b from-[#0284C7] via-[#38BDF8] via-40% via-[#7DD3FC] to-[#E0F2FE] text-[#0A192F]"
+            ? "bg-gradient-to-b from-[#C2E3FD] via-[#DBEFFF] via-40% via-[#ECF6FE] to-[#F6FBFF] text-[#0A192F]"
             : "cirra-bg-canvas text-[#0F1E36]"
         }`}
       >
