@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
   Eye,
@@ -9,6 +9,10 @@ import {
   Cpu,
   ShieldCheck,
   Filter,
+  Loader2,
+  CheckCircle2,
+  RotateCcw,
+  ExternalLink,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useDashboard } from "@/hooks/useDashboard";
@@ -19,6 +23,7 @@ import { SpendBarChart } from "@/components/charts/SpendBarChart";
 import { TopServicesTable } from "@/components/ui/TopServicesTable";
 import { TopAiKeysCard } from "@/components/ui/TopAiKeysCard";
 import { formatNumber } from "@/lib/utils";
+import { apiFetch } from "@/lib/api";
 import type { Period } from "@/types";
 
 export default function DashboardPage() {
@@ -297,6 +302,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Live Scenario Engine Panel */}
+      <LiveScenarioPanel />
+
       {/* 4. Top AI Keys Section */}
       <div>
         <TopAiKeysCard data={data?.topAiKeys ?? []} loading={isLoading} />
@@ -305,3 +313,525 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+function formatRelativeTime(dateString?: string): string {
+  if (!dateString) return "just now";
+  try {
+    const diffSec = Math.max(0, Math.floor((Date.now() - new Date(dateString).getTime()) / 1000));
+    if (diffSec < 10) return "just now";
+    if (diffSec < 60) return `${diffSec}s ago`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin}m ago`;
+    const diffHr = Math.floor(diffMin / 60);
+    return `${diffHr}h ago`;
+  } catch {
+    return "just now";
+  }
+}
+
+interface DemoScenarioAnomaly {
+  id?: string;
+  keyId: string;
+  name: string;
+  scenario: "leaked-key" | "runaway-process" | "bill-spike";
+  provider: string;
+  severity: "Catastrophic" | "Critical" | "High";
+  status: "DETECTING..." | "DETECTED";
+  channels: string[];
+  prUrl?: string | null;
+  detectedAt?: string;
+}
+
+function LiveScenarioPanel() {
+  const [loadingScenario, setLoadingScenario] = useState<string | null>(null);
+  const [successScenario, setSuccessScenario] = useState<string | null>(null);
+  const [isCleaning, setIsCleaning] = useState(false);
+  const [pendingScenarios, setPendingScenarios] = useState<Record<string, number>>({});
+  const [detectedItems, setDetectedItems] = useState<DemoScenarioAnomaly[]>([]);
+
+  const pollData = useCallback(async () => {
+    try {
+      let anomData: any[] = [];
+      try {
+        anomData = await apiFetch<any[]>("/api/v1/anomalies?limit=50");
+      } catch {
+        try {
+          const token = typeof window !== "undefined" ? localStorage.getItem("cirra_token") || localStorage.getItem("token") : null;
+          const res = await fetch("/api/v1/anomalies?limit=50", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (res.ok) anomData = await res.json();
+        } catch {}
+      }
+      if (!Array.isArray(anomData)) anomData = [];
+
+      let actionsData: any[] = [];
+      try {
+        actionsData = await apiFetch<any[]>("/api/v1/actions?tenant_id=00000000-0000-0000-0000-000000000001");
+      } catch {
+        try {
+          const token = typeof window !== "undefined" ? localStorage.getItem("cirra_token") || localStorage.getItem("token") : null;
+          const res = await fetch("/api/v1/actions?tenant_id=00000000-0000-0000-0000-000000000001", {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          });
+          if (res.ok) actionsData = await res.json();
+        } catch {}
+      }
+      if (!Array.isArray(actionsData)) actionsData = [];
+
+      const prUrlByAnomalyId: Record<string, string> = {};
+      const prUrlByKeyId: Record<string, string> = {};
+      if (Array.isArray(actionsData)) {
+        for (const act of actionsData) {
+          if (act.github_pr_url) {
+            if (act.anomaly_id) prUrlByAnomalyId[act.anomaly_id] = act.github_pr_url;
+            if (act.target_key_id) prUrlByKeyId[act.target_key_id] = act.github_pr_url;
+          }
+        }
+      }
+
+      const items: DemoScenarioAnomaly[] = [];
+      const detectedKeyIds = new Set<string>();
+
+      if (Array.isArray(anomData)) {
+        for (const a of anomData) {
+          const isLeaked =
+            a.api_key_id === "demo_leaked_key_exposed_001" ||
+            a.series_key?.includes("demo_leaked_key_exposed_001");
+          const isRunaway =
+            a.api_key_id === "demo_key_sk_prod_001" ||
+            a.series_key?.includes("demo_key_sk_prod_001");
+          const isVercel =
+            a.api_key_id === "demo_vercel_key_001" ||
+            a.series_key?.includes("demo_vercel_key_001") ||
+            a.provider === "vercel";
+
+          if (isLeaked || isRunaway || isVercel) {
+            const keyId = isLeaked
+              ? "demo_leaked_key_exposed_001"
+              : isRunaway
+              ? "demo_key_sk_prod_001"
+              : "demo_vercel_key_001";
+
+            if (detectedKeyIds.has(keyId)) continue;
+            detectedKeyIds.add(keyId);
+
+            const pr = prUrlByAnomalyId[a.id] || prUrlByKeyId[keyId] || null;
+
+            if (isLeaked) {
+              items.push({
+                id: a.id,
+                keyId,
+                name: "API Key Leaked (Dormant Key)",
+                scenario: "leaked-key",
+                provider: "openai",
+                severity: "Catastrophic",
+                status: "DETECTED",
+                channels: ["Slack", "ntfy", "GitHub PR", "Voice Call", "Kill Switch"],
+                prUrl: pr,
+                detectedAt: a.detected_at || a.created_at,
+              });
+            } else if (isRunaway) {
+              items.push({
+                id: a.id,
+                keyId,
+                name: "Runaway Process (341% Spend Spike)",
+                scenario: "runaway-process",
+                provider: "openai",
+                severity: "Critical",
+                status: "DETECTED",
+                channels: ["Slack", "GitHub PR", "Voice Call"],
+                prUrl: pr,
+                detectedAt: a.detected_at || a.created_at,
+              });
+            } else if (isVercel) {
+              items.push({
+                id: a.id,
+                keyId,
+                name: "Vercel Bill Surge (2x Overnight)",
+                scenario: "bill-spike",
+                provider: "vercel",
+                severity: "High",
+                status: "DETECTED",
+                channels: ["Slack", "ntfy", "GitHub PR"],
+                prUrl: pr,
+                detectedAt: a.detected_at || a.created_at,
+              });
+            }
+          }
+        }
+      }
+
+      // Check for pending scenarios that haven't appeared in anomalies yet (within 90s)
+      const now = Date.now();
+      for (const [scen, ts] of Object.entries(pendingScenarios)) {
+        if (now - ts > 90000) continue;
+        if (scen === "leaked-key" && !detectedKeyIds.has("demo_leaked_key_exposed_001")) {
+          items.unshift({
+            keyId: "demo_leaked_key_exposed_001",
+            name: "API Key Leaked (Dormant Key)",
+            scenario: "leaked-key",
+            provider: "openai",
+            severity: "Catastrophic",
+            status: "DETECTING...",
+            channels: ["Slack", "ntfy", "GitHub PR", "Voice Call", "Kill Switch"],
+            detectedAt: new Date(ts).toISOString(),
+          });
+        } else if (scen === "runaway-process" && !detectedKeyIds.has("demo_key_sk_prod_001")) {
+          items.unshift({
+            keyId: "demo_key_sk_prod_001",
+            name: "Runaway Process (341% Spend Spike)",
+            scenario: "runaway-process",
+            provider: "openai",
+            severity: "Critical",
+            status: "DETECTING...",
+            channels: ["Slack", "GitHub PR", "Voice Call"],
+            detectedAt: new Date(ts).toISOString(),
+          });
+        } else if (scen === "bill-spike" && !detectedKeyIds.has("demo_vercel_key_001")) {
+          items.unshift({
+            keyId: "demo_vercel_key_001",
+            name: "Vercel Bill Surge (2x Overnight)",
+            scenario: "bill-spike",
+            provider: "vercel",
+            severity: "High",
+            status: "DETECTING...",
+            channels: ["Slack", "ntfy", "GitHub PR"],
+            detectedAt: new Date(ts).toISOString(),
+          });
+        }
+      }
+
+      setDetectedItems(items);
+    } catch (e) {
+      console.error("LiveScenarioPanel polling error:", e);
+    }
+  }, [pendingScenarios]);
+
+  useEffect(() => {
+    pollData();
+    const interval = setInterval(pollData, 5000);
+    return () => clearInterval(interval);
+  }, [pollData]);
+
+  const handleInject = async (scenario: "leaked-key" | "runaway-process" | "bill-spike") => {
+    setLoadingScenario(scenario);
+    setSuccessScenario(null);
+    setPendingScenarios((prev) => ({ ...prev, [scenario]: Date.now() }));
+
+    try {
+      let res: Response | null = null;
+      try {
+        res = await fetch(`/api/v1/inject/${scenario}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch {}
+
+      if (!res || !res.ok) {
+        res = await fetch(`http://localhost:8000/inject/${scenario}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      if (res && res.ok) {
+        setSuccessScenario(scenario);
+        setTimeout(() => {
+          setSuccessScenario((curr) => (curr === scenario ? null : curr));
+        }, 5000);
+      }
+    } catch (e) {
+      console.error(`Failed to inject scenario ${scenario}:`, e);
+    } finally {
+      setLoadingScenario(null);
+      setTimeout(pollData, 1200);
+    }
+  };
+
+  const handleReset = async () => {
+    setIsCleaning(true);
+    try {
+      let res: Response | null = null;
+      try {
+        res = await fetch(`/api/v1/inject/cleanup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch {}
+
+      if (!res || !res.ok) {
+        res = await fetch(`http://localhost:8000/inject/cleanup`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      setPendingScenarios({});
+      setSuccessScenario(null);
+    } catch (e) {
+      console.error("Cleanup error:", e);
+    } finally {
+      setIsCleaning(false);
+      setTimeout(pollData, 600);
+    }
+  };
+
+  return (
+    <div className="cirra-card p-6 border border-[#D6E4F5] bg-white rounded-2xl shadow-sm space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EBF2FA] pb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg font-bold text-[#0A192F] tracking-tight">
+              🔥 Live Scenario Engine
+            </h2>
+            <span className="text-[10px] font-bold text-[#7C3AED] bg-purple-50 border border-purple-200 px-2.5 py-0.5 rounded-full">
+              Interactive Incident Simulator
+            </span>
+          </div>
+          <p className="text-xs text-[#5A6E85] mt-1">
+            Simulate real infrastructure incidents by injecting synthetic anomalies directly into ClickHouse. Sentinel picks them up organically and triggers live alert routing.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleReset}
+          disabled={isCleaning}
+          className="self-start sm:self-center px-3.5 py-1.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 active:scale-95 shadow-sm"
+          title="Clean up injected demo data from ClickHouse and Postgres"
+        >
+          <RotateCcw className={`w-3.5 h-3.5 ${isCleaning ? "animate-spin" : ""}`} />
+          <span>{isCleaning ? "Resetting..." : "🔁 Reset All"}</span>
+        </button>
+      </div>
+
+      {/* 3 Scenario Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Scenario 1: Leaked Key */}
+        <div className="border border-purple-200/80 hover:border-purple-400 bg-purple-50/30 hover:bg-purple-50/60 rounded-xl p-4 flex flex-col justify-between transition-all">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#7C3AED] flex items-center gap-1.5">
+                <span>💀</span> Inject Leaked Key
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-100 text-[#7C3AED] border border-purple-300">
+                CATASTROPHIC
+              </span>
+            </div>
+            <p className="text-xs text-[#5A6E85]">
+              847 requests • All channels fire
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => handleInject("leaked-key")}
+              disabled={loadingScenario === "leaked-key"}
+              className="w-full py-2 px-3 rounded-lg bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-75 active:scale-95"
+            >
+              {loadingScenario === "leaked-key" ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Injecting & detecting...</span>
+                </>
+              ) : successScenario === "leaked-key" ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Injected. Sentinel detecting...</span>
+                </>
+              ) : (
+                <span>Inject Leaked Key</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Scenario 2: Runaway Process */}
+        <div className="border border-red-200/80 hover:border-red-400 bg-red-50/30 hover:bg-red-50/60 rounded-xl p-4 flex flex-col justify-between transition-all">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#DC2626] flex items-center gap-1.5">
+                <span>🔄</span> Runaway Process
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-red-100 text-[#DC2626] border border-red-300">
+                CRITICAL
+              </span>
+            </div>
+            <p className="text-xs text-[#5A6E85]">
+              GPT-4o • 341% spike • Voice call
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => handleInject("runaway-process")}
+              disabled={loadingScenario === "runaway-process"}
+              className="w-full py-2 px-3 rounded-lg bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-75 active:scale-95"
+            >
+              {loadingScenario === "runaway-process" ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Injecting & detecting...</span>
+                </>
+              ) : successScenario === "runaway-process" ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Injected. Sentinel detecting...</span>
+                </>
+              ) : (
+                <span>Inject Runaway Process</span>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Scenario 3: Bill Spike */}
+        <div className="border border-orange-200/80 hover:border-orange-400 bg-orange-50/30 hover:bg-orange-50/60 rounded-xl p-4 flex flex-col justify-between transition-all">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-extrabold text-[#EA580C] flex items-center gap-1.5">
+                <span>📈</span> Bill Spike
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-100 text-[#EA580C] border border-orange-300">
+                HIGH
+              </span>
+            </div>
+            <p className="text-xs text-[#5A6E85]">
+              Vercel • 2x overnight • Slack + PR
+            </p>
+          </div>
+
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => handleInject("bill-spike")}
+              disabled={loadingScenario === "bill-spike"}
+              className="w-full py-2 px-3 rounded-lg bg-[#EA580C] hover:bg-[#C2410C] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-75 active:scale-95"
+            >
+              {loadingScenario === "bill-spike" ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Injecting & detecting...</span>
+                </>
+              ) : successScenario === "bill-spike" ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Injected. Sentinel detecting...</span>
+                </>
+              ) : (
+                <span>Inject Bill Spike</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Feed Panel */}
+      <div className="rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] p-4 space-y-3">
+        <div className="flex items-center justify-between border-b border-[#E2EDF9] pb-2.5">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-extrabold text-[#0A192F] uppercase tracking-wider">
+              Live Detection Feed
+            </span>
+          </div>
+          <span className="text-[11px] font-medium text-[#7E93AB]">
+            Auto-refreshes every 5s
+          </span>
+        </div>
+
+        {detectedItems.length === 0 ? (
+          <div className="py-7 text-center text-xs text-[#7E93AB] font-medium">
+            No active scenarios. Click a button above to simulate an incident.
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {detectedItems.map((item, idx) => (
+              <div
+                key={item.id || item.keyId + idx}
+                className="bg-white border border-[#D6E4F5] rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+              >
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Status Badge */}
+                    {item.status === "DETECTING..." ? (
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-600 animate-ping" />
+                        DETECTING...
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                        DETECTED
+                      </span>
+                    )}
+
+                    {/* Severity Badge */}
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold uppercase border ${
+                        item.severity === "Catastrophic"
+                          ? "bg-purple-100 text-[#7C3AED] border-purple-300"
+                          : item.severity === "Critical"
+                          ? "bg-red-100 text-[#DC2626] border-red-300"
+                          : "bg-orange-100 text-[#EA580C] border-orange-300"
+                      }`}
+                    >
+                      {item.severity}
+                    </span>
+
+                    <span className="text-xs font-bold text-[#0A192F]">
+                      {item.name}
+                    </span>
+
+                    <span className="text-[11px] font-mono text-[#7E93AB]">
+                      ({item.keyId})
+                    </span>
+                  </div>
+
+                  {/* Channels Fired Badges */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                    <span className="text-[11px] font-semibold text-[#7E93AB] mr-1">
+                      Channels fired:
+                    </span>
+                    {item.channels.map((ch) => (
+                      <span
+                        key={ch}
+                        className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-[#F0F5FD] text-[#0A192F] border border-[#D6E4F5]"
+                      >
+                        {ch}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 sm:self-center">
+                  {/* GitHub PR link if created */}
+                  {item.prUrl && (
+                    <a
+                      href={item.prUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 transition-colors"
+                      title="Inspect GitHub Pull Request"
+                    >
+                      <span>View PR</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+
+                  <span className="text-[11px] text-[#7E93AB] font-medium whitespace-nowrap">
+                    {formatRelativeTime(item.detectedAt)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+

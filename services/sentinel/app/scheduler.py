@@ -8,12 +8,102 @@ from app.config import settings
 from app.detector import AnomalyDetector
 from app.explainer import explain_anomaly
 from app.db import get_db_pool, fetch_active_tenants, write_anomaly, ensure_db_constraints
-from app.alerts import dispatch_alert
+from app.alerts import dispatch_alert, dispatch_tiered_alert
 
 logger = logging.getLogger("cirra.sentinel.scheduler")
 
 scheduler: Optional[AsyncIOScheduler] = None
 detector = AnomalyDetector()
+
+
+async def run_detection_for_tenant(
+    tenant_id: str = "00000000-0000-0000-0000-000000000001",
+) -> dict:
+    """
+    On-demand or scheduled detection cycle for a single tenant.
+    Pulls recent spend from ClickHouse (last 24h), compares against
+    each key's 7-day baseline, creates anomalies, and calls
+    dispatch_tiered_alert() across all alert channels.
+    """
+    logger.info(f"Running detection cycle for tenant {tenant_id}...")
+    total_flagged = 0
+    flagged_series = []
+
+    try:
+        pool = await get_db_pool()
+        async with pool.acquire() as conn:
+            await ensure_db_constraints(conn)
+
+        # 1. Leaked Key Detection
+        try:
+            leaked_anomalies = detector.detect_leaked_key(tenant_id=tenant_id)
+            for anomaly in leaked_anomalies:
+                explanation = explain_anomaly(anomaly)
+                async with pool.acquire() as conn:
+                    aid = await write_anomaly(anomaly, explanation, conn)
+                total_flagged += 1
+                flagged_series.append(anomaly.series_key)
+                logger.warning(
+                    f"CRITICAL: Detected suspicious key: tenant={tenant_id} key={anomaly.api_key_id} "
+                    f"provider={anomaly.provider}"
+                )
+                await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(aid) if aid else "")
+        except Exception as e:
+            logger.error(f"Error in leaked key detection for tenant {tenant_id}: {e}", exc_info=True)
+
+        # 2. AI Spend Detection
+        try:
+            ai_anomalies = detector.detect_ai_spend_spike(
+                tenant_id=tenant_id,
+                lookback_days=14,
+                min_dollar_impact=settings.SENTINEL_MIN_DOLLAR_IMPACT_AI,
+            )
+            for anomaly in ai_anomalies:
+                explanation = explain_anomaly(anomaly)
+                async with pool.acquire() as conn:
+                    aid = await write_anomaly(anomaly, explanation, conn)
+                total_flagged += 1
+                flagged_series.append(anomaly.series_key)
+                logger.info(
+                    f"Detected AI spend spike: tenant={tenant_id} series={anomaly.series_key} "
+                    f"severity={anomaly.severity} actual={anomaly.actual_value} baseline={anomaly.baseline_value}"
+                )
+                await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(aid) if aid else "")
+        except Exception as e:
+            logger.error(f"Error in AI spend detection for tenant {tenant_id}: {e}", exc_info=True)
+
+        # 3. Cloud Spend Detection
+        try:
+            cloud_anomalies = detector.detect_cloud_spend_spike(
+                tenant_id=tenant_id,
+                lookback_days=14,
+                min_dollar_impact=5.0,  # sensitive enough for Vercel demo spike
+            )
+            for anomaly in cloud_anomalies:
+                if anomaly.provider == "vercel" and not anomaly.api_key_id:
+                    anomaly.api_key_id = "demo_vercel_key_001"
+                explanation = explain_anomaly(anomaly)
+                async with pool.acquire() as conn:
+                    aid = await write_anomaly(anomaly, explanation, conn)
+                total_flagged += 1
+                flagged_series.append(anomaly.series_key)
+                logger.info(
+                    f"Detected Cloud spend spike: tenant={tenant_id} series={anomaly.series_key} "
+                    f"severity={anomaly.severity} actual={anomaly.actual_value} baseline={anomaly.baseline_value}"
+                )
+                await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(aid) if aid else "")
+        except Exception as e:
+            logger.error(f"Error in Cloud spend detection for tenant {tenant_id}: {e}", exc_info=True)
+
+        logger.info(f"Detection cycle completed for tenant {tenant_id}. Flagged: {total_flagged}")
+    except Exception as exc:
+        logger.error(f"Detection cycle encountered error for tenant {tenant_id}: {exc}", exc_info=True)
+
+    return {
+        "tenant_id": tenant_id,
+        "total_flagged": total_flagged,
+        "anomalies": flagged_series,
+    }
 
 
 async def run_ai_anomaly_detection() -> None:

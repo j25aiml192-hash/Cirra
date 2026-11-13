@@ -31,6 +31,7 @@ from app.routers import (
     onboarding,
     dev,
     demo,
+    inject,
 )
 
 
@@ -93,3 +94,5 @@ app.include_router(onboarding.router)
 app.include_router(dev.router, prefix=settings.API_V1_PREFIX)
 app.include_router(dev.router)
 app.include_router(demo.router, prefix="/demo")
+app.include_router(inject.router, prefix="/inject", tags=["inject"])
+app.include_router(inject.router, prefix=settings.API_V1_PREFIX + "/inject", tags=["inject"])

@@ -7,7 +7,7 @@ import sys
 from typing import Optional
 import uuid
 
-from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi import BackgroundTasks, FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel
 import uvicorn
 
@@ -25,6 +25,7 @@ from app.scheduler import (
     run_ai_anomaly_detection,
     run_cloud_anomaly_detection,
     run_leaked_key_detection,
+    run_detection_for_tenant,
 )
 
 logging.basicConfig(
@@ -73,6 +74,19 @@ app = FastAPI(
 class RunDetectionRequest(BaseModel):
     tenant_id: Optional[str] = "00000000-0000-0000-0000-000000000001"
     force: bool = False
+
+
+@app.post("/detect/run-now")
+async def detect_run_now(background_tasks: BackgroundTasks):
+    """
+    Immediately runs one detection cycle for tenant zero asynchronously on demand.
+    """
+    tenant_zero = "00000000-0000-0000-0000-000000000001"
+    background_tasks.add_task(run_detection_for_tenant, tenant_zero)
+    return {
+        "status": "detection_cycle_started",
+        "tenant_id": tenant_zero,
+    }
 
 
 @app.post("/run-detection")
