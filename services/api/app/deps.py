@@ -69,6 +69,7 @@ async def get_db_tenant_session(
 async def get_raw_db() -> AsyncGenerator[AsyncSession, None]:
     """Raw database session for public endpoints like health or initial auth."""
     async with async_session_factory() as session:
+        await session.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000000', true)"))
         yield session
 
 
