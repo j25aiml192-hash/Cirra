@@ -1,4 +1,4 @@
-from . import auth, connections, team, health, dashboard, spend, allocation, anomalies, ask, actions, savings, voice, voice_webhooks, settings, onboarding
+from . import auth, connections, team, health, dashboard, spend, allocation, anomalies, ask, actions, savings, voice, voice_webhooks, settings, onboarding, dev
 
 __all__ = [
     "auth",
@@ -16,4 +16,5 @@ __all__ = [
     "voice_webhooks",
     "settings",
     "onboarding",
+    "dev",
 ]

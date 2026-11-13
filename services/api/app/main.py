@@ -29,6 +29,7 @@ from app.routers import (
     voice_webhooks,
     settings as settings_router,
     onboarding,
+    dev,
 )
 
 
@@ -88,3 +89,5 @@ app.include_router(settings_router.router, prefix=settings.API_V1_PREFIX)
 app.include_router(settings_router.router)
 app.include_router(onboarding.router, prefix=settings.API_V1_PREFIX)
 app.include_router(onboarding.router)
+app.include_router(dev.router, prefix=settings.API_V1_PREFIX)
+app.include_router(dev.router)

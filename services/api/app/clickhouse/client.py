@@ -68,3 +68,48 @@ class ClickHouseReaderClient:
 
 # Default singleton client instance for API
 clickhouse_reader = ClickHouseReaderClient()
+
+
+class ClickHouseWriterClient:
+    """
+    Ingest / Writer ClickHouse client for services/api.
+    """
+
+    def __init__(
+        self,
+        host: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        database: Optional[str] = None,
+    ):
+        raw_host = host or os.getenv("CLICKHOUSE_HOST", "localhost")
+        self.secure = "https://" in raw_host or str(os.getenv("CLICKHOUSE_PORT", "8123")) == "8443"
+        self.host = raw_host.replace("https://", "").replace("http://", "").strip().rstrip("/")
+        self.port = port or int(os.getenv("CLICKHOUSE_PORT", "8443" if self.secure else "8123"))
+        self.user = user or os.getenv("CLICKHOUSE_INGEST_USER") or os.getenv("CLICKHOUSE_USER", "default")
+        self.password = password or os.getenv("CLICKHOUSE_INGEST_PASSWORD") or os.getenv("CLICKHOUSE_PASSWORD", "")
+        self.database = database or os.getenv("CLICKHOUSE_DATABASE", "cirra")
+        self._client = None
+
+    def get_client(self):
+        if self._client is None:
+            self._client = clickhouse_connect.get_client(
+                host=self.host,
+                port=self.port,
+                username=self.user,
+                password=self.password,
+                database=self.database,
+                secure=self.secure,
+                connect_timeout=10,
+                send_receive_timeout=30,
+            )
+        return self._client
+
+    def insert(self, table: str, data: List[List[Any]], column_names: List[str]):
+        client = self.get_client()
+        return client.insert(table, data, column_names=column_names)
+
+
+clickhouse_writer = ClickHouseWriterClient()
+

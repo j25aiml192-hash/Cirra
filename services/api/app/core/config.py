@@ -53,6 +53,9 @@ class Settings(BaseSettings):
     # Investigator Service
     INVESTIGATOR_URL: str = Field(default="http://localhost:8001", alias="INVESTIGATOR_URL")
 
+    # Sentinel Service
+    SENTINEL_URL: str = Field(default="http://localhost:8002", alias="SENTINEL_URL")
+
     # Action Engine Service
     ACTION_ENGINE_URL: str = Field(default="http://localhost:8003", alias="ACTION_ENGINE_URL")
 
