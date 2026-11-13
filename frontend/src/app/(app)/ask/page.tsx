@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp } from "lucide-react";
+import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp, TrendingUp, Server, Layers } from "lucide-react";
 import { useAskCirra } from "@/hooks/useAsk";
 import { formatNumber } from "@/lib/utils";
 
@@ -237,22 +237,59 @@ export default function AskPage() {
               Cirra queries your live multi-cloud data — every number comes from ClickHouse FOCUS, never guessed
             </p>
 
-            {/* Quick Prompt Pills in Pristine Frosted Cloud Glass */}
-            <div className="flex flex-wrap gap-2.5 justify-center mt-2 max-w-xl">
+            {/* Restructured Prompt Suggestion Cards (Balanced 3-Column Glass Grid) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full max-w-2xl mt-4 text-left">
               {[
-                "Why did OpenAI spend spike last week?",
-                "Which team spent most on EC2 this month?",
-                "What's our unallocated spend?",
-              ].map((q) => (
-                <button
-                  key={q}
-                  type="button"
-                  onClick={() => handleAsk(q)}
-                  className="text-xs sm:text-[13px] font-semibold px-4.5 py-2.5 rounded-full border border-white bg-white/90 text-[#026AA2] hover:text-[#0055D6] hover:bg-white transition-all shadow-[0_4px_16px_rgba(2,106,162,0.10)] backdrop-blur-md hover:scale-[1.03] hover:shadow-[0_8px_24px_rgba(2,106,162,0.18)] cursor-pointer"
-                >
-                  {q}
-                </button>
-              ))}
+                {
+                  category: "Anomaly Spike",
+                  icon: TrendingUp,
+                  query: "Why did OpenAI spend spike last week?",
+                  desc: "Detect LLM token surge & drift",
+                },
+                {
+                  category: "Attribution",
+                  icon: Server,
+                  query: "Which team spent most on EC2 this month?",
+                  desc: "Multi-cloud compute by team",
+                },
+                {
+                  category: "Governance",
+                  icon: Layers,
+                  query: "What's our unallocated spend?",
+                  desc: "Inspect orphan & untagged spend",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.query}
+                    type="button"
+                    onClick={() => handleAsk(item.query)}
+                    className="group relative flex flex-col justify-between p-3.5 sm:p-4 rounded-2xl bg-white/90 hover:bg-white border border-white shadow-[0_6px_20px_rgba(2,106,162,0.08)] hover:shadow-[0_12px_28px_rgba(2,106,162,0.16)] backdrop-blur-xl transition-all duration-200 hover:-translate-y-1 cursor-pointer text-left overflow-hidden"
+                  >
+                    <div>
+                      <div className="flex items-center gap-1.5 text-[#0284C7] font-bold text-[11px] uppercase tracking-wider mb-2">
+                        <span className="w-5 h-5 rounded-lg bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center flex-shrink-0 group-hover:bg-[#0062E0] group-hover:text-white transition-colors">
+                          <Icon className="w-3 h-3" />
+                        </span>
+                        <span className="truncate">{item.category}</span>
+                      </div>
+                      <p className="text-xs sm:text-[13px] font-semibold text-[#0A2540] group-hover:text-[#0062E0] transition-colors leading-snug">
+                        {item.query}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-100/80">
+                      <span className="text-[10px] text-[#64748B] font-medium truncate">
+                        {item.desc}
+                      </span>
+                      <span className="w-4 h-4 rounded-full bg-slate-100 group-hover:bg-[#0062E0] text-slate-400 group-hover:text-white flex items-center justify-center flex-shrink-0 transition-all text-[10px]">
+                        →
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         ) : (
