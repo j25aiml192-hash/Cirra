@@ -12,7 +12,7 @@ import { AppleFooter } from "@/components/landing/AppleFooter";
 
 export default function HomePage() {
   return (
-    <div className="cirra-bg-canvas min-h-screen text-[#0A192F] font-sans selection:bg-[#0062E0] selection:text-white flex flex-col">
+    <div className="min-h-screen text-[#0A192F] font-sans selection:bg-[#0062E0] selection:text-white flex flex-col">
       <AppleGlobalNav />
 
       {/* 2. Alternating Full-Bleed Product Tiles */}

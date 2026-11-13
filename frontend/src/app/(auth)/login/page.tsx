@@ -160,8 +160,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="cirra-bg-canvas flex min-h-screen items-center justify-center px-4">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center px-4 py-8">
+      <Card className="w-full max-w-md my-auto">
         <CardHeader className="text-center">
           <img
             src="/cirra-logo.png"
