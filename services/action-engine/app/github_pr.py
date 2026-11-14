@@ -42,6 +42,13 @@ class GitHubPREngine:
         self.token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
         self.repo_owner = settings.GITHUB_DEMO_REPO_OWNER
         self.repo_name = settings.GITHUB_DEMO_REPO_NAME
+        repo_str = os.getenv("GITHUB_REPO") or getattr(settings, "GITHUB_REPO", None)
+        if repo_str:
+            repo_clean = repo_str.replace("https://github.com/", "").strip("/").strip()
+            parts = repo_clean.split("/")
+            if len(parts) >= 2:
+                self.repo_owner = parts[0]
+                self.repo_name = parts[1]
         self.g = Github(self.token) if self.token else None
 
     def _ensure_client(self):
