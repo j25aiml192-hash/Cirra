@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import os
 import random
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -15,6 +16,8 @@ from app.clickhouse.client import clickhouse_reader, clickhouse_writer
 from app.core.config import settings
 from app.core.database import async_session_factory
 
+SENTINEL_URL = os.getenv("SENTINEL_URL", "http://localhost:8002")
+
 logger = logging.getLogger("cirra.api.inject")
 
 router = APIRouter(tags=["inject"])
@@ -24,7 +27,7 @@ TENANT_ZERO_ID = "00000000-0000-0000-0000-000000000001"
 
 async def _trigger_sentinel_run_now() -> bool:
     """Trigger Sentinel on-demand detection cycle."""
-    sentinel_url = getattr(settings, "SENTINEL_URL", "http://localhost:8002").rstrip("/")
+    sentinel_url = (getattr(settings, "SENTINEL_URL", None) or SENTINEL_URL).rstrip("/")
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.post(f"{sentinel_url}/detect/run-now")

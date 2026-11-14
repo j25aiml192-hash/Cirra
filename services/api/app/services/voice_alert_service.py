@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -12,6 +13,8 @@ from app.integrations.telephony.base import CallRequest, CallResult
 from app.integrations.telephony.mock_provider import MockTelephonyProvider
 from app.integrations.telephony.twilio_provider import TwilioProvider
 from app.services.twiml_builder import TwiMLBuilder
+
+INVESTIGATOR_URL = os.getenv("INVESTIGATOR_URL", "http://localhost:8001")
 
 logger = logging.getLogger("cirra.voice.alert_service")
 
@@ -66,7 +69,7 @@ async def _call_llm_router(
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
-                "http://localhost:8001/llm/complete",
+                f"{INVESTIGATOR_URL.rstrip('/')}/llm/complete",
                 headers={"X-Internal-Service": "internal-dev-key"},
                 json={
                     "task_type": "call_script_generation",

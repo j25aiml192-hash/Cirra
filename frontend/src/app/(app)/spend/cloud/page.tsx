@@ -13,13 +13,208 @@ import { useCloudSpend } from "@/hooks/useSpend";
 import { formatNumber } from "@/lib/utils";
 import type { CloudSpendRecord } from "@/types";
 
+const DEMO_CLOUD_SPEND_ITEMS: CloudSpendRecord[] = [
+  {
+    service: "Amazon Elastic Compute Cloud (EC2)",
+    provider: "AWS",
+    region: "us-east-1",
+    attributed: true,
+    spend: 24150,
+    priorPeriodSpend: 22900,
+    change: "+5.4%",
+    changePositive: false,
+    impactPercent: 28.4,
+    team: "Core Platform",
+    billedCost: 24150,
+    effectiveCost: 24150,
+  },
+  {
+    service: "Google Kubernetes Engine (GKE)",
+    provider: "GCP",
+    region: "us-central1",
+    attributed: true,
+    spend: 14850,
+    priorPeriodSpend: 15200,
+    change: "-2.3%",
+    changePositive: true,
+    impactPercent: 17.5,
+    team: "Infrastructure",
+    billedCost: 14850,
+    effectiveCost: 14850,
+  },
+  {
+    service: "Amazon Relational Database Service (RDS)",
+    provider: "AWS",
+    region: "us-east-1",
+    attributed: true,
+    spend: 12400,
+    priorPeriodSpend: 11950,
+    change: "+3.8%",
+    changePositive: false,
+    impactPercent: 14.6,
+    team: "Core Platform",
+    billedCost: 12400,
+    effectiveCost: 12400,
+  },
+  {
+    service: "Google Cloud Storage (Standard Tier)",
+    provider: "GCP",
+    region: "us-central1",
+    attributed: true,
+    spend: 7920,
+    priorPeriodSpend: 7450,
+    change: "+6.3%",
+    changePositive: false,
+    impactPercent: 9.3,
+    team: "Data Lake",
+    billedCost: 7920,
+    effectiveCost: 7920,
+  },
+  {
+    service: "Amazon Simple Storage Service (S3)",
+    provider: "AWS",
+    region: "us-east-1",
+    attributed: true,
+    spend: 6850,
+    priorPeriodSpend: 6600,
+    change: "+3.7%",
+    changePositive: false,
+    impactPercent: 8.1,
+    team: "Data Lake",
+    billedCost: 6850,
+    effectiveCost: 6850,
+  },
+  {
+    service: "BigQuery Analysis & Storage Slots",
+    provider: "GCP",
+    region: "us-central1",
+    attributed: true,
+    spend: 5200,
+    priorPeriodSpend: 4900,
+    change: "+6.1%",
+    changePositive: false,
+    impactPercent: 6.1,
+    team: "Data Lake",
+    billedCost: 5200,
+    effectiveCost: 5200,
+  },
+  {
+    service: "AWS Lambda Serverless Functions",
+    provider: "AWS",
+    region: "us-east-1",
+    attributed: true,
+    spend: 4180,
+    priorPeriodSpend: 3950,
+    change: "+5.8%",
+    changePositive: false,
+    impactPercent: 4.9,
+    team: "Core Platform",
+    billedCost: 4180,
+    effectiveCost: 4180,
+  },
+  {
+    service: "Amazon CloudFront Global Edge",
+    provider: "AWS",
+    region: "global",
+    attributed: true,
+    spend: 3650,
+    priorPeriodSpend: 3800,
+    change: "-3.9%",
+    changePositive: true,
+    impactPercent: 4.3,
+    team: "Infrastructure",
+    billedCost: 3650,
+    effectiveCost: 3650,
+  },
+  {
+    service: "AWS Application Load Balancer",
+    provider: "AWS",
+    region: "us-east-1",
+    attributed: true,
+    spend: 3000,
+    priorPeriodSpend: 2950,
+    change: "+1.7%",
+    changePositive: false,
+    impactPercent: 3.5,
+    team: "Infrastructure",
+    billedCost: 3000,
+    effectiveCost: 3000,
+  },
+  {
+    service: "Google Cloud Virtual Network & Interconnect",
+    provider: "GCP",
+    region: "us-central1",
+    attributed: false,
+    spend: 2800,
+    priorPeriodSpend: 2650,
+    change: "+5.7%",
+    changePositive: false,
+    impactPercent: 3.3,
+    team: "Unallocated",
+    billedCost: 2800,
+    effectiveCost: 2800,
+  },
+];
+
+const DEMO_DAILY_VELOCITY = [
+  { date: "2026-10-15", amount: 2750 },
+  { date: "2026-10-16", amount: 2810 },
+  { date: "2026-10-17", amount: 2690 },
+  { date: "2026-10-18", amount: 2720 },
+  { date: "2026-10-19", amount: 2850 },
+  { date: "2026-10-20", amount: 2890 },
+  { date: "2026-10-21", amount: 2910 },
+  { date: "2026-10-22", amount: 2870 },
+  { date: "2026-10-23", amount: 2820 },
+  { date: "2026-10-24", amount: 2790 },
+  { date: "2026-10-25", amount: 2830 },
+  { date: "2026-10-26", amount: 2860 },
+  { date: "2026-10-27", amount: 2880 },
+  { date: "2026-10-28", amount: 2920 },
+  { date: "2026-10-29", amount: 2950 },
+  { date: "2026-10-30", amount: 2890 },
+  { date: "2026-10-31", amount: 2840 },
+  { date: "2026-11-01", amount: 2780 },
+  { date: "2026-11-02", amount: 2830 },
+  { date: "2026-11-03", amount: 2870 },
+  { date: "2026-11-04", amount: 2890 },
+  { date: "2026-11-05", amount: 2910 },
+  { date: "2026-11-06", amount: 2930 },
+  { date: "2026-11-07", amount: 2880 },
+  { date: "2026-11-08", amount: 2850 },
+  { date: "2026-11-09", amount: 2890 },
+  { date: "2026-11-10", amount: 2940 },
+  { date: "2026-11-11", amount: 2970 },
+  { date: "2026-11-12", amount: 2990 },
+  { date: "2026-11-13", amount: 3020 },
+];
+
 export default function CloudSpendPage() {
   const { data, isLoading } = useCloudSpend();
   const [providerFilter, setProviderFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [teamFilter, setTeamFilter] = useState("all");
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => {
+    if (data?.items && data.items.length > 0) {
+      return data.items;
+    }
+    return DEMO_CLOUD_SPEND_ITEMS;
+  }, [data?.items]);
+
+  const velocityData = useMemo(() => {
+    if (data?.dailyVelocity && data.dailyVelocity.length > 0) {
+      return data.dailyVelocity;
+    }
+    return DEMO_DAILY_VELOCITY;
+  }, [data?.dailyVelocity]);
+
+  const totalCost = useMemo(() => {
+    if (data?.totalCost && data.totalCost > 0) {
+      return data.totalCost;
+    }
+    return items.reduce((sum, i) => sum + i.spend, 0);
+  }, [data?.totalCost, items]);
 
   // Filter items dynamically (hooks must be called before any conditional return)
   const filteredItems = useMemo(() => {
@@ -63,10 +258,8 @@ export default function CloudSpendPage() {
     document.body.removeChild(link);
   };
 
-  // Derive multi-cloud stacked time series from dailyVelocity & items ratio
+  // Derive multi-cloud stacked time series from velocityData & items ratio
   const multiCloudData = useMemo(() => {
-    if (!data?.dailyVelocity) return [];
-
     const awsTotal = items
       .filter((i) => i.provider === "AWS")
       .reduce((sum, i) => sum + i.spend, 0);
@@ -76,7 +269,7 @@ export default function CloudSpendPage() {
     const total = awsTotal + gcpTotal || 1;
     const awsRatio = awsTotal / total;
 
-    return data.dailyVelocity.map((pt) => {
+    return velocityData.map((pt) => {
       let aws = Math.round(pt.amount * awsRatio);
       let gcp = pt.amount - aws;
 
@@ -95,7 +288,7 @@ export default function CloudSpendPage() {
         gcp,
       };
     });
-  }, [data?.dailyVelocity, items, providerFilter]);
+  }, [velocityData, items, providerFilter]);
 
   // Table columns styled to match the reference layout in the light palette
   const cloudColumns: Column<CloudSpendRecord>[] = [
@@ -290,7 +483,7 @@ export default function CloudSpendPage() {
               {/* MTD Spend pill matching reference image top-right badge */}
               <div className="bg-[#E6F8F0] border border-[#B3ECCB] px-3.5 py-1.5 rounded-xl text-left sm:text-right w-fit">
                 <div className="text-base sm:text-lg font-bold text-[#0D824D] cirra-metric leading-tight">
-                  ${data ? formatNumber(data.totalCost) : 0}
+                  ${formatNumber(totalCost)}
                 </div>
                 <div className="text-[10px] font-semibold text-[#0D824D] uppercase tracking-wider">
                   Total Spend (MTD)
@@ -319,7 +512,7 @@ export default function CloudSpendPage() {
             </div>
 
             <SpendVelocityChart
-              data={data?.dailyVelocity ?? []}
+              data={velocityData}
               loading={isLoading}
             />
           </div>

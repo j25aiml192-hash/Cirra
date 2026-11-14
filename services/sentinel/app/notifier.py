@@ -8,6 +8,8 @@ import httpx
 from app.config import settings
 from app.detector import DetectedAnomaly
 
+INVESTIGATOR_URL = os.getenv("INVESTIGATOR_URL", "http://localhost:8001")
+
 logger = logging.getLogger("cirra.sentinel.notifier")
 
 
@@ -73,7 +75,7 @@ class AlertNotifier:
 
         # Attempt to get LLM narrative for Slack alert from Investigator router
         slack_explanation = explanation
-        investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or "http://localhost:8001").rstrip("/")
+        investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or INVESTIGATOR_URL).rstrip("/")
         try:
             async with httpx.AsyncClient(timeout=6.0) as http_client:
                 llm_resp = await http_client.post(
