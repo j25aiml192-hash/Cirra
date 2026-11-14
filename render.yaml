@@ -48,6 +48,10 @@ services:
         value: cirra
       - key: INVESTIGATOR_URL
         value: https://cirra-investigator.onrender.com
+      - key: ACTION_ENGINE_URL
+        value: https://cirra-action-engine.onrender.com
+      - key: API_BASE_URL
+        value: https://cirra-api.onrender.com
       - key: INTERNAL_SERVICE_KEY
         value: internal-dev-key
       - key: SLACK_WEBHOOK_URL
@@ -110,7 +114,13 @@ services:
         value: internal-dev-key
       - key: GROQ_API_KEY
         sync: false
-      - key: VAPI_API_KEY
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_FROM_NUMBER
+        value: "+17372508034"
+      - key: PUBLIC_WEBHOOK_URL
         sync: false
       - key: NTFY_TOPIC
         sync: false
@@ -120,3 +130,4 @@ services:
         sync: false
       - key: GITHUB_REPO
         sync: false
+
