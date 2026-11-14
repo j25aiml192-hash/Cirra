@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, Security, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database import async_session_factory
+from app.core.database import async_session_factory, is_postgres_reachable, DummyAsyncSession
 from app.core.security import decode_cirra_token
 from app.core.redis import get_redis
 from app.core.config import settings
@@ -56,18 +56,29 @@ async def get_db_tenant_session(
     claims: Dict[str, Any] = Depends(get_current_user_claims)
 ) -> AsyncGenerator[AsyncSession, None]:
     """Database session with SET LOCAL app.tenant_id = :tenant_id inside an open transaction."""
+    if not is_postgres_reachable():
+        yield DummyAsyncSession()
+        return
+
     tenant_id = claims["tenant_id"]
-    async with async_session_factory() as session:
-        async with session.begin():
-            await session.execute(
-                text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
-                {"tenant_id": tenant_id}
-            )
-            yield session
+    try:
+        async with async_session_factory() as session:
+            async with session.begin():
+                await session.execute(
+                    text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+                    {"tenant_id": tenant_id}
+                )
+                yield session
+    except Exception:
+        yield DummyAsyncSession()
 
 
 async def get_raw_db() -> AsyncGenerator[Optional[AsyncSession], None]:
     """Raw database session for public endpoints like health or initial auth."""
+    if not is_postgres_reachable():
+        yield DummyAsyncSession()
+        return
+
     try:
         async with async_session_factory() as session:
             try:
@@ -76,7 +87,7 @@ async def get_raw_db() -> AsyncGenerator[Optional[AsyncSession], None]:
                 pass
             yield session
     except Exception:
-        yield None
+        yield DummyAsyncSession()
 
 
 def require_role(min_role: str):

@@ -1,4 +1,6 @@
 import os
+import socket
+import time
 import logging
 from typing import Any, Dict, List, Optional
 import clickhouse_connect
@@ -7,6 +9,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logger = logging.getLogger("cirra.api.clickhouse")
+
+
+def can_reach_host(host: str, port: int, timeout: float = 0.2) -> bool:
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except Exception:
+        return False
 
 
 class ClickHouseReaderClient:
@@ -55,6 +65,17 @@ class ClickHouseReaderClient:
         """
         if "tenant_id" not in parameters:
             raise ValueError("Security violation: ClickHouse query must include 'tenant_id' parameter.")
+
+        now = time.time()
+        if hasattr(self, "_last_ch_check") and (now - self._last_ch_check < 5.0) and not getattr(self, "_last_ch_status", False):
+            return []
+
+        if not can_reach_host(self.host, self.port):
+            self._last_ch_check = now
+            self._last_ch_status = False
+            return []
+        self._last_ch_check = now
+        self._last_ch_status = True
 
         try:
             client = self.get_client()
