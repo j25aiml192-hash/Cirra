@@ -10,8 +10,14 @@ from app.core.config import settings
 
 Base = declarative_base()
 
+db_url = str(settings.DATABASE_URL).strip()
+if db_url.startswith("postgres://"):
+    db_url = "postgresql+asyncpg://" + db_url[len("postgres://"):]
+elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+asyncpg://"):
+    db_url = "postgresql+asyncpg://" + db_url[len("postgresql://"):]
+
 engine = create_async_engine(
-    settings.DATABASE_URL,
+    db_url,
     echo=(settings.ENVIRONMENT == "development"),
     future=True,
     pool_pre_ping=True,

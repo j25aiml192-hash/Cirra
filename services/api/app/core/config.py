@@ -36,6 +36,17 @@ class Settings(BaseSettings):
     CIRRA_JWT_ALGORITHM: str = "HS256"
     CIRRA_JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
+    @field_validator("DATABASE_URL", mode="before")
+    def validate_database_url(cls, v):
+        if not v:
+            return "postgresql+asyncpg://postgres:postgres@localhost:5432/cirra"
+        v_str = str(v).strip()
+        if v_str.startswith("postgres://"):
+            return "postgresql+asyncpg://" + v_str[len("postgres://"):]
+        if v_str.startswith("postgresql://") and not v_str.startswith("postgresql+asyncpg://"):
+            return "postgresql+asyncpg://" + v_str[len("postgresql://"):]
+        return v_str
+
     @field_validator("ENCRYPTION_KEY", mode="before")
     def validate_encryption_key(cls, v):
         return v if v else "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
