@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: cirra_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cirra_app
+      POSTGRES_PASSWORD: cirrapassword
+      POSTGRES_DB: cirra
+    ports:
+      - "5432:5432"
+    volumes:
+      - cirra_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cirra_app -d cirra"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: cirra_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  cirra_postgres_data:
