@@ -67,7 +67,7 @@ class ClickHouseReaderClient:
             raise ValueError("Security violation: ClickHouse query must include 'tenant_id' parameter.")
 
         now = time.time()
-        if hasattr(self, "_last_ch_check") and (now - self._last_ch_check < 5.0) and not getattr(self, "_last_ch_status", False):
+        if hasattr(self, "_last_ch_check") and (now - self._last_ch_check < 60.0) and not getattr(self, "_last_ch_status", False):
             return []
 
         if not can_reach_host(self.host, self.port):

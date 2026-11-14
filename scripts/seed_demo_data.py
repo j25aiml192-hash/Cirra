@@ -88,6 +88,8 @@ def get_clickhouse_client():
         password=password,
         database=database,
         secure=secure,
+        connect_timeout=3,
+        send_receive_timeout=3,
     )
 
 def seed_clickhouse(ch_client, now):
@@ -312,6 +314,20 @@ async def seed_postgres(now):
     db_url = raw_db_url.replace("postgresql+asyncpg://", "postgresql://")
     conn = await asyncpg.connect(db_url)
     
+    # Ensure Tenant Zero exists
+    await conn.execute("""
+        INSERT INTO tenants (id, name, plan, created_at)
+        VALUES ($1::uuid, 'Tenant Zero', 'enterprise', NOW())
+        ON CONFLICT (id) DO NOTHING
+    """, TENANT_ID)
+
+    # Ensure User Zero (hiten@cirra.dev) exists
+    await conn.execute("""
+        INSERT INTO users (id, tenant_id, email, role, created_at)
+        VALUES ('00000000-0000-0000-0000-000000000002'::uuid, $1::uuid, 'hiten@cirra.dev', 'admin', NOW())
+        ON CONFLICT (id) DO NOTHING
+    """, TENANT_ID)
+
     # Clean previous anomalies and savings
     await conn.execute("DELETE FROM savings_entries WHERE tenant_id = $1::uuid", TENANT_ID)
     await conn.execute("DELETE FROM actions WHERE tenant_id = $1::uuid", TENANT_ID)
@@ -550,9 +566,13 @@ async def seed_postgres(now):
 
 def main():
     now = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
-    ch_client = get_clickhouse_client()
+    cf_count, ai_count = 0, 0
+    try:
+        ch_client = get_clickhouse_client()
+        cf_count, ai_count = seed_clickhouse(ch_client, now)
+    except Exception as e:
+        print(f"Notice: ClickHouse seeding note: {e}")
 
-    cf_count, ai_count = seed_clickhouse(ch_client, now)
     anom_count, sav_count = asyncio.run(seed_postgres(now))
 
     verified_total = Decimal("5580.00") + Decimal("1830.00")

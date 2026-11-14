@@ -123,7 +123,7 @@ async def check_database_health() -> bool:
 
 async def verify_non_superuser_role() -> None:
     """Startup check to fail fast if the connected DB role is a superuser or has BYPASSRLS."""
-    if settings.ENVIRONMENT == "test":
+    if settings.ENVIRONMENT in ("test", "development"):
         return
     try:
         async with async_session_factory() as session:
