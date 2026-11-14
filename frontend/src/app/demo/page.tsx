@@ -165,7 +165,7 @@ export default function DemoPage() {
   >({});
   const [resettingMap, setResettingMap] = useState<Record<string, boolean>>({});
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_BASE = "";
 
   useEffect(() => {
     async function fetchScenarios() {

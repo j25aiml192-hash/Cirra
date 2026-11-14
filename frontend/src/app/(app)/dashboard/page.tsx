@@ -539,8 +539,7 @@ function LiveScenarioPanel() {
       } catch {}
 
       if (!res || !res.ok) {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        res = await fetch(`${apiBase}/inject/${scenario}`, {
+        res = await fetch(`/api/v1/inject/${scenario}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
@@ -572,8 +571,7 @@ function LiveScenarioPanel() {
       } catch {}
 
       if (!res || !res.ok) {
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-        res = await fetch(`${apiBase}/inject/cleanup`, {
+        res = await fetch(`/api/v1/inject/cleanup`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });

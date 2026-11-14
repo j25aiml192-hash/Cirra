@@ -33,3 +33,4 @@ services:
 
 volumes:
   cirra_postgres_data:
+

@@ -15,3 +15,4 @@ Set-Location "C:\PROJECTS(ALL)\Cirra"
 docker-compose -f docker-compose.local.yml stop
 
 Write-Host "All CIRRA services stopped." -ForegroundColor Green
+
