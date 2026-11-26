@@ -1,5 +1,4 @@
 import logging
-import os
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -9,8 +8,6 @@ import httpx
 
 from app.config import settings
 from app.kill_switch import KillSwitchResult
-
-INVESTIGATOR_URL = os.getenv("INVESTIGATOR_URL", "http://localhost:8001")
 
 logger = logging.getLogger("cirra.action_engine.github_pr")
 
@@ -39,23 +36,20 @@ class PRResult:
 
 class GitHubPREngine:
     def __init__(self):
-        self.token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
         self.repo_owner = settings.GITHUB_DEMO_REPO_OWNER
         self.repo_name = settings.GITHUB_DEMO_REPO_NAME
-        repo_str = os.getenv("GITHUB_REPO") or getattr(settings, "GITHUB_REPO", None)
-        if repo_str:
-            repo_clean = repo_str.replace("https://github.com/", "").strip("/").strip()
-            parts = repo_clean.split("/")
-            if len(parts) >= 2:
-                self.repo_owner = parts[0]
-                self.repo_name = parts[1]
-        self.g = Github(self.token) if self.token else None
+        self.token = None
+        self.g = None
+        self._ensure_client()
 
-    def _ensure_client(self):
-        if not self.token or not self.g:
-            self.token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
+    def _ensure_client(self, force_refresh: bool = False):
+        fresh_token = getattr(settings, "effective_github_token", None) or settings.GITHUB_TOKEN
+        if force_refresh or not self.g or fresh_token != self.token:
+            self.token = fresh_token
             if self.token:
                 self.g = Github(self.token)
+            else:
+                self.g = None
 
     async def create_anomaly_pr(
         self,
@@ -105,7 +99,19 @@ class GitHubPREngine:
             anomaly_id,
         )
         try:
-            repo = self.g.get_repo(f"{self.repo_owner}/{self.repo_name}")
+            try:
+                repo = self.g.get_repo(f"{self.repo_owner}/{self.repo_name}")
+            except GithubException as ge:
+                if ge.status == 401:
+                    logger.warning("GitHub 401 received. Invalidating token and retrying with fresh token...")
+                    if hasattr(settings, "invalidate_github_token"):
+                        settings.invalidate_github_token()
+                    self._ensure_client(force_refresh=True)
+                    if not self.g:
+                        raise
+                    repo = self.g.get_repo(f"{self.repo_owner}/{self.repo_name}")
+                else:
+                    raise
             default_branch_name = repo.default_branch or "main"
             default_branch = repo.get_branch(default_branch_name)
 
@@ -179,7 +185,7 @@ class GitHubPREngine:
             )
 
             # Try generating enriched PR narrative via LLM router (task_type=pr_body_generation)
-            investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or INVESTIGATOR_URL).rstrip("/")
+            investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or "http://localhost:8001").rstrip("/")
             try:
                 async with httpx.AsyncClient(timeout=8.0) as http_client:
                     llm_resp = await http_client.post(

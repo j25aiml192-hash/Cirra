@@ -71,6 +71,7 @@ const config: Config = {
         input: "8px",
       },
       boxShadow: {
+        xs: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
         card: "0 4px 24px -4px rgba(12, 48, 96, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02)",
         "card-hover": "0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03)",
         soft: "0 2px 10px -2px rgba(12, 45, 90, 0.04)",

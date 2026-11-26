@@ -72,7 +72,7 @@ class SentinelSettings(BaseSettings):
 
     # Notification / Alert Delivery Configuration
     cirra_dashboard_url: str = Field(
-        default="http://localhost:3000",
+        default="https://cirra-beta.vercel.app",
         validation_alias=AliasChoices("CIRRA_DASHBOARD_URL", "cirra_dashboard_url"),
     )
     slack_webhook_url: Optional[str] = Field(

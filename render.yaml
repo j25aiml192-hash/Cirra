@@ -1,133 +1,214 @@
-databases:
-  - name: cirra-postgres
-    databaseName: cirra
-    user: cirra
-    plan: free
-
 services:
-  - type: web
-    name: cirra-investigator
-    env: python
-    plan: free
-    region: oregon
-    rootDir: services/investigator
-    buildCommand: pip install --upgrade pip && pip install -e .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: GROQ_API_KEY
-        sync: false
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: NVIDIA_NIM_API_KEY
-        sync: false
-      - key: INTERNAL_SERVICE_KEY
-        value: internal-dev-key
-
-  - type: web
-    name: cirra-sentinel
-    env: python
-    plan: free
-    region: oregon
-    rootDir: services/sentinel
-    buildCommand: pip install --upgrade pip && pip install -e .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: cirra-postgres
-          property: connectionString
-      - key: CLICKHOUSE_HOST
-        sync: false
-      - key: CLICKHOUSE_PORT
-        value: "8443"
-      - key: CLICKHOUSE_USER
-        sync: false
-      - key: CLICKHOUSE_PASSWORD
-        sync: false
-      - key: CLICKHOUSE_DATABASE
-        value: cirra
-      - key: INVESTIGATOR_URL
-        value: https://cirra-investigator.onrender.com
-      - key: ACTION_ENGINE_URL
-        value: https://cirra-action-engine.onrender.com
-      - key: API_BASE_URL
-        value: https://cirra-api.onrender.com
-      - key: INTERNAL_SERVICE_KEY
-        value: internal-dev-key
-      - key: SLACK_WEBHOOK_URL
-        sync: false
-      - key: NTFY_TOPIC
-        sync: false
-
-  - type: web
-    name: cirra-action-engine
-    env: python
-    plan: free
-    region: oregon
-    rootDir: services/action-engine
-    buildCommand: pip install --upgrade pip && pip install -e .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: cirra-postgres
-          property: connectionString
-      - key: INVESTIGATOR_URL
-        value: https://cirra-investigator.onrender.com
-      - key: INTERNAL_SERVICE_KEY
-        value: internal-dev-key
-      - key: GITHUB_TOKEN
-        sync: false
-      - key: GITHUB_REPO
-        sync: false
-
+  # ── Core API ────────────────────────────────────────────────────────────────
   - type: web
     name: cirra-api
-    env: python
-    plan: free
-    region: oregon
+    runtime: python
     rootDir: services/api
-    buildCommand: pip install --upgrade pip && pip install -e .
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: pip install -e .
+    startCommand: alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
     envVars:
+      - key: ENVIRONMENT
+        value: production
       - key: DATABASE_URL
         fromDatabase:
           name: cirra-postgres
           property: connectionString
+      - key: REDIS_URL
+        sync: false  # Set manually: Upstash Redis URL
+      - key: CIRRA_JWT_SECRET
+        generateValue: true
+      - key: ENCRYPTION_KEY
+        sync: false  # Set manually: same base64 key as local
+      - key: INTERNAL_SERVICE_KEY
+        value: cirra-internal-prod-key-2026
+      - key: INVESTIGATOR_URL
+        sync: false  # Set to: https://cirra-investigator.onrender.com
+      - key: SENTINEL_URL
+        sync: false  # Set to: https://cirra-sentinel.onrender.com
+      - key: ACTION_ENGINE_URL
+        sync: false  # Set to: https://cirra-action-engine.onrender.com
+      - key: API_BASE_URL
+        sync: false  # Set to: https://cirra-api.onrender.com
+      - key: PUBLIC_WEBHOOK_URL
+        sync: false  # Set to: https://cirra-api.onrender.com
+      - key: CIRRA_DASHBOARD_URL
+        value: https://cirra-beta.vercel.app
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["https://cirra-beta.vercel.app","http://localhost:3000"]'
+      - key: GROQ_API_KEY
+        sync: false
       - key: CLICKHOUSE_HOST
         sync: false
       - key: CLICKHOUSE_PORT
         value: "8443"
       - key: CLICKHOUSE_USER
-        sync: false
+        value: default
       - key: CLICKHOUSE_PASSWORD
         sync: false
       - key: CLICKHOUSE_DATABASE
         value: cirra
-      - key: INVESTIGATOR_URL
-        value: https://cirra-investigator.onrender.com
-      - key: SENTINEL_URL
-        value: https://cirra-sentinel.onrender.com
-      - key: ACTION_ENGINE_URL
-        value: https://cirra-action-engine.onrender.com
-      - key: INTERNAL_SERVICE_KEY
-        value: internal-dev-key
-      - key: GROQ_API_KEY
+      - key: CLICKHOUSE_READER_USER
+        value: cirra_reader
+      - key: CLICKHOUSE_READER_PASSWORD
+        value: Reader_Secure_Password123
+      - key: CLICKHOUSE_INGEST_USER
+        value: cirra_ingest
+      - key: CLICKHOUSE_INGEST_PASSWORD
+        value: Ingest_Secure_Password123
+      - key: SLACK_WEBHOOK_URL
         sync: false
+      - key: NTFY_TOPIC_URL
+        sync: false
+      - key: VAPI_API_KEY
+        sync: false
+      - key: VAPI_ASSISTANT_ID
+        sync: false
+      - key: VAPI_ALERT_PHONE_NUMBER
+        value: "+918910095002"
       - key: TWILIO_ACCOUNT_SID
         sync: false
       - key: TWILIO_AUTH_TOKEN
         sync: false
       - key: TWILIO_FROM_NUMBER
         value: "+17372508034"
-      - key: PUBLIC_WEBHOOK_URL
+      - key: GITHUB_APP_ID
         sync: false
-      - key: NTFY_TOPIC
+      - key: GITHUB_APP_PRIVATE_KEY
         sync: false
+      - key: GITHUB_INSTALLATION_ID
+        sync: false
+      - key: GITHUB_DEMO_REPO_OWNER
+        value: j25aiml192-hash
+      - key: GITHUB_DEMO_REPO_NAME
+        value: cirra-demo-infra
+      - key: ENABLE_SMART_ALLOCATION
+        value: "true"
+      - key: INGEST_MOCK
+        value: "false"
+
+  # ── Investigator ────────────────────────────────────────────────────────────
+  - type: web
+    name: cirra-investigator
+    runtime: python
+    rootDir: services/investigator
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: INTERNAL_SERVICE_KEY
+        value: cirra-internal-prod-key-2026
+      - key: GROQ_API_KEY
+        sync: false
+      - key: CLICKHOUSE_HOST
+        sync: false
+      - key: CLICKHOUSE_PORT
+        value: "8443"
+      - key: CLICKHOUSE_USER
+        value: default
+      - key: CLICKHOUSE_PASSWORD
+        sync: false
+      - key: CLICKHOUSE_DATABASE
+        value: cirra
+      - key: CLICKHOUSE_READER_USER
+        value: cirra_reader
+      - key: CLICKHOUSE_READER_PASSWORD
+        value: Reader_Secure_Password123
+
+  # ── Sentinel ────────────────────────────────────────────────────────────────
+  - type: web
+    name: cirra-sentinel
+    runtime: python
+    rootDir: services/sentinel
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cirra-postgres
+          property: connectionString
+      - key: INTERNAL_SERVICE_KEY
+        value: cirra-internal-prod-key-2026
+      - key: API_BASE_URL
+        sync: false  # Set to: https://cirra-api.onrender.com
+      - key: ACTION_ENGINE_URL
+        sync: false  # Set to: https://cirra-action-engine.onrender.com
+      - key: CIRRA_DASHBOARD_URL
+        value: https://cirra-beta.vercel.app
+      - key: CLICKHOUSE_HOST
+        sync: false
+      - key: CLICKHOUSE_PORT
+        value: "8443"
+      - key: CLICKHOUSE_USER
+        value: default
+      - key: CLICKHOUSE_PASSWORD
+        sync: false
+      - key: CLICKHOUSE_DATABASE
+        value: cirra
+      - key: CLICKHOUSE_READER_USER
+        value: cirra_reader
+      - key: CLICKHOUSE_READER_PASSWORD
+        value: Reader_Secure_Password123
       - key: SLACK_WEBHOOK_URL
         sync: false
-      - key: GITHUB_TOKEN
+      - key: NTFY_TOPIC_URL
         sync: false
-      - key: GITHUB_REPO
+      - key: VAPI_API_KEY
         sync: false
+      - key: VAPI_ASSISTANT_ID
+        sync: false
+      - key: VAPI_ALERT_PHONE_NUMBER
+        value: "+918910095002"
 
+  # ── Action Engine ────────────────────────────────────────────────────────────
+  - type: web
+    name: cirra-action-engine
+    runtime: python
+    rootDir: services/action-engine
+    buildCommand: pip install -e .
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: starter
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cirra-postgres
+          property: connectionString
+      - key: INTERNAL_SERVICE_KEY
+        value: cirra-internal-prod-key-2026
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GITHUB_APP_ID
+        sync: false
+      - key: GITHUB_APP_PRIVATE_KEY
+        sync: false
+      - key: GITHUB_INSTALLATION_ID
+        sync: false
+      - key: GITHUB_DEMO_REPO_OWNER
+        value: j25aiml192-hash
+      - key: GITHUB_DEMO_REPO_NAME
+        value: cirra-demo-infra
+      - key: CORS_ORIGINS
+        value: '["https://cirra-beta.vercel.app","http://localhost:3000"]'
+      - key: INGEST_MOCK
+        value: "false"
+
+databases:
+  - name: cirra-postgres
+    databaseName: cirra
+    user: cirra_app
+    plan: starter

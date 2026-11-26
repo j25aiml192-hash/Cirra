@@ -8,8 +8,6 @@ import httpx
 from app.config import settings
 from app.detector import DetectedAnomaly
 
-INVESTIGATOR_URL = os.getenv("INVESTIGATOR_URL", "http://localhost:8001")
-
 logger = logging.getLogger("cirra.sentinel.notifier")
 
 
@@ -75,7 +73,7 @@ class AlertNotifier:
 
         # Attempt to get LLM narrative for Slack alert from Investigator router
         slack_explanation = explanation
-        investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or INVESTIGATOR_URL).rstrip("/")
+        investigator_url = (getattr(settings, "INVESTIGATOR_URL", None) or "http://localhost:8001").rstrip("/")
         try:
             async with httpx.AsyncClient(timeout=6.0) as http_client:
                 llm_resp = await http_client.post(
@@ -305,7 +303,7 @@ class AlertNotifier:
                 f"Informational notice only — normal variance."
             )
         elif tier == 5 or priority == "urgent":
-            title = f"🚨 CATASTROPHIC: Leaked Key on {anomaly.provider}"
+            title = f"CATASTROPHIC: Leaked Key on {anomaly.provider}"
             tags = f"rotating_light,fire,{anomaly.provider.lower()}"
             extra_spend = (
                 float(anomaly.actual_value - anomaly.baseline_value)

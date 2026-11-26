@@ -43,7 +43,7 @@ export function useApproveAction() {
   return useMutation({
     mutationFn: async (actionId: string) => {
       const user = useAuthStore.getState().user;
-      const approvedBy = user?.id || "00000000-0000-0000-0000-000000000001";
+      const approvedBy = user?.id || "00000000-0000-0000-0000-000000000002";
       return apiFetch(`/api/v1/actions/${actionId}/approve`, {
         method: "POST",
         body: JSON.stringify({

@@ -36,17 +36,6 @@ class Settings(BaseSettings):
     CIRRA_JWT_ALGORITHM: str = "HS256"
     CIRRA_JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
-    @field_validator("DATABASE_URL", mode="before")
-    def validate_database_url(cls, v):
-        if not v:
-            return "postgresql+asyncpg://postgres:postgres@localhost:5432/cirra"
-        v_str = str(v).strip()
-        if v_str.startswith("postgres://"):
-            return "postgresql+asyncpg://" + v_str[len("postgres://"):]
-        if v_str.startswith("postgresql://") and not v_str.startswith("postgresql+asyncpg://"):
-            return "postgresql+asyncpg://" + v_str[len("postgresql://"):]
-        return v_str
-
     @field_validator("ENCRYPTION_KEY", mode="before")
     def validate_encryption_key(cls, v):
         return v if v else "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
@@ -104,14 +93,39 @@ class Settings(BaseSettings):
     def internal_service_key(self) -> str:
         return self.INTERNAL_SERVICE_KEY
 
-    # CORS
-    CORS_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "https://cirra.dev",
-        "https://cirra-frontend.vercel.app",
-        "https://*.vercel.app",
-    ]
+    # CORS — override via CORS_ORIGINS env var (JSON array string or comma-separated)
+    CORS_ORIGINS: List[str] = Field(
+        default=[
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "https://cirra.dev",
+            "https://cirra-beta.vercel.app",
+        ],
+        alias="CORS_ORIGINS",
+    )
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            import json
+            stripped = v.strip()
+            if stripped.startswith("["):
+                try:
+                    parsed = json.loads(stripped)
+                    # Always include the Vercel production origin
+                    if "https://cirra-beta.vercel.app" not in parsed:
+                        parsed.append("https://cirra-beta.vercel.app")
+                    return parsed
+                except Exception:
+                    pass
+            origins = [o.strip() for o in stripped.split(",") if o.strip()]
+            if "https://cirra-beta.vercel.app" not in origins:
+                origins.append("https://cirra-beta.vercel.app")
+            return origins
+        if isinstance(v, list) and "https://cirra-beta.vercel.app" not in v:
+            v.append("https://cirra-beta.vercel.app")
+        return v
 
     model_config = SettingsConfigDict(
         env_file=".env",

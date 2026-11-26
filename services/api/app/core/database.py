@@ -10,14 +10,8 @@ from app.core.config import settings
 
 Base = declarative_base()
 
-db_url = str(settings.DATABASE_URL).strip()
-if db_url.startswith("postgres://"):
-    db_url = "postgresql+asyncpg://" + db_url[len("postgres://"):]
-elif db_url.startswith("postgresql://") and not db_url.startswith("postgresql+asyncpg://"):
-    db_url = "postgresql+asyncpg://" + db_url[len("postgresql://"):]
-
 engine = create_async_engine(
-    db_url,
+    settings.DATABASE_URL,
     echo=(settings.ENVIRONMENT == "development"),
     future=True,
     pool_pre_ping=True,
@@ -30,77 +24,6 @@ async_session_factory = async_sessionmaker(
     autocommit=False,
     autoflush=False,
 )
-
-
-import socket
-import time
-from urllib.parse import urlparse
-
-_last_pg_check = 0.0
-_last_pg_status = False
-
-def is_postgres_reachable(timeout: float = 0.15) -> bool:
-    """Fast socket probe to check if PostgreSQL host:port is listening, cached for 5s."""
-    global _last_pg_check, _last_pg_status
-    now = time.time()
-    if now - _last_pg_check < 5.0:
-        return _last_pg_status
-    try:
-        raw_dsn = db_url.replace("postgresql+asyncpg://", "http://").replace("postgresql://", "http://")
-        parsed = urlparse(raw_dsn)
-        host = parsed.hostname or "127.0.0.1"
-        port = parsed.port or 5432
-        with socket.create_connection((host, port), timeout=timeout):
-            _last_pg_status = True
-            _last_pg_check = now
-            return True
-    except Exception:
-        _last_pg_status = False
-        _last_pg_check = now
-        return False
-
-
-class DummyResult:
-    def scalars(self):
-        return self
-    def all(self):
-        return []
-    def scalar_one_or_none(self):
-        return None
-    def scalar(self):
-        return None
-    def fetchone(self):
-        return None
-    def first(self):
-        return None
-
-
-class DummyAsyncSession:
-    """In-memory dummy session for graceful degradation when Postgres is offline."""
-    async def execute(self, *args, **kwargs):
-        return DummyResult()
-    async def scalar(self, *args, **kwargs):
-        return None
-    def add(self, *args, **kwargs):
-        pass
-    def add_all(self, *args, **kwargs):
-        pass
-    async def commit(self):
-        pass
-    async def flush(self):
-        pass
-    async def refresh(self, *args, **kwargs):
-        pass
-    async def rollback(self):
-        pass
-    async def close(self):
-        pass
-    async def begin(self):
-        return self
-    async def __aenter__(self):
-        return self
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        pass
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -123,7 +46,7 @@ async def check_database_health() -> bool:
 
 async def verify_non_superuser_role() -> None:
     """Startup check to fail fast if the connected DB role is a superuser or has BYPASSRLS."""
-    if settings.ENVIRONMENT in ("test", "development"):
+    if settings.ENVIRONMENT == "test":
         return
     try:
         async with async_session_factory() as session:

@@ -530,20 +530,10 @@ function LiveScenarioPanel() {
     setPendingScenarios((prev) => ({ ...prev, [scenario]: Date.now() }));
 
     try {
-      let res: Response | null = null;
-      try {
-        res = await fetch(`/api/v1/inject/${scenario}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-      } catch {}
-
-      if (!res || !res.ok) {
-        res = await fetch(`/api/v1/inject/${scenario}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+      const res = await fetch(`/api/v1/inject/${scenario}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
       if (res && res.ok) {
         setSuccessScenario(scenario);
@@ -562,20 +552,10 @@ function LiveScenarioPanel() {
   const handleReset = async () => {
     setIsCleaning(true);
     try {
-      let res: Response | null = null;
-      try {
-        res = await fetch(`/api/v1/inject/cleanup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-      } catch {}
-
-      if (!res || !res.ok) {
-        res = await fetch(`/api/v1/inject/cleanup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-      }
+      await fetch(`/api/v1/inject/cleanup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
       setPendingScenarios({});
       setSuccessScenario(null);
     } catch (e) {
@@ -762,7 +742,7 @@ function LiveScenarioPanel() {
             {detectedItems.map((item, idx) => (
               <div
                 key={item.id || item.keyId + idx}
-                className="bg-white border border-[#D6E4F5] rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+                className="bg-white border border-[#D6E4F5] rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm"
               >
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">

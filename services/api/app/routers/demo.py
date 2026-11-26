@@ -1,5 +1,4 @@
 import logging
-import os
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -13,8 +12,6 @@ from sqlalchemy import text
 from app.core.config import settings
 from app.core.database import async_session_factory
 from app.services.demo_scenarios import ALL_SCENARIOS, DemoScenario
-
-SENTINEL_URL = os.getenv("SENTINEL_URL", "http://localhost:8002")
 
 logger = logging.getLogger("cirra.api.demo")
 
@@ -150,7 +147,7 @@ async def run_scenario(scenario_id: str):
         logger.warning("Spike generation note: %s", exc)
 
     # 3. Call dispatch_tiered_alert() on Sentinel
-    sentinel_url = (getattr(settings, "SENTINEL_URL", None) or SENTINEL_URL).rstrip("/")
+    sentinel_url = getattr(settings, "SENTINEL_URL", "http://localhost:8002").rstrip("/")
     tiered_res: Dict[str, Any] = {}
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:

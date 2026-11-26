@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -13,8 +12,6 @@ from app.integrations.telephony.base import CallRequest, CallResult
 from app.integrations.telephony.mock_provider import MockTelephonyProvider
 from app.integrations.telephony.twilio_provider import TwilioProvider
 from app.services.twiml_builder import TwiMLBuilder
-
-INVESTIGATOR_URL = os.getenv("INVESTIGATOR_URL", "http://localhost:8001")
 
 logger = logging.getLogger("cirra.voice.alert_service")
 
@@ -62,14 +59,13 @@ async def _call_llm_router(
     max_tokens: int = 300,
 ) -> str:
     """
-    Calls investigator's LLM router for call script
-    generation. Falls back to empty string on failure
-    so voice calls still fire even if LLM is down.
+    Calls investigator's LLM router for call script generation.
+    Falls back to direct Groq client if investigator is unavailable.
     """
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=4.0) as client:
             response = await client.post(
-                f"{INVESTIGATOR_URL.rstrip('/')}/llm/complete",
+                "http://localhost:8001/llm/complete",
                 headers={"X-Internal-Service": "internal-dev-key"},
                 json={
                     "task_type": "call_script_generation",
@@ -78,15 +74,30 @@ async def _call_llm_router(
                     "max_tokens": max_tokens,
                 },
             )
-            response.raise_for_status()
-            data = response.json()
-            return data.get("text") or data.get("content") or ""
+            if response.status_code == 200:
+                data = response.json()
+                content = data.get("text") or data.get("content") or ""
+                if content.strip():
+                    return content
     except Exception as e:
-        logger.warning(
-            f"LLM router unavailable for call script: {e}. "
-            f"Using fallback script."
-        )
-        return ""  # caller uses hardcoded fallback
+        logger.debug(f"Investigator LLM router unavailable: {e}. Trying direct Groq...")
+
+    if settings.GROQ_API_KEY:
+        try:
+            from groq import AsyncGroq
+            groq_client = AsyncGroq(api_key=settings.GROQ_API_KEY)
+            resp = await groq_client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+            )
+            if resp.choices and resp.choices[0].message.content:
+                return resp.choices[0].message.content.strip()
+        except Exception as e:
+            logger.warning(f"Direct Groq call failed: {e}")
+
+    return ""
 
 
 async def generate_call_script(anomaly: dict) -> str:

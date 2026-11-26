@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -54,18 +55,9 @@ app = FastAPI(
 )
 
 # CORS Middleware
-cors_origins = list(settings.CORS_ORIGINS)
-for origin in [
-    "https://cirra-frontend.vercel.app",
-    "https://*.vercel.app",
-]:
-    if origin not in cors_origins:
-        cors_origins.append(origin)
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -95,7 +87,8 @@ app.include_router(actions.router)
 app.include_router(savings.router, prefix=settings.API_V1_PREFIX)
 app.include_router(savings.router)
 app.include_router(voice.router)
-app.include_router(voice_webhooks.router)
+app.include_router(voice_webhooks.router, prefix=settings.API_V1_PREFIX + "/voice/webhooks")
+app.include_router(voice_webhooks.router, prefix="/voice/webhooks")
 app.include_router(settings_router.router, prefix=settings.API_V1_PREFIX)
 app.include_router(settings_router.router)
 app.include_router(onboarding.router, prefix=settings.API_V1_PREFIX)
@@ -105,3 +98,9 @@ app.include_router(dev.router)
 app.include_router(demo.router, prefix="/demo")
 app.include_router(inject.router, prefix="/inject", tags=["inject"])
 app.include_router(inject.router, prefix=settings.API_V1_PREFIX + "/inject", tags=["inject"])
+
+if os.getenv("ENABLE_SMART_ALLOCATION") == "true":
+    from app.routers.beta_allocation import router as smart_alloc_router
+    app.include_router(smart_alloc_router, prefix=settings.API_V1_PREFIX)
+    app.include_router(smart_alloc_router)
+

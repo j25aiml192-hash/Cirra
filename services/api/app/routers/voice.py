@@ -98,8 +98,8 @@ async def trigger_call(
         caller_tenant_id = req.tenant_id
 
     async with async_session_factory() as session:
-        # Set tenant isolation
-        await session.execute(text("SELECT set_config('app.tenant_id', :tenant_id, true)"), {"tenant_id": caller_tenant_id})
+        # Set tenant isolation (session-scoped)
+        await session.execute(text("SELECT set_config('app.tenant_id', :tenant_id, false)"), {"tenant_id": caller_tenant_id})
 
         # Fetch and validate anomaly
         res = await session.execute(

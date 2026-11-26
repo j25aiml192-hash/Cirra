@@ -64,44 +64,66 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    _cached_token: Optional[str] = None
+    _cached_token_expires_at: float = 0.0
+
+    def invalidate_github_token(self):
+        """Force re-minting of GitHub App installation token on next access."""
+        self._cached_token = None
+        self._cached_token_expires_at = 0.0
+
     @property
     def effective_github_token(self) -> Optional[str]:
-        if self.GITHUB_TOKEN and not self.GITHUB_TOKEN.startswith("..."):
+        # If a personal access token is configured directly in env and not a placeholder
+        if self.GITHUB_TOKEN and not self.GITHUB_TOKEN.startswith("...") and not self.GITHUB_TOKEN.startswith("ghs_"):
             return self.GITHUB_TOKEN
 
-        # Dynamically mint installation token from GitHub App if configured
-        if self.GITHUB_APP_ID and self.GITHUB_INSTALLATION_ID and self.GITHUB_APP_PRIVATE_KEY:
-            try:
-                pk_val = self.GITHUB_APP_PRIVATE_KEY.strip()
-                # Check if it's a file path
-                if os.path.exists(pk_val.strip('"\'')):
-                    with open(pk_val.strip('"\''), "r", encoding="utf-8") as f:
-                        private_key = f.read().strip()
-                else:
-                    private_key = pk_val.replace("\\n", "\n")
+        # Check if cached token is still valid (with 2-minute safety buffer)
+        now = time.time()
+        if self._cached_token and now < (self._cached_token_expires_at - 120):
+            return self._cached_token
 
-                now = int(time.time())
-                payload = {
-                    "iat": now - 60,
-                    "exp": now + 600,
-                    "iss": str(self.GITHUB_APP_ID),
-                }
-                encoded_jwt = jwt.encode(payload, private_key, algorithm="RS256")
-                resp = httpx.post(
-                    f"https://api.github.com/app/installations/{self.GITHUB_INSTALLATION_ID}/access_tokens",
-                    headers={
-                        "Authorization": f"Bearer {encoded_jwt}",
-                        "Accept": "application/vnd.github+json",
-                    },
-                    timeout=10.0,
-                )
-                if resp.status_code == 201:
-                    token = resp.json()["token"]
-                    self.GITHUB_TOKEN = token
-                    return token
-            except Exception:
-                pass
-        return None
+        # Dynamically mint installation token from GitHub App if configured
+        if self.GITHUB_APP_ID and self.GITHUB_INSTALLATION_ID:
+            pk_val = (self.GITHUB_APP_PRIVATE_KEY or "").strip()
+            # If path not found, try workspace secrets/github-app.pem
+            if not pk_val or not os.path.exists(pk_val.strip('"\'')):
+                workspace_pem = Path(__file__).resolve().parents[3] / "secrets" / "github-app.pem"
+                if workspace_pem.is_file():
+                    pk_val = str(workspace_pem)
+
+            if pk_val:
+                try:
+                    clean_path = pk_val.strip('"\'')
+                    if os.path.exists(clean_path):
+                        with open(clean_path, "r", encoding="utf-8") as f:
+                            private_key = f.read().strip()
+                    else:
+                        private_key = pk_val.replace("\\n", "\n")
+
+                    iat = int(now)
+                    payload = {
+                        "iat": iat - 30,
+                        "exp": iat + 500,
+                        "iss": str(self.GITHUB_APP_ID),
+                    }
+                    encoded_jwt = jwt.encode(payload, private_key, algorithm="RS256")
+                    resp = httpx.post(
+                        f"https://api.github.com/app/installations/{self.GITHUB_INSTALLATION_ID}/access_tokens",
+                        headers={
+                            "Authorization": f"Bearer {encoded_jwt}",
+                            "Accept": "application/vnd.github+json",
+                        },
+                        timeout=10.0,
+                    )
+                    if resp.status_code == 201:
+                        token = resp.json()["token"]
+                        self._cached_token = token
+                        self._cached_token_expires_at = now + 3500
+                        return token
+                except Exception:
+                    pass
+        return self._cached_token or self.GITHUB_TOKEN
 
 
 settings = Settings()

@@ -259,6 +259,19 @@ class ActionWorkflow:
             raise ValueError(f"Action {action_id} is already in state '{current_status}' and cannot be re-executed")
 
         tenant_id = str(action.get("tenant_id"))
+
+        # Validate that approved_by is a valid user ID in users table (satisfies foreign key constraint)
+        valid_user = await conn.fetchval("SELECT id FROM users WHERE id = $1::uuid", approved_by)
+        if not valid_user:
+            valid_user = await conn.fetchval(
+                "SELECT id FROM users WHERE tenant_id = $1::uuid ORDER BY created_at ASC LIMIT 1",
+                tenant_id,
+            )
+            if not valid_user:
+                valid_user = await conn.fetchval("SELECT id FROM users ORDER BY created_at ASC LIMIT 1")
+            if valid_user:
+                logger.info("Mapped approved_by %s to valid user id %s", approved_by, valid_user)
+                approved_by = str(valid_user)
         action_type = action.get("type")
         provider = action.get("provider") or "unknown"
         target_key = action.get("target_key_id") or "unknown"

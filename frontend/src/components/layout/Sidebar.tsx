@@ -32,6 +32,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
   badgeType?: "warning" | "info";
+  badgeColor?: string;
   matchPrefix?: boolean;
 }
 
@@ -60,6 +61,11 @@ const MAIN_NAV_ITEMS: NavItem[] = [
     name: "Allocation",
     href: "/allocation",
     icon: Layers,
+    badge:
+      process.env.NEXT_PUBLIC_ENABLE_SMART_ALLOCATION === "true"
+        ? "SMART"
+        : undefined,
+    badgeColor: "green",
   },
   {
     name: "Anomalies",
@@ -224,12 +230,14 @@ export function Sidebar({ collapsed, pinned = false, onToggle, onHoverChange }: 
                   </span>
                 )}
 
-                {/* Badge (e.g. Anomalies count) */}
+                {/* Badge (e.g. Anomalies count or SMART beta) */}
                 {isExpanded && badgeValue && (
                   <span
                     className={cn(
                       "ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full select-none",
-                      badgeType === "warning"
+                      item.badgeColor === "green"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : badgeType === "warning"
                         ? "bg-[#FEF3C7] text-[#D97706]"
                         : "bg-blue-100 text-blue-700"
                     )}
