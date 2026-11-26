@@ -18,6 +18,16 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/cirra",
         alias="DATABASE_URL"
     )
+
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def ensure_asyncpg_driver(cls, v):
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+asyncpg://", 1)
+            if v.startswith("postgresql://"):
+                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
     # Non-superuser database URL for RLS enforcement
     DATABASE_RLS_USER: str = Field(default="cirra_app", alias="DATABASE_RLS_USER")
 
