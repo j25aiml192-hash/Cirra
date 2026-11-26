@@ -32,8 +32,8 @@ async def seed(db_url: str):
     conn = await asyncpg.connect(conn_url)
 
     try:
-        # Bypass RLS for seeding
-        await conn.execute("SET app.tenant_id = '00000000-0000-0000-0000-000000000000'")
+        # Set tenant_id for RLS
+        await conn.execute("SET app.tenant_id = '00000000-0000-0000-0000-000000000001'")
 
         # 1. Ensure tenant zero exists
         tenant_exists = await conn.fetchval(

@@ -86,6 +86,7 @@ async def write_anomaly(
     Falls back gracefully if the composite index is not present in the existing schema.
     """
     tenant_id_uuid = uuid.UUID(anomaly.tenant_id)
+    await conn.execute("SELECT set_config('app.tenant_id', $1, false)", str(tenant_id_uuid))
 
     # Primary statement with ON CONFLICT
     on_conflict_sql = """

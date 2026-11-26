@@ -555,6 +555,10 @@ async def dispatch_tiered_alert(
             pool = await get_db_pool()
             async with pool.acquire() as conn:
                 await conn.execute(
+                    "SELECT set_config('app.tenant_id', $1, false)",
+                    str(anomaly.tenant_id),
+                )
+                await conn.execute(
                     """
                     UPDATE anomalies SET 
                       alert_sent = true,

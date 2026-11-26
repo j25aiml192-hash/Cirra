@@ -1,8 +1,11 @@
 import asyncio
+import os
 import asyncpg
 
 async def fix_rls():
-    conn = await asyncpg.connect("postgresql://postgres:postgrespassword@localhost:5432/cirra")
+    db_url = os.environ.get("DATABASE_URL", "postgresql://postgres:postgrespassword@localhost:5432/cirra")
+    db_url = db_url.replace("postgresql+asyncpg://", "postgresql://").replace("postgres+asyncpg://", "postgresql://")
+    conn = await asyncpg.connect(db_url)
     tables = [
         "users",
         "api_keys",
@@ -14,6 +17,7 @@ async def fix_rls():
         "voice_calls",
         "onboarding_state",
         "tenant_settings",
+        "smart_rules",
     ]
     for t in tables:
         exists = await conn.fetchval(
