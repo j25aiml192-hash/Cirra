@@ -3,7 +3,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://api.cirra.dev/api/:path*"
+      "destination": "https://cirra-api.onrender.com/api/:path*"
     }
   ]
 }
