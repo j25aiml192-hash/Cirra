@@ -259,9 +259,15 @@ class ActionWorkflow:
             raise ValueError(f"Action {action_id} is already in state '{current_status}' and cannot be re-executed")
 
         tenant_id = str(action.get("tenant_id"))
+        await conn.execute(f"SET LOCAL app.tenant_id = '{tenant_id}'")
 
         # Validate that approved_by is a valid user ID in users table (satisfies foreign key constraint)
-        valid_user = await conn.fetchval("SELECT id FROM users WHERE id = $1::uuid", approved_by)
+        valid_user = None
+        try:
+            uuid.UUID(str(approved_by))
+            valid_user = await conn.fetchval("SELECT id FROM users WHERE id = $1::uuid", approved_by)
+        except ValueError:
+            valid_user = None
         if not valid_user:
             valid_user = await conn.fetchval(
                 "SELECT id FROM users WHERE tenant_id = $1::uuid ORDER BY created_at ASC LIMIT 1",

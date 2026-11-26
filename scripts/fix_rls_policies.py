@@ -33,19 +33,27 @@ async def fix_rls():
                     USING (
                         NULLIF(current_setting('app.tenant_id', true), '') IS NULL
                         OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
-                        OR tenant_id = current_setting('app.tenant_id', true)::uuid
+                        OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
                     )
                     WITH CHECK (
                         NULLIF(current_setting('app.tenant_id', true), '') IS NULL
                         OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
-                        OR tenant_id = current_setting('app.tenant_id', true)::uuid
+                        OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
                     );
                 """)
             else:
                 await conn.execute(f"""
                     CREATE POLICY {polname} ON {t}
-                    USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-                    WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+                    USING (
+                        NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+                        OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
+                        OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+                    )
+                    WITH CHECK (
+                        NULLIF(current_setting('app.tenant_id', true), '') IS NULL
+                        OR current_setting('app.tenant_id', true) = '00000000-0000-0000-0000-000000000000'
+                        OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid
+                    );
                 """)
             print(f"✅ Recreated permissive RLS policy for {t}")
     await conn.close()
