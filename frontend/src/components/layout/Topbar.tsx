@@ -111,22 +111,51 @@ export function Topbar({ title, subtitle }: TopbarProps) {
   const displayTitle = getDisplayTitle();
 
   return (
-    <header className="fixed top-0 left-0 lg:left-64 right-0 h-14 bg-black border-b border-zinc-800/80 z-30 select-none text-white flex items-center justify-between px-6 transition-all font-sans">
-      {/* Left: Universal Greeting or Page Title */}
-      <div className="flex items-center gap-2.5 min-w-0">
-        <h1 className="text-sm font-semibold text-white tracking-tight truncate">
-          {displayTitle}
-        </h1>
-        {subtitle && pathname !== "/dashboard" && pathname !== "/" && pathname !== "/ask" && (
-          <span className="hidden xl:inline-block text-xs text-zinc-500 font-normal truncate">
-            · {subtitle}
+    <header className="fixed top-0 left-0 right-0 h-14 bg-[#09090b]/55 backdrop-blur-2xl backdrop-saturate-[180%] border-b border-white/[0.12] z-50 select-none text-white flex items-center justify-between px-3.5 transition-all font-sans shadow-[0_10px_30px_rgba(0,0,0,0.5),inset_0_-1px_0_0_rgba(255,255,255,0.08)]">
+      {/* Specular Ambient Sheen */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent pointer-events-none" />
+
+      {/* Left: Cirra Brand Header (62px width exactly aligned with Sidebar dock) */}
+      <div className="flex items-center min-w-0 relative z-10">
+        <Link
+          href="/dashboard"
+          className="w-[62px] h-14 flex items-center justify-center shrink-0 group focus:outline-none"
+          title="Cirra FinOps Cloud"
+        >
+          {/* Golden Ratio Squircle Badge on Navbar */}
+          <div className="w-[38px] h-[38px] rounded-[13px] bg-white flex items-center justify-center p-1 shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform overflow-hidden">
+            <img
+              src="/cirra-mark.png"
+              alt="Cirra Logo"
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </Link>
+
+        {/* Brand Name & Page Title */}
+        <div className="flex items-center gap-3 pl-2 min-w-0">
+          <span className="text-[15px] font-black tracking-tight text-white font-mono leading-none">
+            CIRRA
           </span>
-        )}
+
+          <div className="h-4 w-px bg-white/[0.12] hidden sm:block" />
+
+          <div className="flex items-center gap-2 min-w-0">
+            <h1 className="text-sm font-semibold text-zinc-200 tracking-tight truncate">
+              {displayTitle}
+            </h1>
+            {subtitle && pathname !== "/dashboard" && pathname !== "/" && pathname !== "/ask" && (
+              <span className="hidden xl:inline-block text-xs text-zinc-400 font-normal truncate">
+                · {subtitle}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Right: Search resources... input + Bell icon + User Avatar (HK) */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        {/* Search resources... pill */}
+      <div className="flex items-center gap-3 flex-shrink-0 relative z-10">
+        {/* Search resources... glass pill */}
         <div className="relative w-44 sm:w-60">
           <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
@@ -134,7 +163,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search resources..."
-            className="w-full h-8 pl-8 pr-3 rounded-full bg-[#09090b] border border-zinc-800 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 transition-all font-sans"
+            className="w-full h-8 pl-8 pr-3 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-white/[0.22] focus:bg-white/[0.08] transition-all font-sans shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]"
           />
         </div>
 
@@ -143,7 +172,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
           <button
             type="button"
             onClick={() => setShowAlerts((p) => !p)}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors relative"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/[0.08] border border-transparent hover:border-white/[0.1] transition-all relative"
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -153,19 +182,19 @@ export function Topbar({ title, subtitle }: TopbarProps) {
           </button>
 
           {showAlerts && (
-            <div className="absolute right-0 top-10 mt-1 w-80 sm:w-96 rounded-2xl bg-[#09090b] border border-zinc-800 shadow-2xl z-50 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-100">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 bg-zinc-950">
+            <div className="absolute right-0 top-10 mt-1 w-80 sm:w-96 rounded-2xl bg-[#09090b]/80 backdrop-blur-2xl border border-white/[0.12] shadow-[0_20px_50px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.1)] z-50 overflow-hidden font-sans animate-in fade-in zoom-in-95 duration-100">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.08] bg-white/[0.02]">
                 <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
                   Sentinel Detections
                 </span>
-                <span className="text-[10px] font-mono text-zinc-500">
+                <span className="text-[10px] font-mono text-zinc-400">
                   {unreadCount} open alerts
                 </span>
               </div>
 
-              <div className="divide-y divide-zinc-800/80 max-h-72 overflow-y-auto">
+              <div className="divide-y divide-white/[0.06] max-h-72 overflow-y-auto">
                 {alerts.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-zinc-500 font-sans">
+                  <div className="p-6 text-center text-xs text-zinc-400 font-sans">
                     All cloud telemetry nominal. No active anomalies.
                   </div>
                 ) : (
@@ -174,9 +203,9 @@ export function Topbar({ title, subtitle }: TopbarProps) {
                       key={alert.id}
                       href="/anomalies"
                       onClick={() => setShowAlerts(false)}
-                      className="p-3.5 hover:bg-zinc-900/60 transition-colors flex items-start gap-3 block"
+                      className="p-3.5 hover:bg-white/[0.06] transition-colors flex items-start gap-3 block"
                     >
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 mt-1" />
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0 mt-1 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
                       <div className="space-y-0.5 truncate flex-1">
                         <div className="text-xs font-semibold text-white truncate">
                           {alert.title}
@@ -190,7 +219,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
                 )}
               </div>
 
-              <div className="p-2 border-t border-zinc-800 bg-zinc-950 text-center">
+              <div className="p-2 border-t border-white/[0.08] bg-white/[0.02] text-center">
                 <Link
                   href="/anomalies"
                   onClick={() => setShowAlerts(false)}
@@ -207,7 +236,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
         <Link
           href="/settings"
           title="Account Settings"
-          className="w-8 h-8 rounded-full overflow-hidden border border-zinc-700 hover:border-zinc-500 flex items-center justify-center transition-colors shadow-[0_0_8px_rgba(255,255,255,0.1)] bg-zinc-800"
+          className="w-8 h-8 rounded-full overflow-hidden border border-white/[0.15] hover:border-white/30 flex items-center justify-center transition-colors shadow-[0_0_10px_rgba(255,255,255,0.12)] bg-zinc-900"
         >
           <img
             src="/profile-avatar.jpg"

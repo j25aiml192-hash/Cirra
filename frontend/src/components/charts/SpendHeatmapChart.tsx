@@ -165,7 +165,7 @@ export function SpendHeatmapChart({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h3 className="font-bold text-[#EDEAE0] text-base sm:text-[18px] tracking-tight">
+            <h3 className="font-bold text-[#FFFFFF] text-base sm:text-[18px] tracking-tight">
               {title}
             </h3>
             <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-800/60 px-2 py-0.5 rounded-full">
@@ -274,7 +274,7 @@ export function SpendHeatmapChart({
                 Upcoming billing cycle on {hoveredDay.dateStr} (no spend telemetry yet)
               </span>
             ) : hoveredDay.count > 0 ? (
-              <span className="text-[#EDEAE0] font-medium">
+              <span className="text-[#FFFFFF] font-medium">
                 <strong className="text-[#38dfca]">{hoveredDay.count} billing events</strong> on{" "}
                 {hoveredDay.dateStr} (${formatNumber(hoveredDay.spend)} spend velocity)
               </span>
@@ -282,7 +282,7 @@ export function SpendHeatmapChart({
               <span>No spend events recorded on {hoveredDay.dateStr}</span>
             )
           ) : (
-            <span className="text-[#EDEAE0]">
+            <span className="text-[#FFFFFF]">
               <strong className="text-[#38dfca]">18 billing events</strong> on Fri, Nov 27, 2026 ($2,840 spend velocity)
             </span>
           )}

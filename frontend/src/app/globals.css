@@ -14,13 +14,12 @@
   --card-border:       #1f1f23;
   --card-border-hover: #2e2e34;
 
-  /* Sherwin-Williams Alabaster SW 7008 (#EDEAE0) */
-  --color-alabaster:   #EDEAE0;
-  --text-ink:          #EDEAE0;
-  --text-ink-soft:     #DDD8CA;
-  --text-graphite:     #C7C1B0;
-  --text-slate:        #ABA491;
-  --text-muted:        #8C8573;
+  /* Universal White Typography System */
+  --text-ink:          #ffffff;
+  --text-ink-soft:     #f4f4f5;
+  --text-graphite:     #a1a1aa;
+  --text-slate:        #71717a;
+  --text-muted:        #52525b;
 
   --hairline:          #1f1f23;
   --hairline-soft:     #17171a;
@@ -39,7 +38,7 @@ html {
 body {
   background: #000000;
   font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", system-ui, sans-serif;
-  color: #EDEAE0;
+  color: #ffffff;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -48,33 +47,14 @@ body {
 /* Background canvas for all pages */
 .cirra-bg-canvas {
   background-color: #000000;
-  color: #EDEAE0;
+  color: #ffffff;
   min-height: 100vh;
 }
 
-/* Sherwin-Williams Alabaster (SW 7008: #EDEAE0) Universal Typography Enforcement */
+/* Universal Pure White Typography */
 h1, h2, h3, h4, h5, h6,
 .hero-display, .display-lg, .display-md, .tagline, .body-strong {
-  color: #EDEAE0 !important;
-}
-
-/* Enforce SW 7008 Alabaster across all text hierarchy: primary, secondary & subtle */
-.text-white,
-.text-zinc-100,
-.text-zinc-200 {
-  color: #EDEAE0 !important;
-}
-
-.text-zinc-300 {
-  color: #DDD8CA !important;
-}
-
-.text-zinc-400 {
-  color: #C7C1B0 !important;
-}
-
-.hover\:text-white:hover {
-  color: #EDEAE0 !important;
+  color: #ffffff;
 }
 
 /* 02 — Typography Scale: SF Pro Display + SF Pro Text (Inter substituted) */

@@ -189,14 +189,14 @@ export function MultiCloudSpendChart({
               dataKey="date"
               axisLine={{ stroke: "#27272a" }}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
               dy={6}
             />
 
             <YAxisAny
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
               tickFormatter={(val: number) =>
                 `$${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}`
               }
@@ -314,14 +314,14 @@ export function SpendVelocityChart({
               dataKey="date"
               axisLine={{ stroke: "#27272a" }}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
               dy={6}
             />
 
             <YAxisAny
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
               tickFormatter={(val: number) =>
                 `$${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}`
               }

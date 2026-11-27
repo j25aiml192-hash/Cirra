@@ -36,7 +36,7 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
           <CartesianGridAny strokeDasharray="3 3" horizontal={false} stroke="#1f1f23" />
           <XAxisAny
             type="number"
-            stroke="#EDEAE0"
+            stroke="#FFFFFF"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -45,7 +45,7 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
           <YAxisAny
             type="category"
             dataKey="model"
-            stroke="#EDEAE0"
+            stroke="#FFFFFF"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -56,7 +56,7 @@ export function ModelCostChart({ data }: ModelCostChartProps) {
               backgroundColor: "#09090b",
               borderRadius: "12px",
               border: "1px solid #27272a",
-              color: "#EDEAE0",
+              color: "#FFFFFF",
               fontSize: "12px",
               boxShadow: "0 10px 30px -4px rgba(0,0,0,0.5)",
             }}

@@ -226,12 +226,12 @@ export function SpendCandlestickChart({
                 strokeDasharray="4 4"
                 strokeWidth={1}
               />
-              {/* Y-Axis Label (Left) in Sherwin-Williams Alabaster SW 7008 (#EDEAE0) */}
+              {/* Y-Axis Label (Left) in Sherwin-Williams Alabaster SW 7008 (#FFFFFF) */}
               <text
                 x={padding.left - 12}
                 y={y + 4}
                 textAnchor="end"
-                fill="#EDEAE0"
+                fill="#FFFFFF"
                 fontSize={12}
                 fontWeight={500}
                 className="select-none"
@@ -325,12 +325,12 @@ export function SpendCandlestickChart({
                 )}
               />
 
-              {/* X-Axis Date Label at the Bottom in Alabaster (#EDEAE0) */}
+              {/* X-Axis Date Label at the Bottom in Alabaster (#FFFFFF) */}
               <text
                 x={xCenter}
                 y={chartHeight - 12}
                 textAnchor="middle"
-                fill="#EDEAE0"
+                fill="#FFFFFF"
                 fontSize={count > 8 ? 10 : 12}
                 fontWeight={500}
                 className="select-none"
@@ -353,7 +353,7 @@ export function SpendCandlestickChart({
         >
           {/* Header: Date + Trend Badge */}
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800 text-xs">
-            <span className="font-bold text-[#EDEAE0]">
+            <span className="font-bold text-[#FFFFFF]">
               {hoveredCandle.candle.date} Telemetry
             </span>
             <span
@@ -374,7 +374,7 @@ export function SpendCandlestickChart({
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
             <div className="flex items-center justify-between">
               <span className="text-[#C7C1B0]">Open:</span>
-              <span className="font-bold text-[#EDEAE0]">
+              <span className="font-bold text-[#FFFFFF]">
                 ${formatNumber(hoveredCandle.candle.open)}
               </span>
             </div>
@@ -392,7 +392,7 @@ export function SpendCandlestickChart({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-[#C7C1B0]">Close:</span>
-              <span className="font-bold text-[#EDEAE0]">
+              <span className="font-bold text-[#FFFFFF]">
                 ${formatNumber(hoveredCandle.candle.close)}
               </span>
             </div>
@@ -403,25 +403,25 @@ export function SpendCandlestickChart({
             <div className="mt-2 pt-2 border-t border-zinc-800/80 space-y-1 text-[11px]">
               <div className="flex items-center justify-between text-zinc-400">
                 <span>AWS:</span>
-                <span className="font-bold text-[#EDEAE0]">
+                <span className="font-bold text-[#FFFFFF]">
                   ${formatNumber(hoveredCandle.candle.aws)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span>GCP:</span>
-                <span className="font-bold text-[#EDEAE0]">
+                <span className="font-bold text-[#FFFFFF]">
                   ${formatNumber(hoveredCandle.candle.gcp)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span>OpenAI:</span>
-                <span className="font-bold text-[#EDEAE0]">
+                <span className="font-bold text-[#FFFFFF]">
                   ${formatNumber(hoveredCandle.candle.openai)}
                 </span>
               </div>
               <div className="flex items-center justify-between text-zinc-400">
                 <span>Anthropic:</span>
-                <span className="font-bold text-[#EDEAE0]">
+                <span className="font-bold text-[#FFFFFF]">
                   ${formatNumber(hoveredCandle.candle.anthropic)}
                 </span>
               </div>

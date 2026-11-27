@@ -14,9 +14,7 @@ import {
   Zap,
   PhoneCall,
   Settings,
-  Search,
-  Bell,
-  MoreHorizontal,
+  ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAnomalies } from "@/hooks/useAnomalies";
@@ -25,12 +23,10 @@ interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string; size?: number | string }>;
-  badge?: string;
-  hasChevron?: boolean;
   matchPrefix?: boolean;
 }
 
-const ALL_NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: NavItem[] = [
   {
     name: "Dashboard",
     href: "/dashboard",
@@ -76,17 +72,18 @@ const ALL_NAV_ITEMS: NavItem[] = [
     href: "/calls",
     icon: PhoneCall,
   },
-  {
-    name: "Settings",
-    href: "/settings",
-    icon: Settings,
-    matchPrefix: true,
-  },
 ];
+
+const SETTINGS_ITEM: NavItem = {
+  name: "Settings",
+  href: "/settings",
+  icon: Settings,
+  matchPrefix: true,
+};
 
 export function Sidebar() {
   const pathname = usePathname();
-  const [filterQuery, setFilterQuery] = React.useState("");
+  const [isHovered, setIsHovered] = React.useState(false);
 
   const { data: anomalies } = useAnomalies("open");
   const openCount = Array.isArray(anomalies) ? anomalies.length : 0;
@@ -101,136 +98,138 @@ export function Sidebar() {
     return pathname === item.href;
   };
 
-  const visibleItems = React.useMemo(() => {
-    if (!filterQuery.trim()) return ALL_NAV_ITEMS;
-    return ALL_NAV_ITEMS.filter((i) =>
-      i.name.toLowerCase().includes(filterQuery.toLowerCase())
-    );
-  }, [filterQuery]);
-
   return (
-    <aside className="w-64 fixed left-0 top-0 bottom-0 h-screen bg-black border-r border-zinc-800/80 flex flex-col justify-between p-3 z-40 select-none overflow-y-auto font-sans scrollbar-none">
-      {/* Top Stack: Cirra Logo Brand + Find Search + Navigation Items */}
-      <div className="space-y-3.5">
-        {/* Cirra Logo & Brand Header */}
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-3 px-2.5 py-2.5 rounded-xl hover:bg-zinc-900/50 transition-colors group"
-        >
-          <img
-            src="/cirra-logo.png"
-            alt="Cirra Logo"
-            className="w-7 h-7 rounded-lg object-contain shadow-[0_0_10px_rgba(5,150,105,0.3)]"
-          />
-          <span className="text-xl font-bold tracking-tight text-white font-sans group-hover:text-emerald-400 transition-colors">
-            cirra
-          </span>
-        </Link>
+    <aside
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className={cn(
+        "fixed left-3.5 top-14 z-40 select-none font-sans transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+        isHovered ? "w-60" : "w-[62px]"
+      )}
+    >
+      {/* Attached Glassmorphic Dock - Translucent, Frosted Glass with Specular Light Rim */}
+      <div className="relative rounded-b-[26px] rounded-t-none bg-[#09090b]/55 backdrop-blur-2xl backdrop-saturate-[180%] border-x border-b border-white/[0.12] border-t-0 shadow-[0_24px_50px_rgba(0,0,0,0.7),inset_1px_0_0_0_rgba(255,255,255,0.08),inset_-1px_0_0_0_rgba(255,255,255,0.08),inset_0_-1px_1px_0_rgba(255,255,255,0.12)] p-2 flex flex-col justify-between overflow-hidden">
+        {/* Subtle Specular Sheen Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] via-transparent to-white/[0.02] pointer-events-none rounded-b-[26px]" />
 
-        {/* Vercel 'Find [F]' search input */}
-        <div className="relative px-0.5">
-          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            value={filterQuery}
-            onChange={(e) => setFilterQuery(e.target.value)}
-            placeholder="Find"
-            className="w-full h-9 pl-9 pr-7 text-xs sm:text-sm font-mono bg-zinc-900/80 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-600/60 transition-colors"
-          />
-          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-500 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700/60 pointer-events-none">
-            F
-          </kbd>
-        </div>
-
-        {/* Navigation List - Larger, comfortable editorial typography */}
-        <nav className="space-y-1 pt-1">
-          {visibleItems.map((item) => {
+        {/* Navigation Items (Golden Ratio Centering, Aligned Directly Beneath Navbar Logo) */}
+        <nav className="space-y-1.5 py-1.5 relative z-10">
+          {NAV_ITEMS.map((item) => {
             const active = isItemActive(item);
             const Icon = item.icon;
-            const badgeValue =
-              item.name === "Anomalies" && openCount > 0
-                ? String(openCount)
-                : item.badge;
+            const hasAnomalies = item.name === "Anomalies" && openCount > 0;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                title={item.name}
                 className={cn(
-                  "px-3.5 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all group",
+                  "group relative flex items-center h-11 transition-all duration-200 cursor-pointer overflow-hidden",
                   active
-                    ? "bg-zinc-900 text-white font-semibold border-l-[3px] border-emerald-600 pl-3 shadow-[0_0_15px_rgba(5,150,105,0.2)]"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
+                    ? isHovered
+                      ? "bg-white text-black font-bold rounded-2xl px-2.5 shadow-none"
+                      : "bg-white text-black font-bold rounded-2xl justify-center w-full shadow-none"
+                    : isHovered
+                    ? "text-zinc-200 hover:text-white hover:bg-white/[0.08] rounded-2xl px-2.5"
+                    : "text-zinc-400 hover:text-white rounded-2xl justify-center w-full"
                 )}
               >
-                <div className="flex items-center gap-3 truncate">
-                  <Icon
-                    size={18}
-                    className={cn(
-                      "flex-shrink-0 transition-colors",
-                      active ? "text-emerald-400" : "text-zinc-500 group-hover:text-zinc-300"
-                    )}
-                  />
-                  <span className="truncate text-[15px] font-medium tracking-tight">
-                    {item.name}
-                  </span>
+                {/* Icon Container: Glassmorphic Squircle (Centered via Golden Ratio) */}
+                <div
+                  className={cn(
+                    "w-[38px] h-[38px] rounded-[13px] flex items-center justify-center shrink-0 transition-all duration-200",
+                    active
+                      ? isHovered
+                        ? "text-black"
+                        : "text-black"
+                      : isHovered
+                      ? "bg-white/[0.05] border border-white/[0.08] text-zinc-300 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+                      : "bg-white/[0.04] border border-white/[0.07] text-zinc-400 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                  )}
+                >
+                  <Icon size={19} />
                 </div>
 
-                {badgeValue && (
+                {/* Expanded Label Text (hidden when collapsed so margin never pushes icon off-center) */}
+                {isHovered && (
                   <span
                     className={cn(
-                      "ml-auto text-xs font-mono font-bold px-2 py-0.5 rounded-full",
-                      item.name === "Anomalies"
-                        ? "bg-emerald-950/90 text-emerald-300 border border-emerald-700/80 shadow-[0_0_8px_rgba(5,150,105,0.4)]"
-                        : "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                      "ml-3 text-[13.5px] font-medium tracking-tight whitespace-nowrap transition-all duration-200 truncate",
+                      active ? "text-black font-semibold" : "text-zinc-200 group-hover:text-white"
                     )}
                   >
-                    {badgeValue}
+                    {item.name}
                   </span>
+                )}
+
+                {/* Badge for Anomalies when expanded */}
+                {hasAnomalies && isHovered && (
+                  <span className="ml-auto text-[10px] font-mono font-extrabold px-1.5 py-0.5 rounded-full bg-rose-500 text-white shrink-0 shadow-[0_0_8px_rgba(244,63,94,0.6)]">
+                    {openCount}
+                  </span>
+                )}
+
+                {/* Badge dot when collapsed */}
+                {hasAnomalies && !isHovered && (
+                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-black/40 shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
                 )}
               </Link>
             );
           })}
         </nav>
-      </div>
 
-      {/* Bottom Stack: User Profile Pill */}
-      <div className="pt-3 border-t border-zinc-800/80">
-        {/* User Profile Pill: Avatar + Name + ... + Bell */}
-        <div className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-900/60 transition-colors group">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-full overflow-hidden border border-emerald-600/50 flex-shrink-0 shadow-[0_0_8px_rgba(5,150,105,0.25)] bg-zinc-800">
-              <img
-                src="/profile-avatar.jpg"
-                alt="hiten kumar"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <span className="text-sm font-semibold text-zinc-200 truncate group-hover:text-white">
-              hiten kumar
-            </span>
-          </div>
+        {/* Glass Divider above Settings */}
+        <div className="my-2 border-t border-white/[0.1] mx-1 relative z-10" />
 
-          <div className="flex items-center gap-1.5 text-zinc-500">
+        {/* Bottom: Settings item */}
+        {(() => {
+          const active = isItemActive(SETTINGS_ITEM);
+          const Icon = SETTINGS_ITEM.icon;
+
+          return (
             <Link
-              href="/settings"
-              className="p-1 hover:text-white rounded transition-colors"
-              title="Organization Settings"
+              href={SETTINGS_ITEM.href}
+              title={SETTINGS_ITEM.name}
+              className={cn(
+                "group relative flex items-center h-11 transition-all duration-200 cursor-pointer overflow-hidden relative z-10",
+                active
+                  ? isHovered
+                    ? "bg-white text-black font-bold rounded-2xl px-2.5 shadow-none"
+                    : "bg-white text-black font-bold rounded-2xl justify-center w-full shadow-none"
+                  : isHovered
+                  ? "text-zinc-200 hover:text-white hover:bg-white/[0.08] rounded-2xl px-2.5"
+                  : "text-zinc-400 hover:text-white rounded-2xl justify-center w-full"
+              )}
             >
-              <MoreHorizontal className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/anomalies"
-              className="p-1 hover:text-white rounded transition-colors relative"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
-              {openCount > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.9)] absolute top-0.5 right-0.5" />
+              <div
+                className={cn(
+                  "w-[38px] h-[38px] rounded-[13px] flex items-center justify-center shrink-0 transition-all duration-200",
+                  active
+                    ? isHovered
+                      ? "text-black"
+                      : "text-black"
+                    : isHovered
+                    ? "bg-white/[0.05] border border-white/[0.08] text-zinc-300 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
+                    : "bg-white/[0.04] border border-white/[0.07] text-zinc-400 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
+                )}
+              >
+                <Icon size={19} />
+              </div>
+
+              {isHovered && (
+                <span
+                  className={cn(
+                    "ml-3 text-[13.5px] font-medium tracking-tight whitespace-nowrap transition-all duration-200 truncate",
+                    active ? "text-black font-semibold" : "text-zinc-200 group-hover:text-white"
+                  )}
+                >
+                  {SETTINGS_ITEM.name}
+                </span>
               )}
             </Link>
-          </div>
-        </div>
+          );
+        })()}
       </div>
     </aside>
   );

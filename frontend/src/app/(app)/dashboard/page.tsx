@@ -54,7 +54,10 @@ import { formatNumber, cn } from "@/lib/utils";
 import { apiFetch } from "@/lib/api";
 import { ProviderLogo } from "@/components/ui/provider-logos";
 import { ThinkingPill } from "@/components/ui/thinking-pill";
+import { ChromePillButton } from "@/components/ui/ChromePillButton";
 import { MagicBento, MagicBentoCard } from "@/components/ui/MagicBento";
+import { CirraGlassCard } from "@/components/ui/CirraGlassCard";
+import { SemiCircleDotGauge } from "@/components/ui/SemiCircleDotGauge";
 import type { Period } from "@/types";
 
 export default function DashboardPage() {
@@ -64,7 +67,6 @@ export default function DashboardPage() {
   const [executiveView, setExecutiveView] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [usageExpanded, setUsageExpanded] = useState(true);
   const [copiedPill, setCopiedPill] = useState(false);
   const [chartView, setChartView] = useState<"candles" | "bars">("candles");
 
@@ -106,6 +108,16 @@ export default function DashboardPage() {
   const coverageSub = data
     ? `${data.attributionCoverage.resourcesCount} of ${data.attributionCoverage.totalResources} tagged`
     : "0 of 0 tagged";
+
+  const dailySpendTotal = data?.total_spend_mtd ? Math.round(data.total_spend_mtd / 30) : 2847;
+  const dailyCloudSpend = data?.cloud_spend_mtd ? Math.round(data.cloud_spend_mtd / 30) : 1902;
+  const dailyAiSpend = data?.ai_spend_mtd ? Math.round(data.ai_spend_mtd / 30) : 945;
+  const cloudRatio = data?.total_spend_mtd && data.total_spend_mtd > 0
+    ? ((data.cloud_spend_mtd / data.total_spend_mtd) * 100).toFixed(1)
+    : "66.8";
+  const aiRatio = data?.total_spend_mtd && data.total_spend_mtd > 0
+    ? ((data.ai_spend_mtd / data.total_spend_mtd) * 100).toFixed(1)
+    : "33.2";
 
   const providers = ["All", "AWS", "GCP", "OpenAI", "Anthropic"];
 
@@ -295,8 +307,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* VERCEL-STYLE SUB-HEADER TOOLBAR: SEARCH + SHORTCUT [/] + FILTER + VIEW TOGGLE */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        {/* VERCEL-STYLE SUB-HEADER TOOLBAR: SEARCH + SHORTCUT [/] + FILTER + VIEW TOGGLE (Hidden on Incident Simulator) */}
+        {activeTab !== "simulator" && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 select-none">
             {/* Search Input with [/] Badge */}
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -305,19 +318,19 @@ export default function DashboardPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search services, models, clusters, or workloads..."
-                className="w-full h-9 pl-9 pr-10 text-xs font-mono bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-600/50 transition-colors"
+                placeholder="Search Projects..."
+                className="w-full h-9 pl-9 pr-10 text-xs font-mono bg-[#09090b] border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-700 transition-colors"
               />
-              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-zinc-800 border border-zinc-700 rounded pointer-events-none">
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-0.5 text-[10px] font-mono text-zinc-500 bg-zinc-800/80 border border-zinc-700/80 rounded pointer-events-none">
                 /
               </kbd>
             </div>
 
-            {/* Filter Pills & View Mode Toggles */}
-            <div className="flex items-center gap-2 self-end sm:self-auto">
-              {/* Provider Quick Filter Pill */}
-              <div className="flex items-center gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800 text-xs font-mono">
-                <Filter className="w-3.5 h-3.5 text-zinc-500 ml-2 mr-1" />
+            {/* Right Controls: Filters */}
+            <div className="flex items-center gap-2.5 self-end sm:self-auto">
+              {/* Sliders / Filter icon button */}
+              <div className="flex items-center gap-1 bg-[#09090b] p-1 rounded-lg border border-zinc-800 text-xs font-mono">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 mx-1" />
                 {providers.map((p) => (
                   <button
                     key={p}
@@ -325,7 +338,7 @@ export default function DashboardPage() {
                     onClick={() => setSelectedProvider(p)}
                     className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all cursor-pointer ${
                       selectedProvider === p
-                        ? "bg-emerald-700 hover:bg-emerald-600 text-white font-bold shadow-[0_0_10px_rgba(4,120,87,0.35)]"
+                        ? "bg-zinc-800 text-white font-bold"
                         : "text-zinc-400 hover:text-white"
                     }`}
                   >
@@ -333,43 +346,9 @@ export default function DashboardPage() {
                   </button>
                 ))}
               </div>
-
-              {/* View Switcher (Grid / List) */}
-              <div className="flex items-center bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    viewMode === "grid" ? "bg-emerald-700 text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                  title="Grid View"
-                >
-                  <Grid className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={`p-1.5 rounded-md transition-colors ${
-                    viewMode === "list" ? "bg-emerald-700 text-white" : "text-zinc-400 hover:text-white"
-                  }`}
-                  title="List View"
-                >
-                  <List className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Onboard / Telemetry Pill (like Vercel 'Onboard Your Agent ⎘') */}
-              <button
-                type="button"
-                onClick={handleCopyTelemetry}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-[11px] font-mono text-zinc-300 transition-colors"
-                title="Copy Telemetry Norm"
-              >
-                <span>Audited FOCUS 1.0</span>
-                {copiedPill ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-zinc-500" />}
-              </button>
             </div>
           </div>
+        )}
 
           {/* Executive View Highlight Banner */}
           {executiveView && (
@@ -425,286 +404,132 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* TAB 1: OVERVIEW (THE ICONIC VERCEL 2-COLUMN DASHBOARD) */}
+          {/* TAB 1: OVERVIEW (MATCHING REFERENCE VERCEL 2-COLUMN DASHBOARD) */}
           {activeTab === "overview" && (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-              {/* LEFT COLUMN: USAGE & ALERTS (Inspired by Vercel Usage / Alerts Cards) */}
-              <div className="lg:col-span-4 space-y-5">
-                {/* 1. USAGE CARD (Styled in Luminous Emerald/Teal Glass Theme) */}
-                <div className="relative p-6 rounded-3xl bg-gradient-to-b from-[#031d1b] via-[#021312] to-[#010908] border border-teal-500/20 font-mono space-y-4 overflow-hidden shadow-[0_0_35px_-5px_rgba(20,184,166,0.25),inset_0_1px_1px_rgba(255,255,255,0.1)] transition-all">
-                  {/* Subtle Grid Backdrop */}
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 opacity-[0.035] bg-[linear-gradient(to_right,#2dd4bf_1px,transparent_1px),linear-gradient(to_bottom,#2dd4bf_1px,transparent_1px)] bg-[size:20px_20px]"
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* LEFT COLUMN: USAGE & ALERTS (Dimensions and exact configuration from Reference Image 2) */}
+              <div className="lg:col-span-4 space-y-6">
+                {/* Section Header */}
+                <div className="space-y-2">
+                  <h3 className="font-bold text-white text-sm font-sans tracking-tight">Usage</h3>
+
+                  {/* 1. USAGE CARD: 3D Cirra GlassCard */}
+                  <CirraGlassCard
+                    cloudSpendFormatted={cloudSpendFormatted}
+                    cloudSpendBudget="$150K"
+                    aiSpendFormatted={aiSpendFormatted}
+                    aiSpendBudget="$50K"
+                    coveragePercentFormatted={coveragePercentFormatted}
+                    projectedFormatted={projectedFormatted}
+                    potentialSavingsFormatted={`+$${formatNumber(data?.potential_savings_monthly ?? 34200)}/mo`}
                   />
-
-                  {/* Top Ambient Glow */}
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-48 h-24 bg-teal-500/15 blur-2xl rounded-full"
-                  />
-
-                  {/* Luminous Bottom Rim Light Bar */}
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-x-0 bottom-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-90 shadow-[0_0_12px_rgba(52,211,153,0.8)]"
-                  />
-                  <div
-                    aria-hidden="true"
-                    className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-20 bg-emerald-500/20 blur-2xl rounded-full"
-                  />
-
-                  {/* Header Row */}
-                  <div className="relative z-10 flex items-center justify-between pb-3 border-b border-teal-500/20">
-                    <div className="flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)] animate-pulse" />
-                      <h3 className="font-bold text-white text-base tracking-tight">Usage</h3>
-                      <span className="text-[10px] text-teal-400/80 font-mono uppercase tracking-wider font-semibold">
-                        Last 30 days
-                      </span>
-                    </div>
-                    <Link
-                      href="/spend/cloud"
-                      className="px-3 py-1 rounded-full text-xs font-semibold bg-teal-950/70 hover:bg-teal-900/90 text-teal-200 border border-teal-500/30 hover:border-teal-400/60 shadow-[0_0_12px_rgba(20,184,166,0.2)] transition-all flex items-center gap-1"
-                    >
-                      <span>Manage</span>
-                    </Link>
-                  </div>
-
-                  {/* Telemetry Metric Items with Circular Gauge / Ring Indicator */}
-                  <div className="relative z-10 space-y-4 text-xs">
-                    {/* Item 1: Cloud Infrastructure */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-zinc-300">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full border border-teal-400/80 bg-teal-400/40 shadow-[0_0_6px_rgba(45,212,191,0.7)]" />
-                          <span className="text-zinc-200 font-medium">Multi-Cloud Infra</span>
-                        </span>
-                        <span className="font-bold text-white tracking-tight">{cloudSpendFormatted} / $150K</span>
-                      </div>
-                      <div className="h-2 w-full bg-black/60 rounded-full overflow-hidden border border-teal-900/40 p-[1px]">
-                        <div
-                          className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(52,211,153,0.6)]"
-                          style={{
-                            width: `${Math.min(100, Math.round(((data?.cloud_spend_mtd ?? 85000) / 150000) * 100))}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Item 2: AI Foundation Models */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-zinc-300">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full border border-cyan-400/80 bg-cyan-400/40 shadow-[0_0_6px_rgba(34,211,238,0.7)]" />
-                          <span className="text-zinc-200 font-medium">AI Inference Tokens</span>
-                        </span>
-                        <span className="font-bold text-white tracking-tight">{aiSpendFormatted} / $50K</span>
-                      </div>
-                      <div className="h-2 w-full bg-black/60 rounded-full overflow-hidden border border-teal-900/40 p-[1px]">
-                        <div
-                          className="h-full bg-gradient-to-r from-cyan-500 to-teal-400 rounded-full transition-all duration-500 shadow-[0_0_12px_rgba(45,212,191,0.6)]"
-                          style={{
-                            width: `${Math.min(100, Math.round(((data?.ai_spend_mtd ?? 42000) / 50000) * 100))}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Item 3: FOCUS Tag Attribution */}
-                    <div className="space-y-1.5">
-                      <div className="flex items-center justify-between text-zinc-300">
-                        <span className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full border border-emerald-400/80 bg-emerald-400/40 shadow-[0_0_6px_rgba(52,211,153,0.8)]" />
-                          <span className="text-zinc-200 font-medium">Cost Attribution</span>
-                        </span>
-                        <span className="font-bold text-white tracking-tight">{coveragePercentFormatted} / 100%</span>
-                      </div>
-                      <div className="h-2 w-full bg-black/60 rounded-full overflow-hidden border border-teal-900/40 p-[1px]">
-                        <div
-                          className="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 rounded-full transition-all duration-500 shadow-[0_0_14px_rgba(52,211,153,0.7)]"
-                          style={{ width: `${Math.min(100, data?.attributionCoverage.percentage ?? 84.2)}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Collapsible extra metrics */}
-                    {usageExpanded && (
-                      <div className="pt-3 border-t border-teal-500/20 space-y-2 text-[11px] text-zinc-300">
-                        <div className="flex items-center justify-between">
-                          <span className="text-zinc-400">Month-End Forecast</span>
-                          <span className="text-white font-bold">{projectedFormatted} Run-rate</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-zinc-400">Pipeline Optimization</span>
-                          <span className="text-emerald-400 font-bold drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">
-                            +${formatNumber(data?.potential_savings_monthly ?? 34200)}/mo
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Expand / Collapse Chevron */}
-                  <button
-                    type="button"
-                    onClick={() => setUsageExpanded((p) => !p)}
-                    className="relative z-10 w-full pt-1 flex items-center justify-center text-teal-400/70 hover:text-teal-200 transition-colors cursor-pointer"
-                  >
-                    {usageExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
                 </div>
 
-                {/* 2. ALERTS CARD (Vercel Style) */}
-                <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 hover:border-zinc-700 transition-colors font-mono space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-                    <h3 className="font-bold text-white text-sm">Alerts & Telephony</h3>
-                    <span className="w-2 h-2 rounded-full bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.5)]" />
+                {/* Section 2: Telemetry Statistics & Semi-Circular Dot Arc Gauge (Replica of Reference Arc Graph) */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-white text-sm font-sans tracking-tight">Spend Statistics</h3>
                   </div>
 
-                  <div className="py-4 flex flex-col items-center justify-center text-center space-y-3">
-                    <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200">
-                      <Bell className="w-4 h-4 text-zinc-200" />
-                    </div>
-                    <p className="text-xs text-zinc-400 max-w-xs font-sans">
-                      Get real-time autonomous voice calls, Slack alerts & webhooks when spend spikes occur.
-                    </p>
-                    <Link
-                      href="/settings"
-                      className="px-4 py-2 rounded-full bg-zinc-100 hover:bg-white text-black text-xs font-bold font-mono uppercase tracking-wider transition-colors shadow-[0_0_12px_rgba(255,255,255,0.2)]"
-                    >
-                      Configure Alerts
-                    </Link>
+                  <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800/90 select-none">
+                    <SemiCircleDotGauge
+                      totalLabel="TOTAL"
+                      totalValue={`$${formatNumber(dailySpendTotal)}`}
+                      subValue="/day"
+                      outerMetric={{
+                        label: "Cloud Infrastructure",
+                        amount: `$${formatNumber(dailyCloudSpend)}`,
+                        change: "+15.2%",
+                        percentage: `${cloudRatio}%`,
+                        color: "#3b82f6",
+                        accentBarColor: "bg-blue-500",
+                      }}
+                      innerMetric={{
+                        label: "AI Foundation Models",
+                        amount: `$${formatNumber(dailyAiSpend)}`,
+                        change: "+8.7%",
+                        percentage: `${aiRatio}%`,
+                        color: "#10b981",
+                        accentBarColor: "bg-emerald-500",
+                      }}
+                    />
                   </div>
-                </div>
-
-                {/* 3. RECENT ACTIVITY & DETECTIONS (Vercel 'Recent Previews' style) */}
-                <div className="p-5 rounded-2xl bg-[#09090b] border border-zinc-800 hover:border-zinc-700 transition-colors font-mono space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
-                    <h3 className="font-bold text-white text-sm">Recent Activity</h3>
-                    <Link href="/anomalies" className="text-[11px] text-zinc-400 hover:text-white underline">
-                      View all
-                    </Link>
-                  </div>
-
-                  {Array.isArray(anomaliesData) && anomaliesData.length > 0 ? (
-                    <div className="space-y-2 pt-1">
-                      {anomaliesData.slice(0, 3).map((a: any) => (
-                        <Link
-                          key={a.id}
-                          href="/anomalies"
-                          className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 flex items-center justify-between text-xs transition-colors block"
-                        >
-                          <div className="flex items-center gap-2 truncate">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
-                            <span className="text-zinc-200 font-medium truncate">{a.service || a.title || "Anomaly"}</span>
-                          </div>
-                          <span className="text-[10px] text-zinc-400 font-mono flex-shrink-0">
-                            ${formatNumber(Number(a.anomaly_cost || a.cost || 0))}
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-6 text-center text-xs text-zinc-500 font-sans">
-                      All systems nominal. No open spend anomalies.
-                    </div>
-                  )}
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: MONITORED WORKLOADS & CLOUD SERVICES (Vercel Projects Grid) */}
-              <div className="lg:col-span-8 space-y-5">
-                {/* Header: Projects (Count) */}
+              {/* RIGHT COLUMN: PROJECTS / WORKLOADS (Exact match to Reference Image 2 List Architecture) */}
+              <div className="lg:col-span-8 space-y-4">
+                {/* Header: Projects */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 font-mono">
-                    <h2 className="text-base font-bold text-white">Monitored Workloads</h2>
-                    <span className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-400">
-                      {filteredWorkloads.length}
-                    </span>
-                  </div>
+                  <h2 className="text-base font-bold text-white font-sans tracking-tight">Projects</h2>
                   <Link
                     href="/settings/connections"
-                    className="text-xs font-mono text-zinc-400 hover:text-white underline"
+                    className="text-xs font-mono text-zinc-400 hover:text-white"
                   >
                     Manage Connections →
                   </Link>
                 </div>
 
-                {/* MagicBento Grid of Workload Cards (Interactive Spotlight & Edge Light) */}
-                <MagicBento
-                  gap={16}
-                  radius={16}
-                  className={
-                    viewMode === "grid"
-                      ? "grid-cols-1 sm:grid-cols-2"
-                      : "grid-cols-1"
-                  }
-                  enableSpotlight={true}
-                  enableBorderGlow={true}
-                >
+                {/* High-density 1px Divider List of Workloads (Matching Reference Image 2) */}
+                <div className="rounded-2xl border border-zinc-800/90 bg-[#09090b] divide-y divide-zinc-800/80 overflow-hidden font-sans">
                   {filteredWorkloads.map((wl) => (
-                    <MagicBentoCard
+                    <Link
                       key={wl.id}
                       href={wl.url}
-                      radius={16}
-                      className="p-5 flex flex-col justify-between font-mono space-y-4"
+                      className="p-4 sm:p-4.5 hover:bg-zinc-900/50 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 group"
                     >
-                      {/* Top Row: Provider Brand Logo + Name + URL + Health Status */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-zinc-900/90 border border-zinc-800/90 flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-all group-hover:border-zinc-700 p-2 shadow-inner">
-                            <ProviderLogo
-                              provider={wl.provider}
-                              name={wl.name}
-                              size={24}
-                              className="shrink-0"
-                            />
-                          </div>
-                          <div className="space-y-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <h3 className="font-bold text-white text-sm group-hover:text-zinc-200 transition-colors">
-                                {wl.name}
-                              </h3>
-                              <ExternalLink className="w-3 h-3 text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            </div>
-                            <p className="text-xs text-zinc-400 truncate max-w-[180px] sm:max-w-[210px]">
-                              {wl.domain}
-                            </p>
-                          </div>
+                      {/* Left: Provider Brand Avatar + Name + URL */}
+                      <div className="flex items-center gap-3.5 min-w-0 md:w-56 lg:w-64">
+                        <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                          <ProviderLogo
+                            provider={wl.provider}
+                            name={wl.name}
+                            size={22}
+                            className="shrink-0"
+                          />
                         </div>
-
-                        {/* Health Indicator: Vercel double-ring checkmark */}
-                        <div className="flex items-center gap-1.5 flex-shrink-0">
-                          <div className="w-5 h-5 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-zinc-200">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-200" />
+                        <div className="space-y-0.5 truncate">
+                          <div className="flex items-center gap-1.5 truncate">
+                            <span className="font-bold text-white text-sm group-hover:text-zinc-200 transition-colors truncate">
+                              {wl.name}
+                            </span>
                           </div>
+                          <p className="text-xs text-zinc-500 truncate font-mono">
+                            {wl.domain}
+                          </p>
                         </div>
                       </div>
 
-                      {/* Middle & Bottom Rows: Git/Telemetry Commit Line */}
-                      <div className="pt-3 border-t border-zinc-800/80 space-y-2 text-xs">
-                        {/* Commit msg / Active spend line */}
-                        <div className="flex items-center gap-2 text-zinc-300 font-sans text-xs">
-                          <GitCommit className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                      {/* Center: Git commit / Telemetry event link */}
+                      <div className="flex-1 min-w-0 space-y-0.5 font-mono text-xs">
+                        <div className="flex items-center gap-2 text-zinc-300 truncate">
+                          <span className="text-zinc-500 shrink-0">⚯</span>
                           <span className="truncate">{wl.commitMsg}</span>
                         </div>
-
-                        {/* Branch & Last Synced Timestamp */}
-                        <div className="flex items-center justify-between text-[11px] text-zinc-500 font-mono">
-                          <span className="flex items-center gap-1">
-                            <GitBranch className="w-3 h-3 text-zinc-600" />
-                            <span>{wl.branch}</span>
-                          </span>
-                          <span className="font-semibold text-zinc-300">{wl.spend}</span>
+                        <div className="flex items-center gap-2 text-zinc-500 text-[11px] truncate">
+                          <GitBranch className="w-3 h-3 text-zinc-600 shrink-0" />
+                          <span className="truncate">{wl.branch} · 8h ago</span>
                         </div>
                       </div>
-                    </MagicBentoCard>
+
+                      {/* Right: Double Checkmark Ring + Status / Spend */}
+                      <div className="flex items-center gap-4 shrink-0 font-mono">
+                        <div className="text-right hidden sm:block">
+                          <span className="text-xs font-bold text-white block">{wl.spend}</span>
+                          <span className="text-[10px] text-zinc-500 uppercase">active stream</span>
+                        </div>
+
+                        {/* Reference Double-Checkmark Status Circle */}
+                        <div className="w-8 h-8 rounded-full bg-zinc-900/90 border border-zinc-700/80 flex items-center justify-center text-zinc-300 group-hover:border-emerald-500 group-hover:text-emerald-400 transition-colors">
+                          <CheckCircle2 className="w-4 h-4" />
+                        </div>
+                      </div>
+                    </Link>
                   ))}
-                </MagicBento>
+                </div>
 
                 {/* Embedded Top AI Keys Intelligence */}
-                <div className="rounded-2xl border border-zinc-800 bg-[#09090b] overflow-hidden">
+                <div className="rounded-2xl border border-zinc-800/90 bg-[#09090b] overflow-hidden mt-6">
                   <TopAiKeysCard data={data?.topAiKeys ?? []} loading={isLoading} embedded />
                 </div>
               </div>
@@ -719,7 +544,7 @@ export default function DashboardPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-[#EDEAE0] text-base font-mono">
+                      <h3 className="font-bold text-[#FFFFFF] text-base font-mono">
                         Monthly Spend Trajectory Matrix
                       </h3>
                       <span className="text-[10px] font-bold text-zinc-300 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
@@ -812,9 +637,6 @@ export default function DashboardPage() {
                       <ChalkAnomalyIcon size={24} />
                       <h4 className="text-sm font-bold text-white">Telemetry Sentinel</h4>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-300 border border-zinc-800">
-                      ACTIVE
-                    </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2.5 my-3 text-center">
                     <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
@@ -854,7 +676,7 @@ export default function DashboardPage() {
                     ].map((s) => (
                       <span
                         key={s.name}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900/90 text-[#EDEAE0] border border-zinc-800/90 hover:border-zinc-700 transition-all flex items-center gap-2 shadow-sm"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium bg-zinc-900/90 text-[#FFFFFF] border border-zinc-800/90 hover:border-zinc-700 transition-all flex items-center gap-2 shadow-sm"
                       >
                         <div className="w-5 h-5 rounded-md bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center shrink-0 p-0.5">
                           <ProviderLogo provider={s.provider} size={14} />
@@ -1114,9 +936,6 @@ function LiveScenarioPanel() {
             <h2 className="text-[18px] font-bold text-white tracking-tight font-mono">
               Live Incident Simulator
             </h2>
-            <span className="text-[10px] font-bold font-mono text-zinc-400 bg-zinc-900 border border-zinc-800 px-2.5 py-0.5 rounded-full">
-              CLICKHOUSE INJECTOR
-            </span>
           </div>
           <p className="text-[13px] text-zinc-400 font-sans mt-1">
             Simulate real infrastructure incidents by injecting synthetic anomalies directly into ClickHouse.
@@ -1155,31 +974,13 @@ function LiveScenarioPanel() {
           </div>
 
           <div className="mt-4">
-            <button
-              type="button"
+            <ChromePillButton
+              label="INJECT LEAKED KEY"
+              loading={loadingScenario === "leaked-key"}
+              success={successScenario === "leaked-key"}
               onClick={() => handleInject("leaked-key")}
-              disabled={loadingScenario === "leaked-key"}
-              className="w-full flex items-center justify-center cursor-pointer transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-75 focus:outline-none"
-            >
-              <ThinkingPill
-                label={
-                  loadingScenario === "leaked-key"
-                    ? "INJECTING"
-                    : successScenario === "leaked-key"
-                    ? "INJECTED // DETECTING"
-                    : "INJECT LEAKED KEY"
-                }
-                dots={loadingScenario === "leaked-key"}
-                width={280}
-                height={38}
-                fontSize={11}
-                fontWeight={700}
-                speed={loadingScenario === "leaked-key" ? 3.0 : 1.3}
-                colors={["#7f1d1d", "#b91c1c", "#dc2626", "#ef4444", "#f97316", "#dc2626", "#7f1d1d"]}
-                style={{ width: "100%" }}
-                className="w-full shadow-[0_0_18px_rgba(239,68,68,0.35)] hover:shadow-[0_0_24px_rgba(239,68,68,0.55)] transition-shadow"
-              />
-            </button>
+              disabled={loadingScenario !== null}
+            />
           </div>
         </div>
 
@@ -1201,31 +1002,13 @@ function LiveScenarioPanel() {
           </div>
 
           <div className="mt-4">
-            <button
-              type="button"
+            <ChromePillButton
+              label="INJECT RUNAWAY"
+              loading={loadingScenario === "runaway-process"}
+              success={successScenario === "runaway-process"}
               onClick={() => handleInject("runaway-process")}
-              disabled={loadingScenario === "runaway-process"}
-              className="w-full flex items-center justify-center cursor-pointer transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-75 focus:outline-none"
-            >
-              <ThinkingPill
-                label={
-                  loadingScenario === "runaway-process"
-                    ? "INJECTING"
-                    : successScenario === "runaway-process"
-                    ? "INJECTED // DETECTING"
-                    : "INJECT RUNAWAY"
-                }
-                dots={loadingScenario === "runaway-process"}
-                width={280}
-                height={38}
-                fontSize={11}
-                fontWeight={700}
-                speed={loadingScenario === "runaway-process" ? 3.0 : 1.3}
-                colors={["#4c1d95", "#6b21a8", "#7c3aed", "#a855f7", "#ec4899", "#7c3aed", "#4c1d95"]}
-                style={{ width: "100%" }}
-                className="w-full shadow-[0_0_18px_rgba(168,85,247,0.35)] hover:shadow-[0_0_24px_rgba(168,85,247,0.55)] transition-shadow"
-              />
-            </button>
+              disabled={loadingScenario !== null}
+            />
           </div>
         </div>
 
@@ -1247,31 +1030,13 @@ function LiveScenarioPanel() {
           </div>
 
           <div className="mt-4">
-            <button
-              type="button"
+            <ChromePillButton
+              label="INJECT BILL SURGE"
+              loading={loadingScenario === "bill-spike"}
+              success={successScenario === "bill-spike"}
               onClick={() => handleInject("bill-spike")}
-              disabled={loadingScenario === "bill-spike"}
-              className="w-full flex items-center justify-center cursor-pointer transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-75 focus:outline-none"
-            >
-              <ThinkingPill
-                label={
-                  loadingScenario === "bill-spike"
-                    ? "INJECTING"
-                    : successScenario === "bill-spike"
-                    ? "INJECTED // DETECTING"
-                    : "INJECT BILL SURGE"
-                }
-                dots={loadingScenario === "bill-spike"}
-                width={280}
-                height={38}
-                fontSize={11}
-                fontWeight={700}
-                speed={loadingScenario === "bill-spike" ? 3.0 : 1.3}
-                colors={["#78350f", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#10b981", "#78350f"]}
-                style={{ width: "100%" }}
-                className="w-full shadow-[0_0_18px_rgba(245,158,11,0.35)] hover:shadow-[0_0_24px_rgba(245,158,11,0.55)] transition-shadow"
-              />
-            </button>
+              disabled={loadingScenario !== null}
+            />
           </div>
         </div>
       </div>

@@ -135,60 +135,47 @@ export default function AnomaliesPage() {
       <Topbar />
 
       <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
-        {/* ── Written Overview Banner (Replacing stat cards) ──────── */}
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-800/80 bg-[#09090b] p-6 sm:p-7 select-none">
-          {/* Subtle ambient aura */}
-          <div
-            className="absolute -top-24 -right-24 w-96 h-96 rounded-full opacity-20 blur-[90px] pointer-events-none"
-            style={{
-              background: "radial-gradient(circle, #ef4444 0%, #dc2626 40%, transparent 75%)",
-            }}
+        {/* ── Top Stat Cards Grid (Matching Image 1) ──────── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard
+            label="OPEN ANOMALIES"
+            icon={<ChalkAnomalyIcon size={16} className="text-zinc-300" />}
+            value={String(anomalies.length)}
+            sub="Requires engineer review"
+            delta="Active"
+            deltaPositive={false}
+            loading={isLoading}
           />
-          <div
-            className="absolute -bottom-24 -left-24 w-96 h-96 rounded-full opacity-15 blur-[90px] pointer-events-none"
-            style={{
-              background: "radial-gradient(circle, #059669 0%, #10b981 40%, transparent 75%)",
-            }}
+          <StatCard
+            label="CRITICAL SEVERITY"
+            icon={<ChalkShieldIcon size={16} className="text-zinc-300" />}
+            value={String(criticalCount)}
+            sub="> 200% spend deviation"
+            delta="Immediate"
+            deltaPositive={false}
+            loading={isLoading}
           />
-
-          <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2 max-w-2xl">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse shadow-[0_0_8px_rgba(244,63,94,0.8)]" />
-                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-rose-400">
-                  REAL-TIME SPEND TELEMETRY & SURGE DETECTION
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-white font-mono tracking-tight">
-                {anomalies.length} Active Spend Anomalies Detected
-              </h2>
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed font-sans">
-                Cirra continuously compares live hourly billing telemetry against 30-day baseline forecasts. 
-                Currently, <span className="text-white font-semibold">{criticalCount} critical incident</span> exceeds 
-                +200% spend deviation and requires immediate engineer intervention. 14 benign fluctuations were auto-dismissed 
-                via pre-configured scaling guardrails this week with an average resolution speed of 18 minutes.
-              </p>
-            </div>
-
-            {/* Quick telemetry summary chips */}
-            <div className="flex flex-wrap lg:flex-col gap-2.5 shrink-0 font-mono text-xs">
-              <div className="px-3.5 py-2 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between gap-4">
-                <span className="text-zinc-400">Open Anomalies</span>
-                <span className="font-bold text-white text-sm">{anomalies.length}</span>
-              </div>
-              <div className="px-3.5 py-2 rounded-xl bg-rose-950/40 border border-rose-800/40 flex items-center justify-between gap-4">
-                <span className="text-rose-300">Critical (&gt;200%)</span>
-                <span className="font-bold text-rose-400 text-sm">{criticalCount}</span>
-              </div>
-              <div className="px-3.5 py-2 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-between gap-4">
-                <span className="text-zinc-400">Avg MTTR</span>
-                <span className="font-bold text-emerald-400 text-sm">18m (-60%)</span>
-              </div>
-            </div>
-          </div>
+          <StatCard
+            label="AUTO-DISMISSED"
+            icon={<ChalkCheckCircleIcon size={16} className="text-zinc-300" />}
+            value="14"
+            sub="Resolved via scaling r..."
+            delta="+8 this wk"
+            deltaPositive={false}
+            loading={isLoading}
+          />
+          <StatCard
+            label="AVG RESOLUTION TIME"
+            icon={<ChalkClockIcon size={16} className="text-zinc-300" />}
+            value="18m"
+            sub="Down from 45m last quarter"
+            delta="-60%"
+            deltaPositive={true}
+            loading={isLoading}
+          />
         </div>
 
-        {/* Anomaly rows as cards */}
+        {/* Anomaly rows as cards (Matching Images 2, 3, 4) */}
         <div className="space-y-4">
           <div className="flex items-center justify-between px-1">
             <h3 className="font-semibold text-white text-base font-mono">Active Spend Alerts</h3>
@@ -218,92 +205,78 @@ export default function AnomaliesPage() {
               return (
                 <div
                   key={anomaly.id}
-                  className="group relative bg-[#09090b] border border-zinc-800/80 hover:border-zinc-700/90 rounded-2xl p-5 sm:p-6 transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 overflow-hidden"
+                  className="group relative bg-[#09090b] border border-zinc-800/80 hover:border-zinc-700/90 rounded-2xl p-5 sm:p-6 transition-all duration-200 flex flex-col lg:flex-row lg:items-center justify-between gap-5"
                 >
-                  {/* Subtle left severity highlight bar */}
-                  <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 ${
-                      isCritical
-                        ? "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)]"
-                        : isHigh
-                        ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
-                        : "bg-emerald-500"
-                    }`}
-                  />
+                  <div className="space-y-2 flex-1 min-w-0">
+                    {/* Line 1: Severity Badge + Title + Surge % pill */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider ${
+                          isCritical
+                            ? "border border-red-500/40 bg-red-950/40 text-red-400"
+                            : isHigh
+                            ? "border border-amber-500/40 bg-amber-950/40 text-amber-400"
+                            : "border border-zinc-700/60 bg-zinc-800/60 text-zinc-300"
+                        }`}
+                      >
+                        {anomaly.severity}
+                      </span>
 
-                  <div className="flex items-start gap-4 flex-1 pl-1">
-                    {/* App / Provider Logo Avatar */}
-                    <div className="w-11 h-11 rounded-xl bg-zinc-900/90 border border-zinc-800 flex items-center justify-center shrink-0 shadow-sm mt-0.5 group-hover:border-zinc-700 transition-colors">
-                      <ProviderLogo
-                        provider={anomaly.provider}
-                        name={anomaly.serviceName}
-                        size={22}
-                      />
+                      <h4 className="font-bold text-white text-[15px] font-mono tracking-tight truncate">
+                        {anomaly.serviceName}
+                      </h4>
+
+                      <span className="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-zinc-900 border border-zinc-800 text-white">
+                        {anomaly.surgePercent}
+                      </span>
                     </div>
 
-                    <div className="space-y-1.5 flex-1 min-w-0">
-                      {/* Service Name & Surge Percentage (no pill boxes) */}
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <h4 className="font-bold text-white text-[15px] font-mono tracking-tight truncate">
-                          {anomaly.serviceName}
-                        </h4>
+                    {/* Line 2: Description */}
+                    <p className="text-xs text-zinc-300 font-mono leading-relaxed max-w-3xl">
+                      {typeof anomaly.explanation === "string"
+                        ? anomaly.explanation
+                        : anomaly.explanation?.summary}
+                    </p>
 
-                        <span
-                          className={`text-xs font-mono font-extrabold ${
-                            isCritical ? "text-rose-400" : "text-amber-400"
-                          }`}
-                        >
-                          {anomaly.surgePercent}
+                    {/* Line 3: Detection timestamp & Cost discrepancy */}
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-zinc-500">
+                      <span>Detected {anomaly.detected_at}</span>
+                      <span className="text-zinc-600">·</span>
+                      <span>
+                        Current:{" "}
+                        <span className="text-zinc-200 font-semibold">
+                          ${formatNumber(anomaly.currentCost)}
+                        </span>{" "}
+                        vs Expected:{" "}
+                        <span className="text-zinc-500">
+                          ${formatNumber(anomaly.expectedCost)}
                         </span>
-                      </div>
-
-                      {/* Explanation Description */}
-                      <p className="text-xs text-zinc-300 max-w-2xl font-mono leading-relaxed">
-                        {typeof anomaly.explanation === "string"
-                          ? anomaly.explanation
-                          : anomaly.explanation?.summary}
-                      </p>
-
-                      {/* Detection timestamp & Cost discrepancy */}
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5 text-xs font-mono">
-                        <span className="text-zinc-500">Detected {anomaly.detected_at}</span>
-                        <span className="text-zinc-600 hidden sm:inline">·</span>
-                        <span className="text-zinc-400">
-                          Current:{" "}
-                          <span className="text-rose-400 font-bold">
-                            ${formatNumber(anomaly.currentCost)}
-                          </span>{" "}
-                          vs Expected:{" "}
-                          <span className="text-zinc-400">
-                            ${formatNumber(anomaly.expectedCost)}
-                          </span>
-                        </span>
-                      </div>
+                      </span>
                     </div>
                   </div>
 
-                  {/* Actions Column */}
-                  <div className="flex items-center gap-3 self-end sm:self-center shrink-0">
+                  {/* Line Actions (Matching Images 2 & 3) */}
+                  <div className="flex items-center gap-3 self-end lg:self-center shrink-0">
                     {showKillSwitch && (
                       <button
                         type="button"
                         onClick={() => setKillSwitchTarget(anomaly)}
-                        className="text-xs font-semibold font-mono text-emerald-500 hover:text-emerald-400 transition-colors flex items-center gap-1.5 cursor-pointer py-1 px-1.5 hover:underline"
+                        className="px-4 py-1.5 rounded-full text-xs font-semibold font-mono border border-red-500/50 bg-[#1a080d] hover:bg-[#280c14] text-red-400 transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(239,68,68,0.15)] active:scale-95"
                       >
-                        <ShieldAlert className="w-3.5 h-3.5 text-emerald-500" />
+                        <ShieldAlert className="w-3.5 h-3.5 text-red-400 stroke-[2.2]" />
                         <span>Kill Switch</span>
                       </button>
                     )}
                     <button
                       type="button"
                       onClick={() => handleDismiss(anomaly.id)}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors font-mono cursor-pointer"
+                      className="px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors font-mono cursor-pointer"
                     >
                       Dismiss
                     </button>
                     <Link
                       href={`/anomalies/${anomaly.id}`}
-                      className="px-4 py-1.5 rounded-full text-xs font-bold font-mono bg-white text-black hover:bg-zinc-200 transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_10px_rgba(255,255,255,0.2)] hover:scale-[1.02]"
+                      className="px-4 py-1.5 rounded-full text-xs font-bold font-mono bg-white text-black hover:bg-zinc-200 transition-all flex items-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(255,255,255,0.2)] hover:scale-[1.02] active:scale-95"
                     >
                       <Eye className="w-3.5 h-3.5 text-black stroke-[2.5]" />
                       <span>View Details</span>

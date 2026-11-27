@@ -39,11 +39,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           className="pointer-events-none fixed top-0 right-0 w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.03),transparent_70%)] z-0"
         />
 
-        {/* Full-Height Vercel Left Sidebar */}
+        {/* Floating Capsule Dock Left Sidebar */}
         <Sidebar />
 
-        {/* Page Content docked to right of sidebar */}
-        <div className="lg:ml-64 min-h-screen bg-black pt-14 relative z-10">
+        {/* Page Content docked to right of floating sidebar rail */}
+        <div className="pl-[82px] min-h-screen bg-black pt-14 relative z-10 transition-all duration-300">
           {children}
         </div>
 

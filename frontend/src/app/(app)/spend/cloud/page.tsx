@@ -115,7 +115,7 @@ export default function CloudSpendPage() {
             />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold text-[#EDEAE0] text-sm tracking-tight truncate">
+            <div className="font-semibold text-[#FFFFFF] text-sm tracking-tight truncate">
               {row.service}
             </div>
             <div className="text-xs text-zinc-400 font-mono mt-0.5 flex items-center gap-1.5">
@@ -132,7 +132,7 @@ export default function CloudSpendPage() {
       header: "Provider",
       width: "120px",
       render: (val) => (
-        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-full border bg-zinc-900/90 text-[#EDEAE0] border-zinc-800/90 shadow-sm">
+        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-full border bg-zinc-900/90 text-[#FFFFFF] border-zinc-800/90 shadow-sm">
           <ProviderLogo provider={String(val)} size={13} className="shrink-0" />
           <span>{String(val)}</span>
         </span>
@@ -167,7 +167,7 @@ export default function CloudSpendPage() {
       key: "spend",
       header: "Spend",
       render: (val) => (
-        <span className="font-bold text-[#EDEAE0] font-mono text-sm tracking-tight">
+        <span className="font-bold text-[#FFFFFF] font-mono text-sm tracking-tight">
           ${formatNumber(Number(val))}
         </span>
       ),
@@ -224,7 +224,7 @@ export default function CloudSpendPage() {
 
         return (
           <div className="w-28 space-y-1.5">
-            <div className="flex justify-between items-center text-xs font-mono font-bold text-[#EDEAE0]">
+            <div className="flex justify-between items-center text-xs font-mono font-bold text-[#FFFFFF]">
               <span>{numVal.toFixed(1)}%</span>
             </div>
             <div className="h-2 w-full bg-zinc-800/90 rounded-full overflow-hidden">

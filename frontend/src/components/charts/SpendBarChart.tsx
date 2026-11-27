@@ -131,13 +131,13 @@ export function SpendBarChart({
               dataKey="month"
               axisLine={{ stroke: "#27272a" }}
               tickLine={false}
-              tick={{ fontSize: 11, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#FFFFFF", fontWeight: 500 }}
               dy={8}
             />
             <YAxisAny
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 11, fill: "#EDEAE0", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#FFFFFF", fontWeight: 500 }}
               tickFormatter={(val: number) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
               dx={-4}
             />

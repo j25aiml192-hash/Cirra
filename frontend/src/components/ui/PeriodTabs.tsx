@@ -33,7 +33,7 @@ export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
             onClick={() => onChange(pill.value)}
             className={`px-3 sm:px-3.5 py-1 rounded-full text-xs transition-all duration-200 cursor-pointer focus:outline-none ${
               isActive
-                ? "bg-zinc-100 hover:bg-white text-black font-bold shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                ? "bg-zinc-100 hover:bg-white text-black font-bold shadow-none"
                 : "text-zinc-400 hover:text-white font-medium hover:bg-zinc-800/60"
             }`}
           >
