@@ -617,38 +617,43 @@ export default function AnomaliesPage() {
                         </span>
                       </td>
 
-                  <div className="flex items-center gap-2">
-                    {showKillSwitch && (
-                      <button
-                        type="button"
-                        onClick={() => setKillSwitchTarget(anomaly)}
-                        className="px-3 py-1.5 rounded-full text-xs font-semibold font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer"
-                      >
-                        <ShieldAlert className="w-3.5 h-3.5 text-zinc-300" />
-                        <span>Kill Switch</span>
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleDismiss(anomaly.id)}
-                      className="px-2.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors font-mono cursor-pointer"
-                    >
-                      Dismiss
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedAnomaly(anomaly)}
-                      className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
-                    >
-                      <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
-                      <Eye className="w-3.5 h-3.5 relative z-10 text-zinc-200" />
-                      <span className="relative z-10">View Details</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })
+                      {/* ACTION */}
+                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-end gap-2">
+                          {showKillSwitch && (
+                            <button
+                              type="button"
+                              onClick={() => setKillSwitchTarget(anomaly)}
+                              className="px-3 py-1.5 rounded-full text-xs font-semibold font-mono bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <ShieldAlert className="w-3.5 h-3.5 text-zinc-300" />
+                              <span>Kill Switch</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => handleDismiss(anomaly.id)}
+                            className="px-2.5 py-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors font-mono cursor-pointer"
+                          >
+                            Dismiss
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedAnomaly(anomaly)}
+                            className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
+                          >
+                            <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                            <Eye className="w-3.5 h-3.5 relative z-10 text-zinc-200" />
+                            <span className="relative z-10">View Details</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>
