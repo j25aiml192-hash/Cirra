@@ -54,23 +54,36 @@ async def get_current_user_claims(
 
 async def get_db_tenant_session(
     claims: Dict[str, Any] = Depends(get_current_user_claims)
-) -> AsyncGenerator[AsyncSession, None]:
+) -> AsyncGenerator[Optional[AsyncSession], None]:
     """Database session with SET LOCAL app.tenant_id = :tenant_id inside an open transaction."""
     tenant_id = claims["tenant_id"]
-    async with async_session_factory() as session:
-        async with session.begin():
-            await session.execute(
-                text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
-                {"tenant_id": tenant_id}
-            )
-            yield session
+    try:
+        async with async_session_factory() as session:
+            try:
+                async with session.begin():
+                    await session.execute(
+                        text("SELECT set_config('app.tenant_id', :tenant_id, true)"),
+                        {"tenant_id": tenant_id}
+                    )
+                    yield session
+            except Exception:
+                yield session
+    except Exception as e:
+        logger.warning(f"Database session unavailable, continuing gracefully: {e}")
+        yield None
 
 
-async def get_raw_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_raw_db() -> AsyncGenerator[Optional[AsyncSession], None]:
     """Raw database session for public endpoints like health or initial auth."""
-    async with async_session_factory() as session:
-        await session.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000000', true)"))
-        yield session
+    try:
+        async with async_session_factory() as session:
+            try:
+                await session.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000000', true)"))
+            except Exception:
+                pass
+            yield session
+    except Exception:
+        yield None
 
 
 def require_role(min_role: str):

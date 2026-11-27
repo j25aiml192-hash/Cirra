@@ -2,7 +2,11 @@
 
 import * as React from "react";
 import FlowingMenu from "@/components/ui/FlowingMenu";
-import { LineChart, Layers, ShieldCheck } from "lucide-react";
+import {
+  BarChartGrowthIcon,
+  LayersRoundedIcon,
+  ShieldSecurityIcon,
+} from "@/components/ui/cirra-icons";
 
 const items = [
   {
@@ -41,7 +45,7 @@ const capabilityCards = [
     description:
       "Separates true optimization from organic traffic drops by contrasting actual invoices against dynamic pre-action forecasts.",
     alignmentClass: "self-start max-w-[350px] w-full",
-    icon: LineChart,
+    icon: BarChartGrowthIcon,
   },
   {
     tag: "Accounting Schema",
@@ -49,7 +53,7 @@ const capabilityCards = [
     description:
       "Normalizes heterogeneous cloud invoices and AI token consumption into a single transparent accounting schema.",
     alignmentClass: "self-end ml-auto max-w-[350px] w-full",
-    icon: Layers,
+    icon: LayersRoundedIcon,
   },
   {
     tag: "Cryptographic Audit",
@@ -57,7 +61,7 @@ const capabilityCards = [
     description:
       "Tamper-evident verification logs certify exact realized ROI for finance leadership, auditors, and board decks.",
     alignmentClass: "self-start max-w-[350px] w-full",
-    icon: ShieldCheck,
+    icon: ShieldSecurityIcon,
   },
 ];
 

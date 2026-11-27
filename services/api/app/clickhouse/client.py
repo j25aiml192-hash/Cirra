@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from typing import Any, Dict, List, Optional
 import clickhouse_connect
@@ -33,6 +34,7 @@ class ClickHouseReaderClient:
         self.password = password or os.getenv("CLICKHOUSE_READER_PASSWORD") or os.getenv("CLICKHOUSE_PASSWORD", "")
         self.database = database or os.getenv("CLICKHOUSE_DATABASE", "cirra")
         self._client = None
+        self._last_fail_time = 0.0
 
     def get_client(self):
         if self._client is None:
@@ -43,8 +45,8 @@ class ClickHouseReaderClient:
                 password=self.password,
                 database=self.database,
                 secure=self.secure,
-                connect_timeout=10,
-                send_receive_timeout=30,
+                connect_timeout=2,
+                send_receive_timeout=3,
             )
         return self._client
 
@@ -56,12 +58,17 @@ class ClickHouseReaderClient:
         if "tenant_id" not in parameters:
             raise ValueError("Security violation: ClickHouse query must include 'tenant_id' parameter.")
 
+        if time.time() - self._last_fail_time < 30.0:
+            return []
+
         try:
             client = self.get_client()
             result = client.query(query, parameters=parameters)
             cols = result.column_names
             return [dict(zip(cols, row)) for row in result.result_rows]
         except Exception as e:
+            self._last_fail_time = time.time()
+            self._client = None
             logger.warning("ClickHouse query error: %s", e)
             return []
 

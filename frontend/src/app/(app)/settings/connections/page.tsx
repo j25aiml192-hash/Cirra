@@ -125,15 +125,17 @@ export default function ConnectionsSettingsPage() {
 
   if (isError) {
     return (
-      <div className="p-8 space-y-6">
-        <Topbar
-          title="Connections & Integrations"
-          subtitle="Connect multi-cloud accounts and AI API providers with read-only scoped credentials"
-        />
-        <EmptyState
-          title="Failed to load connections"
-          description="Unable to connect to the connections API. Please verify the backend service is running and try again."
-        />
+      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+        <div className="p-8 space-y-6 max-w-7xl mx-auto">
+          <Topbar
+            title="Connections & Integrations"
+            subtitle="Connect multi-cloud accounts and AI API providers with read-only scoped credentials"
+          />
+          <EmptyState
+            title="Failed to load connections"
+            description="Unable to connect to the connections API. Please verify the backend service is running and try again."
+          />
+        </div>
       </div>
     );
   }
@@ -141,339 +143,339 @@ export default function ConnectionsSettingsPage() {
   const items = connections ?? [];
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-center justify-between">
-        <Topbar
-          title="Connections & Integrations"
-          subtitle="Connect multi-cloud accounts and AI API providers with read-only scoped credentials"
-        />
-        <button
-          type="button"
-          onClick={() => {
-            setSheetOpen(true);
-            setSelectedProvider("aws");
-            setTestStatus("idle");
-          }}
-          className="px-4 py-2 rounded-xl bg-[#0062E0] text-white font-medium text-xs flex items-center gap-2 hover:bg-[#0052C2] shadow-sm transition-all"
-        >
-          <Plus className="w-4 h-4" /> Add Connection
-        </button>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="rounded-2xl p-5 bg-white border border-[#D6E4F5] space-y-4"
-            >
-              <div className="flex items-center gap-3.5">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <div className="space-y-1.5 flex-1">
-                  <Skeleton className="h-4 w-1/2" />
-                  <Skeleton className="h-3 w-1/4" />
-                </div>
-              </div>
-              <Skeleton className="h-8 w-full rounded-lg" />
-            </div>
-          ))}
+    <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+      <div className="p-8 space-y-6 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <Topbar
+            title="Connections & Integrations"
+            subtitle="Connect multi-cloud accounts and AI API providers with read-only scoped credentials"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              setSheetOpen(true);
+              setSelectedProvider("aws");
+              setTestStatus("idle");
+            }}
+            className="px-4 py-2 rounded-full bg-white text-black font-mono font-semibold text-xs uppercase tracking-wider flex items-center gap-2 hover:bg-zinc-200 transition-all self-start sm:self-auto"
+          >
+            <Plus className="w-4 h-4" /> Add Connection
+          </button>
         </div>
-      ) : items.length === 0 ? (
-        <EmptyState
-          title="No connections found"
-          description="Click 'Add Connection' above to connect AWS, GCP, OpenAI, or other telemetry providers."
-        />
-      ) : (
-        /* Connection rows as white cards (grid-cols-2 gap-4) */
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {items.map((conn) => {
-            const prov = getProviderInfo(conn.provider);
-            const isErrorState = conn.status === "error";
 
-            return (
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
               <div
-                key={conn.id}
-                className={`rounded-2xl p-5 shadow-sm transition-all flex flex-col justify-between ${
-                  isErrorState
-                    ? "bg-red-50/70 border border-red-200"
-                    : "bg-white border border-[#D6E4F5] shadow-[0_4px_24px_-4px_rgba(12,48,96,0.05),0_1px_3px_rgba(0,0,0,0.02)] hover:border-[#BCD4F0] hover:shadow-[0_8px_30px_-6px_rgba(12,48,96,0.08),0_2px_6px_rgba(0,0,0,0.03)]"
-                }`}
-                style={{
-                  borderLeft: isErrorState ? "4px solid #EF4444" : undefined,
-                }}
+                key={i}
+                className="rounded-2xl p-5 bg-[#09090b] border border-zinc-800 space-y-4"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3.5">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0"
-                      style={{ background: prov.color }}
+                <div className="flex items-center gap-3.5">
+                  <Skeleton className="w-10 h-10 rounded-full bg-zinc-800" />
+                  <div className="space-y-1.5 flex-1">
+                    <Skeleton className="h-4 w-1/2 bg-zinc-800" />
+                    <Skeleton className="h-3 w-1/4 bg-zinc-800" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-full rounded-lg bg-zinc-800" />
+              </div>
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <EmptyState
+            title="No connections found"
+            description="Click 'Add Connection' above to connect AWS, GCP, OpenAI, or other telemetry providers."
+          />
+        ) : (
+          /* Connection cards (grid-cols-2 gap-4) */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {items.map((conn) => {
+              const prov = getProviderInfo(conn.provider);
+              const isErrorState = conn.status === "error";
+
+              return (
+                <div
+                  key={conn.id}
+                  className={`rounded-2xl p-5 transition-all flex flex-col justify-between ${
+                    isErrorState
+                      ? "bg-[#09090b] border border-rose-900/60"
+                      : "bg-[#09090b] border border-zinc-800/80 hover:border-zinc-700"
+                  }`}
+                  style={{
+                    borderLeft: isErrorState ? "3px solid #f43f5e" : undefined,
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3.5">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-mono font-bold text-sm bg-zinc-800 border border-zinc-700 flex-shrink-0"
+                      >
+                        {prov.letter}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-white text-sm leading-tight">
+                          {conn.name}
+                        </h4>
+                        <span className="text-xs font-mono text-zinc-400">{prov.name}</span>
+                      </div>
+                    </div>
+
+                    <Badge
+                      variant={
+                        conn.status === "connected"
+                          ? "success"
+                          : conn.status === "error"
+                          ? "danger"
+                          : "neutral"
+                      }
+                      className="capitalize text-[10px] font-mono"
                     >
-                      {prov.letter}
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-[#0A192F] text-sm leading-tight">
-                        {conn.name}
-                      </h4>
-                      <span className="text-xs text-[#64748B]">{prov.name}</span>
-                    </div>
+                      {conn.status}
+                    </Badge>
                   </div>
 
-                  <Badge
-                    variant={
-                      conn.status === "connected"
-                        ? "success"
-                        : conn.status === "error"
-                        ? "danger"
-                        : "neutral"
-                    }
-                    className="capitalize text-[10px]"
+                  {isErrorState && conn.errorMessage && (
+                    <div className="mt-3 text-xs font-mono text-rose-300 bg-rose-950/40 p-2.5 rounded-lg border border-rose-900/60 flex items-start gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-rose-400 mt-0.5 flex-shrink-0" />
+                      <span>{conn.errorMessage}</span>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4 mt-3 border-t border-zinc-800/80">
+                    <span className="text-xs font-mono text-zinc-500">
+                      Last synced {conn.last_synced_at ?? "never"}
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        disabled={testingId === conn.id}
+                        onClick={() => handleTestExisting(conn.id)}
+                        className="px-2.5 py-1 text-xs font-mono rounded-full border border-zinc-700 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-1"
+                      >
+                        {testingId === conn.id ? (
+                          <>
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            <span>Verifying...</span>
+                          </>
+                        ) : (
+                          <span>Verify</span>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(conn.id)}
+                        className="p-1.5 text-zinc-500 hover:text-rose-400 hover:bg-rose-950/30 rounded-md transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* SideSheet for Add Connection */}
+        {sheetOpen && (
+          <div className="fixed inset-0 z-50 overflow-hidden">
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+              onClick={() => setSheetOpen(false)}
+            />
+
+            <div className="fixed inset-y-0 right-0 max-w-md w-full bg-[#09090b] border-l border-zinc-800 text-white shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
+              <div>
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-4">
+                  <div>
+                    <h3 className="font-bold text-white text-base font-mono uppercase tracking-wider">Connect New Provider</h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Telemetry ingested with read-only least-privilege credentials
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSheetOpen(false)}
+                    className="p-1 text-zinc-400 hover:text-white rounded-md"
                   >
-                    {conn.status}
-                  </Badge>
+                    <X className="w-5 h-5" />
+                  </button>
                 </div>
 
-                {isErrorState && conn.errorMessage && (
-                  <div className="mt-3 text-xs text-red-700 bg-red-100/60 p-2.5 rounded-lg border border-red-200/50 flex items-start gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 flex-shrink-0" />
-                    <span>{conn.errorMessage}</span>
+                {/* Provider grid (2x4) */}
+                <div className="mt-5">
+                  <label className="text-[10px] font-mono font-semibold uppercase tracking-wider text-zinc-400 block mb-2.5">
+                    Select Provider
+                  </label>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {providerOptions.map((prov) => {
+                      const isSelected = selectedProvider === prov.key;
+                      return (
+                        <button
+                          key={prov.key}
+                          type="button"
+                          onClick={() => {
+                            setSelectedProvider(prov.key);
+                            setTestStatus("idle");
+                          }}
+                          className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
+                            isSelected
+                              ? "border-white bg-zinc-900 text-white ring-1 ring-white"
+                              : "border-zinc-800 hover:border-zinc-700 bg-[#050505] text-zinc-400"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <div
+                              className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[11px] font-bold font-mono bg-zinc-800 border border-zinc-700"
+                            >
+                              {prov.letter}
+                            </div>
+                            <span className="text-xs font-mono font-semibold text-zinc-200">{prov.name}</span>
+                          </div>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Dynamic Credential Fields */}
+                {selectedProvider && (
+                  <div className="mt-6 space-y-3.5 pt-4 border-t border-zinc-800">
+                    <div>
+                      <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                        Connection Nickname
+                      </label>
+                      <input
+                        value={connName}
+                        onChange={(e) => setConnName(e.target.value)}
+                        placeholder="e.g. Production Billing"
+                        className="w-full h-9 px-3 text-xs font-mono rounded-xl border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+                      />
+                    </div>
+
+                    {["aws", "bedrock"].includes(selectedProvider) && (
+                      <>
+                        <div>
+                          <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                            Role ARN (Read-Only)
+                          </label>
+                          <input
+                            value={roleArn}
+                            onChange={(e) => setRoleArn(e.target.value)}
+                            placeholder="arn:aws:iam::123456789012:role/CirraCostReader"
+                            className="w-full h-9 px-3 text-xs font-mono rounded-xl border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                            External ID
+                          </label>
+                          <input
+                            defaultValue="cirra-tenant-token-98f2b"
+                            readOnly
+                            className="w-full h-9 px-3 text-xs font-mono rounded-xl border border-zinc-800 bg-[#050505] text-zinc-500 cursor-not-allowed"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {["openai", "anthropic"].includes(selectedProvider) && (
+                      <div>
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                          Admin Usage Read-Only API Key
+                        </label>
+                        <input
+                          type="password"
+                          value={apiKey}
+                          onChange={(e) => setApiKey(e.target.value)}
+                          placeholder="sk-admin-..."
+                          className="w-full h-9 px-3 text-xs font-mono rounded-xl border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono"
+                        />
+                      </div>
+                    )}
+
+                    {["gcp", "vertex"].includes(selectedProvider) && (
+                      <div>
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                          Service Account JSON Key
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={serviceAccountKey}
+                          onChange={(e) => setServiceAccountKey(e.target.value)}
+                          placeholder='{"type": "service_account", ...}'
+                          className="w-full p-2.5 text-xs font-mono rounded-xl border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500 font-mono"
+                        />
+                      </div>
+                    )}
+
+                    {selectedProvider === "kubernetes" && (
+                      <div>
+                        <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
+                          Prometheus / OpenCost Endpoint
+                        </label>
+                        <input
+                          value={endpoint}
+                          onChange={(e) => setEndpoint(e.target.value)}
+                          placeholder="https://opencost.internal.cluster:9003"
+                          className="w-full h-9 px-3 text-xs font-mono rounded-xl border border-zinc-700 bg-zinc-900 text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-500"
+                        />
+                      </div>
+                    )}
+
+                    {/* Inline Test Connection button & status */}
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={handleTestHandshake}
+                        disabled={testStatus === "testing"}
+                        className="w-full h-9 rounded-full border border-zinc-700 bg-zinc-900 text-zinc-200 text-xs font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 hover:bg-zinc-800 transition-colors"
+                      >
+                        {testStatus === "testing" ? (
+                          <>
+                            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                            <span>Verifying handshake...</span>
+                          </>
+                        ) : (
+                          <span>Verify Connection Handshake</span>
+                        )}
+                      </button>
+
+                      {testStatus === "success" && (
+                        <div className="mt-2 text-xs font-mono text-emerald-400 bg-emerald-950/40 p-2 rounded-xl border border-emerald-800/80 flex items-center gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Connection verified successfully! Ready to save.</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-
-                <div className="flex items-center justify-between pt-4 mt-3 border-t border-[#D6E4F5]">
-                  <span className="text-xs text-[#64748B]">
-                    Last synced {conn.last_synced_at ?? "never"}
-                  </span>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      disabled={testingId === conn.id}
-                      onClick={() => handleTestExisting(conn.id)}
-                      className="px-2.5 py-1 text-xs font-medium text-[#475569] hover:text-[#0A192F] hover:bg-[#F0F5FD] rounded-md transition-colors flex items-center gap-1"
-                    >
-                      {testingId === conn.id ? (
-                        <>
-                          <RefreshCw className="w-3 h-3 animate-spin" />
-                          <span>Verifying...</span>
-                        </>
-                      ) : (
-                        <span>Verify</span>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemove(conn.id)}
-                      className="p-1.5 text-[#64748B] hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
               </div>
-            );
-          })}
-        </div>
-      )}
 
-      {/* SideSheet for Add Connection */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
-          <div
-            className="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity"
-            onClick={() => setSheetOpen(false)}
-          />
-
-          <div className="fixed inset-y-0 right-0 max-w-md w-full bg-white border-l border-[#D6E4F5] shadow-2xl p-6 flex flex-col justify-between overflow-y-auto">
-            <div>
-              <div className="flex items-center justify-between border-b border-[#D6E4F5] pb-4">
-                <div>
-                  <h3 className="font-bold text-[#0A192F] text-lg">Connect New Provider</h3>
-                  <p className="text-xs text-[#475569] mt-0.5">
-                    Telemetry ingested with read-only least-privilege credentials
-                  </p>
-                </div>
+              {/* Bottom Actions */}
+              <div className="pt-4 border-t border-zinc-800 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setSheetOpen(false)}
-                  className="p-1 text-[#64748B] hover:text-[#334155] rounded-md"
+                  className="px-4 py-2 rounded-full text-xs font-mono uppercase tracking-wider text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
-                  <X className="w-5 h-5" />
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveConnection}
+                  disabled={testStatus !== "success"}
+                  className="px-5 py-2 rounded-full text-xs font-mono uppercase tracking-wider font-semibold bg-white text-black hover:bg-zinc-200 disabled:opacity-40 transition-colors"
+                >
+                  Save & Connect
                 </button>
               </div>
-
-              {/* Provider grid (2x4) */}
-              <div className="mt-5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-[#64748B] block mb-2.5">
-                  Select Provider
-                </label>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {providerOptions.map((prov) => {
-                    const isSelected = selectedProvider === prov.key;
-                    return (
-                      <button
-                        key={prov.key}
-                        type="button"
-                        onClick={() => {
-                          setSelectedProvider(prov.key);
-                          setTestStatus("idle");
-                        }}
-                        className={`p-3 rounded-xl border text-left flex items-center justify-between transition-all ${
-                          isSelected
-                            ? "border-[#0062E0] bg-[#EBF3FE] ring-1 ring-[#0062E0]"
-                            : "border-[#D6E4F5] hover:border-[#BCD4F0] bg-white"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div
-                            className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[11px] font-bold"
-                            style={{ background: prov.color }}
-                          >
-                            {prov.letter}
-                          </div>
-                          <span className="text-xs font-semibold text-[#334155]">{prov.name}</span>
-                        </div>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#0062E0]" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Dynamic Credential Fields */}
-              {selectedProvider && (
-                <div className="mt-6 space-y-3.5 pt-4 border-t border-[#D6E4F5]">
-                  <div>
-                    <label className="text-xs font-semibold text-[#334155] block mb-1">
-                      Connection Nickname
-                    </label>
-                    <input
-                      value={connName}
-                      onChange={(e) => setConnName(e.target.value)}
-                      placeholder="e.g. Production Billing"
-                      className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white focus:outline-none focus:border-[#0062E0]"
-                    />
-                  </div>
-
-                  {["aws", "bedrock"].includes(selectedProvider) && (
-                    <>
-                      <div>
-                        <label className="text-xs font-semibold text-[#334155] block mb-1">
-                          Role ARN (Read-Only)
-                        </label>
-                        <input
-                          value={roleArn}
-                          onChange={(e) => setRoleArn(e.target.value)}
-                          placeholder="arn:aws:iam::123456789012:role/CirraCostReader"
-                          className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0]"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-[#334155] block mb-1">
-                          External ID
-                        </label>
-                        <input
-                          defaultValue="cirra-tenant-token-98f2b"
-                          readOnly
-                          className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-[#F8FAFD] text-[#475569]"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {["openai", "anthropic"].includes(selectedProvider) && (
-                    <div>
-                      <label className="text-xs font-semibold text-[#334155] block mb-1">
-                        Admin Usage Read-Only API Key
-                      </label>
-                      <input
-                        type="password"
-                        value={apiKey}
-                        onChange={(e) => setApiKey(e.target.value)}
-                        placeholder="sk-admin-..."
-                        className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
-                      />
-                    </div>
-                  )}
-
-                  {["gcp", "vertex"].includes(selectedProvider) && (
-                    <div>
-                      <label className="text-xs font-semibold text-[#334155] block mb-1">
-                        Service Account JSON Key
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={serviceAccountKey}
-                        onChange={(e) => setServiceAccountKey(e.target.value)}
-                        placeholder='{"type": "service_account", ...}'
-                        className="w-full p-2.5 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0] font-mono"
-                      />
-                    </div>
-                  )}
-
-                  {selectedProvider === "kubernetes" && (
-                    <div>
-                      <label className="text-xs font-semibold text-[#334155] block mb-1">
-                        Prometheus / OpenCost Endpoint
-                      </label>
-                      <input
-                        value={endpoint}
-                        onChange={(e) => setEndpoint(e.target.value)}
-                        placeholder="https://opencost.internal.cluster:9003"
-                        className="w-full h-9 px-3 text-xs rounded-lg border border-[#D6E4F5] bg-white text-[#0A192F] focus:outline-none focus:border-[#0062E0]"
-                      />
-                    </div>
-                  )}
-
-                  {/* Inline Test Connection button & status */}
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      onClick={handleTestHandshake}
-                      disabled={testStatus === "testing"}
-                      className="w-full h-9 rounded-lg border border-[#D6E4F5] bg-[#F8FAFD] text-[#334155] text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-[#F0F5FD] transition-colors"
-                    >
-                      {testStatus === "testing" ? (
-                        <>
-                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                          <span>Verifying handshake...</span>
-                        </>
-                      ) : (
-                        <span>Verify Connection Handshake</span>
-                      )}
-                    </button>
-
-                    {testStatus === "success" && (
-                      <div className="mt-2 text-xs text-emerald-700 bg-emerald-50 p-2 rounded-lg border border-emerald-200 flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Connection verified successfully! Ready to save.</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Bottom Actions */}
-            <div className="pt-4 border-t border-[#D6E4F5] flex items-center justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setSheetOpen(false)}
-                className="px-3.5 py-2 rounded-lg text-xs font-medium text-[#475569] hover:bg-[#F0F5FD]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveConnection}
-                disabled={testStatus !== "success"}
-                className="px-5 py-2 rounded-lg text-xs font-semibold bg-[#0062E0] text-white hover:bg-[#0052C2] disabled:opacity-40 transition-colors shadow-sm"
-              >
-                Save & Connect
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

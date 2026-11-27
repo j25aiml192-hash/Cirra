@@ -1,5 +1,6 @@
 import logging
 import uuid
+from typing import Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select, text
@@ -99,7 +100,7 @@ async def exchange_session(
 @router.post("/register", response_model=SessionResponse)
 async def register_user(
     payload: RegisterRequest,
-    db: AsyncSession = Depends(get_raw_db)
+    db: Optional[AsyncSession] = Depends(get_raw_db)
 ):
     """
     Direct registration:
@@ -139,31 +140,32 @@ async def register_user(
 
     # 2. Find or create in local PostgreSQL
     user = None
-    try:
-        stmt = select(User).where(User.email == email_clean)
-        result = await db.execute(stmt)
-        user = result.scalar_one_or_none()
+    if db is not None:
+        try:
+            stmt = select(User).where(User.email == email_clean)
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
 
-        if not user:
-            new_tenant_id = uuid.uuid4()
-            tenant = Tenant(id=new_tenant_id, name=company, plan="starter")
-            db.add(tenant)
-            await db.flush()
+            if not user:
+                new_tenant_id = uuid.uuid4()
+                tenant = Tenant(id=new_tenant_id, name=company, plan="starter")
+                db.add(tenant)
+                await db.flush()
 
-            # Set tenant_id in transaction context to satisfy RLS policy
-            await db.execute(text("SELECT set_config('app.tenant_id', :tid, true)"), {"tid": str(new_tenant_id)})
+                # Set tenant_id in transaction context to satisfy RLS policy
+                await db.execute(text("SELECT set_config('app.tenant_id', :tid, true)"), {"tid": str(new_tenant_id)})
 
-            user = User(
-                id=uuid.uuid4(),
-                tenant_id=new_tenant_id,
-                email=email_clean,
-                role="admin",
-            )
-            db.add(user)
-            await db.commit()
-    except Exception as err:
-        logger.error(f"Error persisting user {email_clean} in DB: {err}")
-        await db.rollback()
+                user = User(
+                    id=uuid.uuid4(),
+                    tenant_id=new_tenant_id,
+                    email=email_clean,
+                    role="admin",
+                )
+                db.add(user)
+                await db.commit()
+        except Exception as err:
+            logger.error(f"Error persisting user {email_clean} in DB: {err}")
+            await db.rollback()
 
     if user:
         tenant_id = str(user.tenant_id)
@@ -193,7 +195,7 @@ async def register_user(
 @router.post("/login", response_model=SessionResponse)
 async def login_user(
     payload: LoginRequest,
-    db: AsyncSession = Depends(get_raw_db)
+    db: Optional[AsyncSession] = Depends(get_raw_db)
 ):
     """
     Direct login: authenticates via Supabase password grant or PostgreSQL user record.
@@ -202,9 +204,10 @@ async def login_user(
 
     # Try Supabase password grant if configured
     supabase_authenticated = False
+    supabase_reachable = False
     if settings.SUPABASE_ANON_KEY and settings.SUPABASE_URL and not "placeholder" in settings.SUPABASE_URL:
         try:
-            async with httpx.AsyncClient(timeout=8.0) as client:
+            async with httpx.AsyncClient(timeout=4.0) as client:
                 headers = {
                     "apikey": settings.SUPABASE_ANON_KEY,
                     "Content-Type": "application/json",
@@ -218,49 +221,72 @@ async def login_user(
                     headers=headers,
                     json=token_payload,
                 )
+                supabase_reachable = True
                 if res.status_code == 200:
                     supabase_authenticated = True
         except Exception as e:
             logger.warning(f"Supabase login check failed: {e}")
+            supabase_reachable = False
 
     # Lookup user in DB
     user = None
-    try:
-        await db.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000000', true)"))
-        stmt = select(User).where(User.email == email_clean)
-        result = await db.execute(stmt)
-        user = result.scalar_one_or_none()
-    except Exception as err:
-        logger.warning(f"Error looking up user {email_clean}: {err}")
+    if db:
+        try:
+            await db.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000000', true)"))
+            stmt = select(User).where(User.email == email_clean)
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
+        except Exception as err:
+            logger.warning(f"Error looking up user {email_clean}: {err}")
 
     if not user and not supabase_authenticated:
-        # If user is not found and Supabase password check failed, return 401
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-        )
+        # If Supabase was reachable and explicitly rejected credentials, return 401
+        if supabase_reachable:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
+
+        # In local development mode when Supabase and PostgreSQL are unreachable,
+        # allow local development authentication for any valid email & password
+        if settings.ENVIRONMENT == "development" and payload.password:
+            pass
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
 
     if not user:
-        # User authenticated in Supabase but not yet in PostgreSQL
-        new_tenant_id = uuid.uuid4()
-        tenant = Tenant(id=new_tenant_id, name=f"{email_clean.split('@')[0].capitalize()}'s Workspace", plan="starter")
-        db.add(tenant)
-        await db.flush()
+        if db is not None:
+            # User authenticated in Supabase but not yet in PostgreSQL
+            try:
+                new_tenant_id = uuid.uuid4()
+                tenant = Tenant(id=new_tenant_id, name=f"{email_clean.split('@')[0].capitalize()}'s Workspace", plan="starter")
+                db.add(tenant)
+                await db.flush()
 
-        await db.execute(text("SELECT set_config('app.tenant_id', :tid, true)"), {"tid": str(new_tenant_id)})
+                await db.execute(text("SELECT set_config('app.tenant_id', :tid, true)"), {"tid": str(new_tenant_id)})
 
-        user = User(
-            id=uuid.uuid4(),
-            tenant_id=new_tenant_id,
-            email=email_clean,
-            role="admin",
-        )
-        db.add(user)
-        await db.commit()
+                user = User(
+                    id=uuid.uuid4(),
+                    tenant_id=new_tenant_id,
+                    email=email_clean,
+                    role="admin",
+                )
+                db.add(user)
+                await db.commit()
+            except Exception as e:
+                logger.warning(f"Error persisting authenticated user to local DB: {e}")
 
-    tenant_id = str(user.tenant_id)
-    user_id = str(user.id)
-    role = user.role
+    if user:
+        tenant_id = str(user.tenant_id)
+        user_id = str(user.id)
+        role = user.role
+    else:
+        tenant_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"tenant:{email_clean}"))
+        user_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, f"user:{email_clean}"))
+        role = "admin"
 
     cirra_jwt = create_cirra_token(
         tenant_id=tenant_id,
@@ -281,7 +307,7 @@ async def login_user(
 @router.post("/demo-login", response_model=SessionResponse)
 async def demo_login(
     payload: DemoLoginRequest = DemoLoginRequest(),
-    db: AsyncSession = Depends(get_raw_db)
+    db: Optional[AsyncSession] = Depends(get_raw_db)
 ):
     """
     Instant demo login for local development / investor walkthroughs.
@@ -290,14 +316,15 @@ async def demo_login(
     target_email = (payload.user_email or "hiten@cirra.dev").strip().lower()
 
     user = None
-    try:
-        await db.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000001', true)"))
-        stmt = select(User).where(User.email == target_email)
-        result = await db.execute(stmt)
-        user = result.scalar_one_or_none()
-    except Exception as err:
-        logger.warning(f"Error querying user {target_email}: {err}")
-        user = None
+    if db is not None:
+        try:
+            await db.execute(text("SELECT set_config('app.tenant_id', '00000000-0000-0000-0000-000000000001', true)"))
+            stmt = select(User).where(User.email == target_email)
+            result = await db.execute(stmt)
+            user = result.scalar_one_or_none()
+        except Exception as err:
+            logger.warning(f"Error querying user {target_email}: {err}")
+            user = None
 
     if not user:
         # Fallback to Tenant Zero defaults

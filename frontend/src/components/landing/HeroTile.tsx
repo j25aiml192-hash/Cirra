@@ -7,6 +7,7 @@ import { BRAND_DATA_URLS } from "@/components/ui/BrandLogos";
 import { ThreeDLetterSwap } from "@/components/ui/ThreeDLetterSwap";
 import FlowingRibbons from "@/components/ui/flowing-ribbons-effect";
 import { VoxelArc } from "@/components/ui/VoxelArc";
+import { ArrowRightRoundedIcon } from "@/components/ui/cirra-icons";
 
 export function HeroTile() {
   return (
@@ -56,9 +57,10 @@ export function HeroTile() {
             <div className="flex flex-wrap items-center gap-3.5">
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center text-[14px] sm:text-[15px] font-medium text-white bg-[#0062E0] hover:bg-[#0052C2] px-6 sm:px-7 py-2.5 sm:py-3 rounded-full apple-btn-active transition-all shadow-[0_4px_16px_rgba(0,98,224,0.28)]"
+                className="inline-flex items-center justify-center gap-2 text-[14px] sm:text-[15px] font-medium text-white bg-[#0062E0] hover:bg-[#0052C2] px-6 sm:px-7 py-2.5 sm:py-3 rounded-full apple-btn-active transition-all shadow-[0_4px_16px_rgba(0,98,224,0.28)]"
               >
-                Run your free audit
+                <span>Run your free audit</span>
+                <ArrowRightRoundedIcon size={16} />
               </Link>
 
               <Link

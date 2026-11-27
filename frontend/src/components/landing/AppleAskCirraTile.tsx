@@ -291,6 +291,7 @@ export function AppleAskCirraTile() {
                   src="/images/ask_cirra_architecture.png"
                   alt="Cirra Multi-Cloud FinOps Engine Architecture"
                   fill
+                  sizes="(max-width: 768px) 100vw, 460px"
                   priority
                   className="object-cover object-center transform hover:scale-105 transition-transform duration-700"
                 />

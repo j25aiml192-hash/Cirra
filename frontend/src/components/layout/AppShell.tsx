@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, createContext, useContext } from "react";
-import { usePathname } from "next/navigation";
+import React, { useEffect, createContext, useContext } from "react";
 import { Sidebar } from "./Sidebar";
 import { AiChatWidget } from "@/components/ui/AiChatWidget";
 
@@ -12,66 +11,39 @@ interface SidebarContextType {
 }
 
 export const SidebarContext = createContext<SidebarContextType>({
-  isExpanded: false,
-  pinned: false,
+  isExpanded: true,
+  pinned: true,
   togglePin: () => {},
 });
 
 export const useSidebar = () => useContext(SidebarContext);
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [pinned, setPinned] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const pathname = usePathname();
-  const isAskPage = pathname === "/ask" || pathname?.startsWith("/ask");
-
   useEffect(() => {
-    const handleToggle = () => setPinned((p) => !p);
-    window.addEventListener("cirra:toggle-sidebar", handleToggle);
-    return () => window.removeEventListener("cirra:toggle-sidebar", handleToggle);
+    document.body.classList.add("cirra-bg-canvas");
+    document.body.style.backgroundColor = "#000000";
   }, []);
-
-  useEffect(() => {
-    if (isAskPage) {
-      document.body.classList.remove("cirra-bg-canvas");
-      document.body.style.backgroundColor = "#CFE7FD";
-    } else {
-      document.body.classList.add("cirra-bg-canvas");
-      document.body.style.backgroundColor = "";
-    }
-  }, [isAskPage]);
-
-  const isExpanded = pinned || isHovered;
 
   return (
     <SidebarContext.Provider
       value={{
-        isExpanded,
-        pinned,
-        togglePin: () => setPinned((p) => !p),
+        isExpanded: true,
+        pinned: true,
+        togglePin: () => {},
       }}
     >
-      <div
-        className={`min-h-screen ${
-          isAskPage
-            ? "bg-gradient-to-b from-[#BEE0FD] via-[#D5ECFE] via-30% via-[#E5F3FE] via-65% via-[#F0F8FF] to-[#FAFDFE] text-[#0A192F]"
-            : "text-[#0F1E36]"
-        }`}
-      >
-        {/* Floating Sidebar elevated on top (z-50) */}
-        <Sidebar
-          pinned={pinned}
-          onToggle={() => setPinned((p) => !p)}
-          onHoverChange={setIsHovered}
+      <div className="min-h-screen bg-black text-white selection:bg-zinc-200 selection:text-black font-sans app-typography relative">
+        {/* Subtle Off-White Ambient Atmosphere */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none fixed top-0 right-0 w-[600px] h-[500px] bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.03),transparent_70%)] z-0"
         />
 
-        {/* Page Content dynamically reacting to sidebar expansion/hover */}
-        <div
-          className={`transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] min-h-screen ${
-            isAskPage ? "pt-4 sm:pt-6" : "pt-14"
-          }`}
-          style={{ marginLeft: isExpanded ? 260 : 88 }}
-        >
+        {/* Full-Height Vercel Left Sidebar */}
+        <Sidebar />
+
+        {/* Page Content docked to right of sidebar */}
+        <div className="lg:ml-64 min-h-screen bg-black pt-14 relative z-10">
           {children}
         </div>
 

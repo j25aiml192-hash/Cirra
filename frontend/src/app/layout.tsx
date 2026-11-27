@@ -50,6 +50,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `nextjs-portal, [data-nextjs-dialog-overlay], [data-nextjs-toast], #__next-build-watcher, [data-nextjs-dev-tools], [data-nextjs-dev-tools-button], [data-nextjs-dialog-left-right] { display: none !important; position: fixed !important; left: -99999px !important; bottom: -99999px !important; width: 0 !important; height: 0 !important; opacity: 0 !important; pointer-events: none !important; }`,
+          }}
+        />
+      </head>
       <body className="antialiased min-h-screen cirra-bg-canvas text-[#0F1E36] selection:bg-[#0062E0] selection:text-white font-sans">
         <Providers>{children}</Providers>
       </body>

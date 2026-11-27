@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp, TrendingUp, Server, Layers } from "lucide-react";
+import { Topbar } from "@/components/layout/Topbar";
 import { useAskCirra } from "@/hooks/useAsk";
 import { formatNumber } from "@/lib/utils";
 
@@ -104,111 +105,14 @@ export default function AskPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-2rem)] flex flex-col justify-between overflow-hidden select-none">
+    <div className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden select-none bg-black text-white">
+      <Topbar />
+
       {/* =========================================================================
-          LIGHT SKY BLUE CANVAS WITH REAL FLUFFY CUMULUS CLOUDS & WHITE MIST
+          DARK RUNWAY EDITORIAL CANVAS
          ========================================================================= */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Soft, light morning sky blue gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#BEE0FD] via-[#D5ECFE] via-30% via-[#E5F3FE] via-65% via-[#F0F8FF] to-[#FAFDFE]" />
-
-        {/* Ambient Warm Sunbeam / Horizon Light Glow */}
-        <div className="absolute -top-32 right-12 w-[650px] h-[650px] bg-gradient-to-br from-white/70 via-white/30 to-transparent rounded-full blur-[110px]" />
-
-        {/* ==================== FLUFFY CUMULUS CLOUDS ==================== */}
-
-        {/* Cloud 1: Top-Left Floating Cumulus */}
-        <div className="absolute top-6 -left-12 w-[340px] sm:w-[420px] h-[160px] animate-float-cloud-left-1 opacity-95">
-          <svg viewBox="0 0 320 120" className="w-full h-full drop-shadow-[0_16px_30px_rgba(10,50,90,0.08)] drop-shadow-[0_4px_10px_rgba(2,132,199,0.06)]">
-            <defs>
-              <linearGradient id="cloudGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="70%" stopColor="#FFFFFF" />
-                <stop offset="100%" stopColor="#F1F7FD" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 50 100 C 25 100 8 85 8 65 C 8 48 20 34 38 32 C 50 16 74 6 102 6 C 124 6 142 14 154 28 C 166 14 190 4 218 4 C 252 4 280 22 286 48 C 300 52 312 66 312 80 C 312 95 296 100 274 100 Z"
-              fill="url(#cloudGrad1)"
-              stroke="#E0EEFA"
-              strokeWidth="1.2"
-            />
-          </svg>
-        </div>
-
-        {/* Cloud 2: Top-Right Billowing Cloud */}
-        <div className="absolute top-12 -right-16 w-[360px] sm:w-[460px] h-[180px] animate-float-cloud-right-1 opacity-90">
-          <svg viewBox="0 0 280 130" className="w-full h-full drop-shadow-[0_18px_34px_rgba(10,50,90,0.09)] drop-shadow-[0_6px_12px_rgba(2,132,199,0.07)]">
-            <defs>
-              <linearGradient id="cloudGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="65%" stopColor="#FFFFFF" />
-                <stop offset="100%" stopColor="#EFF6FD" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 40 110 C 18 110 5 95 5 78 C 5 62 16 50 32 46 C 36 28 55 12 78 12 C 92 12 105 18 114 28 C 126 10 150 2 176 2 C 206 2 230 18 238 42 C 254 45 268 58 268 74 C 268 92 252 110 230 110 Z"
-              fill="url(#cloudGrad2)"
-              stroke="#DEECF9"
-              strokeWidth="1.2"
-            />
-          </svg>
-        </div>
-
-        {/* Cloud 3: Mid-Left Soft Cumulus */}
-        <div className="absolute top-[42%] -left-20 w-[380px] sm:w-[480px] h-[170px] animate-float-cloud-left-2 opacity-85">
-          <svg viewBox="0 0 360 110" className="w-full h-full drop-shadow-[0_14px_28px_rgba(10,50,90,0.07)]">
-            <defs>
-              <linearGradient id="cloudGrad3" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#FFFFFF" />
-                <stop offset="75%" stopColor="#FFFFFF" />
-                <stop offset="100%" stopColor="#F2F8FE" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 45 95 C 20 95 5 82 5 65 C 5 50 16 38 32 35 C 42 18 64 8 90 8 C 108 8 124 15 135 26 C 148 12 172 4 198 4 C 228 4 252 18 260 40 C 272 42 284 52 288 64 C 298 65 315 72 315 84 C 315 95 300 95 285 95 Z"
-              fill="url(#cloudGrad3)"
-              stroke="#E2EFFB"
-              strokeWidth="1"
-            />
-          </svg>
-        </div>
-
-        {/* Cloud 4: Mid-Right Drifting Fluffy Cloud */}
-        <div className="absolute top-[38%] -right-14 w-[320px] sm:w-[400px] h-[150px] animate-float-cloud-right-2 opacity-80 scale-x-[-1]">
-          <svg viewBox="0 0 320 120" className="w-full h-full drop-shadow-[0_12px_24px_rgba(10,50,90,0.06)]">
-            <path
-              d="M 50 100 C 25 100 8 85 8 65 C 8 48 20 34 38 32 C 50 16 74 6 102 6 C 124 6 142 14 154 28 C 166 14 190 4 218 4 C 252 4 280 22 286 48 C 300 52 312 66 312 80 C 312 95 296 100 274 100 Z"
-              fill="url(#cloudGrad1)"
-              stroke="#E0EEFA"
-              strokeWidth="1"
-            />
-          </svg>
-        </div>
-
-        {/* Ambient Soft Smoke / Cloud Wisps Layer */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[900px] h-[450px] bg-gradient-to-t from-white/70 via-white/40 to-transparent rounded-full blur-[90px]" />
-
-        {/* Horizon Bed of White Fluffy Clouds across the Bottom */}
-        <div className="absolute -bottom-24 left-0 right-0 h-[320px] bg-gradient-to-t from-white via-white/95 via-50% via-white/60 to-transparent blur-2xl" />
-
-        {/* Fluffy Cloud Lobe Bank at Bottom Left & Right */}
-        <div className="absolute -bottom-12 -left-10 w-[580px] h-[220px] opacity-95">
-          <svg viewBox="0 0 360 110" className="w-full h-full drop-shadow-[0_-8px_20px_rgba(10,50,90,0.05)]">
-            <path
-              d="M 45 95 C 20 95 5 82 5 65 C 5 50 16 38 32 35 C 42 18 64 8 90 8 C 108 8 124 15 135 26 C 148 12 172 4 198 4 C 228 4 252 18 260 40 C 272 42 284 52 288 64 C 298 65 315 72 315 84 C 315 95 300 95 285 95 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
-        </div>
-        <div className="absolute -bottom-14 -right-12 w-[620px] h-[240px] opacity-95 scale-x-[-1]">
-          <svg viewBox="0 0 360 110" className="w-full h-full drop-shadow-[0_-8px_20px_rgba(10,50,90,0.05)]">
-            <path
-              d="M 45 95 C 20 95 5 82 5 65 C 5 50 16 38 32 35 C 42 18 64 8 90 8 C 108 8 124 15 135 26 C 148 12 172 4 198 4 C 228 4 252 18 260 40 C 272 42 284 52 288 64 C 298 65 315 72 315 84 C 315 95 300 95 285 95 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
-        </div>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-black">
+        <div className="absolute inset-0 bg-[radial-gradient(#1f1f23_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
       </div>
 
       {/* =========================================================================
@@ -219,7 +123,7 @@ export default function AskPage() {
           /* Empty State: Cirra Logo, Heading, & 3 Query Pills in 2 Rows */
           <div className="flex flex-col items-center gap-4 text-center my-auto py-8">
             {/* CIRRA LOGO in squircle */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white border border-slate-200/90 shadow-[0_8px_30px_rgba(2,106,162,0.12)] p-3 sm:p-3.5 flex items-center justify-center transition-transform hover:scale-105 duration-200">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#09090b] border border-zinc-800 p-3 sm:p-3.5 flex items-center justify-center transition-transform hover:scale-105 duration-200">
               <img
                 src="/cirra-logo.png"
                 alt="Cirra Logo"
@@ -228,30 +132,30 @@ export default function AskPage() {
             </div>
 
             {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0A2540] tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">
               Ask anything about your spend
             </h2>
 
             {/* Descriptive Subtitle */}
-            <p className="text-[#475569] font-medium text-sm sm:text-base max-w-md leading-relaxed">
+            <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-md leading-relaxed font-sans">
               Cirra queries your live data — every number comes from the database, never guessed
             </p>
 
-            {/* Suggestion Pills in 2 Rows matching reference design */}
+            {/* Suggestion Pills in 2 Rows */}
             <div className="flex flex-col items-center gap-2.5 w-full mt-4">
               {/* Row 1: Two Pills */}
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <button
                   type="button"
                   onClick={() => handleAsk("Why did OpenAI spend spike last week?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
                 >
                   Why did OpenAI spend spike last week?
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAsk("Which team spent most on EC2 this month?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
                 >
                   Which team spent most on EC2 this month?
                 </button>
@@ -262,7 +166,7 @@ export default function AskPage() {
                 <button
                   type="button"
                   onClick={() => handleAsk("What's our unallocated spend?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-white border border-blue-100/90 shadow-[0_2px_8px_rgba(2,106,162,0.08)] hover:shadow-[0_4px_16px_rgba(2,106,162,0.16)] hover:border-blue-300 text-[#0066CC] font-semibold text-sm sm:text-[15px] transition-all duration-200 cursor-pointer active:scale-98"
+                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
                 >
                   What&apos;s our unallocated spend?
                 </button>
@@ -286,46 +190,46 @@ export default function AskPage() {
                 <div key={index} className="space-y-4">
                   {/* User Question Bubble */}
                   <div className="flex justify-end">
-                    <div className="bg-[#0062E0] text-white rounded-[18px_18px_4px_18px] px-5 py-3 text-sm max-w-[80%] shadow-[0_4px_16px_rgba(0,98,224,0.25)] font-medium">
+                    <div className="bg-white text-black font-semibold rounded-[18px_18px_4px_18px] px-5 py-3 text-sm max-w-[80%] font-mono">
                       {entry.question}
                     </div>
                   </div>
 
-                  {/* AI Answer Bubble & Verified Proof in Frosted Glass Card */}
+                  {/* AI Answer Bubble & Verified Proof */}
                   <div className="flex justify-start">
-                    <div className="bg-white/95 backdrop-blur-2xl border border-white rounded-[18px_18px_18px_4px] p-5 max-w-[92%] shadow-[0_12px_40px_rgba(2,106,162,0.12)] space-y-3.5 w-full sm:w-auto text-[#0A192F]">
-                      <div className="flex items-center justify-between text-xs pb-2 border-b border-[#E2E8F0] gap-4">
-                        <div className="flex items-center gap-2 font-bold text-[#0F1E36]">
+                    <div className="bg-[#09090b] border border-zinc-800/80 rounded-[18px_18px_18px_4px] p-5 max-w-[92%] space-y-3.5 w-full sm:w-auto text-white">
+                      <div className="flex items-center justify-between text-xs pb-2 border-b border-zinc-800/80 gap-4">
+                        <div className="flex items-center gap-2 font-bold text-white font-mono">
                           <img src="/cirra-logo.png" alt="Cirra" className="w-4 h-4 object-contain rounded" />
                           <span>Cirra Verified Response</span>
                         </div>
                         {entry.execution_time_ms !== undefined && (
-                          <span className="text-[#64748B] font-mono text-[11px] whitespace-nowrap">
+                          <span className="text-zinc-500 font-mono text-[11px] whitespace-nowrap">
                             Query ran in {Math.round(entry.execution_time_ms)}ms
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-[#0F1E36] leading-relaxed font-normal">
+                      <p className="text-sm text-zinc-200 leading-relaxed font-normal font-sans">
                         {entry.answer}
                       </p>
 
-                      {/* Collapsible SQL Code Block (respecting Citation toggle) */}
+                      {/* Collapsible SQL Code Block */}
                       {citationEnabled && sqlQuery && (
-                        <details open className="group rounded-xl bg-[#F4F9FE] border border-[#BAE6FD] p-3 text-xs text-[#0F1E36] font-mono overflow-x-auto">
-                          <summary className="flex items-center justify-between cursor-pointer list-none text-[#026AA2] text-[11px] font-sans font-semibold select-none">
+                        <details open className="group rounded-xl bg-zinc-950 border border-zinc-800 p-3 text-xs text-white font-mono overflow-x-auto">
+                          <summary className="flex items-center justify-between cursor-pointer list-none text-zinc-400 text-[11px] font-mono font-semibold select-none">
                             <div className="flex items-center gap-2">
-                              <Terminal className="w-3.5 h-3.5" />
+                              <Terminal className="w-3.5 h-3.5 text-white" />
                               <span>ClickHouse FOCUS SQL Citation</span>
                             </div>
-                            <span className="text-[10px] text-[#0062E0] group-open:hidden">
+                            <span className="text-[10px] text-zinc-400 group-open:hidden">
                               Show SQL
                             </span>
-                            <span className="text-[10px] text-[#0062E0] hidden group-open:inline">
+                            <span className="text-[10px] text-zinc-400 hidden group-open:inline">
                               Hide SQL
                             </span>
                           </summary>
-                          <pre className="mt-2 text-xs font-mono text-[#0A192F] whitespace-pre-wrap break-all pt-2 border-t border-[#BAE6FD]/60">
+                          <pre className="mt-2 text-xs font-mono text-zinc-300 whitespace-pre-wrap break-all pt-2 border-t border-zinc-850">
                             <code>{sqlQuery}</code>
                           </pre>
                         </details>
@@ -333,10 +237,10 @@ export default function AskPage() {
 
                       {/* Row Results Table if row_count > 0 */}
                       {rowCount > 0 && entry.rows && entry.rows.length > 0 && (
-                        <div className="rounded-xl border border-[#D6E4F5] overflow-hidden mt-3 shadow-xs">
+                        <div className="rounded-xl border border-zinc-800 overflow-hidden mt-3">
                           <div className="overflow-x-auto max-h-60">
                             <table className="w-full text-xs text-left border-collapse">
-                              <thead className="bg-[#EBF4FE] text-[#334155] border-b border-[#D6E4F5] sticky top-0">
+                              <thead className="bg-zinc-950 text-zinc-400 border-b border-zinc-800 sticky top-0 font-mono">
                                 <tr>
                                   {columns.map((col, cIdx) => (
                                     <th
@@ -348,9 +252,9 @@ export default function AskPage() {
                                   ))}
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-[#EBF2FA] bg-white">
+                              <tbody className="divide-y divide-zinc-850 bg-[#09090b]">
                                 {entry.rows.slice(0, 15).map((row, rIdx) => (
-                                  <tr key={rIdx} className="hover:bg-[#F8FAFD]">
+                                  <tr key={rIdx} className="hover:bg-zinc-900/50">
                                     {columns.map((col, cIdx) => {
                                       const cellVal = Array.isArray(row)
                                         ? row[cIdx]
@@ -358,7 +262,7 @@ export default function AskPage() {
                                       return (
                                         <td
                                           key={cIdx}
-                                          className="px-3 py-2 font-mono text-[#334155] whitespace-nowrap"
+                                          className="px-3 py-2 font-mono text-zinc-300 whitespace-nowrap"
                                         >
                                           {typeof cellVal === "number"
                                             ? formatNumber(cellVal)
@@ -372,7 +276,7 @@ export default function AskPage() {
                             </table>
                           </div>
                           {entry.rows.length > 15 && (
-                            <div className="text-[11px] text-[#64748B] px-3 py-1.5 bg-[#F8FAFD] border-t border-[#D6E4F5] text-center font-medium">
+                            <div className="text-[11px] text-zinc-500 px-3 py-1.5 bg-zinc-950 border-t border-zinc-800 text-center font-mono">
                               Showing first 15 of {rowCount} rows
                             </div>
                           )}
@@ -387,8 +291,8 @@ export default function AskPage() {
             {/* Typing Indicator */}
             {askCirra.isPending && (
               <div className="flex justify-start">
-                <div className="bg-white/95 backdrop-blur-md border border-white rounded-[16px_16px_16px_4px] px-3.5 py-2 text-xs text-[#026AA2] font-semibold flex items-center gap-2 shadow-[0_4px_16px_rgba(2,106,162,0.10)]">
-                  <Bot className="w-3.5 h-3.5 text-[#0062E0] animate-pulse" />
+                <div className="bg-[#09090b] border border-zinc-800 rounded-[16px_16px_16px_4px] px-3.5 py-2 text-xs text-zinc-300 font-mono flex items-center gap-2">
+                  <Bot className="w-3.5 h-3.5 text-white animate-pulse" />
                   <span>Checking FOCUS query data...</span>
                 </div>
               </div>
@@ -398,7 +302,7 @@ export default function AskPage() {
         )}
 
         {/* =========================================================================
-            PROMPT INPUT CARD (MATCHING USER'S IMAGE SPECIFICATION)
+            PROMPT INPUT CARD
            ========================================================================= */}
         <div className="w-full mt-auto relative pt-2">
           {/* Hidden File Input */}
@@ -409,17 +313,17 @@ export default function AskPage() {
             className="hidden"
           />
 
-          {/* Frosted Modern Prompt Card */}
-          <div className="w-full rounded-[22px] bg-white/95 backdrop-blur-2xl border border-slate-200/90 shadow-[0_14px_45px_rgba(2,106,162,0.14)] p-3.5 sm:p-4 transition-all focus-within:ring-2 focus-within:ring-[#0062E0]/20 focus-within:border-[#0062E0]/40">
+          {/* Prompt Card */}
+          <div className="w-full rounded-[22px] bg-[#09090b] border border-zinc-800/80 p-3.5 sm:p-4 transition-all focus-within:border-zinc-600">
             {/* Attached file tag if any */}
             {attachedFile && (
-              <div className="mb-2 flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 text-xs rounded-lg w-max">
-                <Paperclip className="w-3 h-3" />
-                <span className="truncate max-w-[200px] font-mono">{attachedFile}</span>
+              <div className="mb-2 flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg w-max font-mono">
+                <Paperclip className="w-3 h-3 text-zinc-400" />
+                <span className="truncate max-w-[200px]">{attachedFile}</span>
                 <button
                   type="button"
                   onClick={() => setAttachedFile(null)}
-                  className="text-blue-500 hover:text-blue-900 ml-1 font-bold"
+                  className="text-zinc-500 hover:text-white ml-1 font-bold"
                 >
                   ×
                 </button>
@@ -428,7 +332,7 @@ export default function AskPage() {
 
             {/* Top Text Input Row */}
             <div className="flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-slate-800 mt-1 flex-shrink-0" />
+              <Sparkles className="w-4 h-4 text-zinc-400 mt-1 flex-shrink-0" />
               <textarea
                 ref={textareaRef}
                 rows={1}
@@ -436,22 +340,22 @@ export default function AskPage() {
                 onChange={handleTextareaInput}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask AI a question or make a request..."
-                className="w-full bg-transparent text-[#0A192F] placeholder:text-slate-500 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[28px] max-h-[160px]"
+                className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[28px] max-h-[160px] font-sans"
               />
             </div>
 
             {/* Bottom Controls Toolbar */}
-            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-slate-100 flex-wrap gap-2">
+            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-zinc-800/80 flex-wrap gap-2">
               {/* Left Buttons: Attach & Writing Styles */}
               <div className="flex items-center gap-2">
                 {/* Attach Button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                  className="h-8 px-3 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono"
                   title="Attach file or logs"
                 >
-                  <Paperclip className="w-3.5 h-3.5 text-slate-600" />
+                  <Paperclip className="w-3.5 h-3.5 text-zinc-400" />
                   <span>Attach</span>
                 </button>
 
@@ -460,15 +364,15 @@ export default function AskPage() {
                   <button
                     type="button"
                     onClick={() => setStyleDropdownOpen((prev) => !prev)}
-                    className="h-8 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 flex items-center gap-1.5 text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                    className="h-8 px-3 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono"
                   >
                     <span>{writingStyle}</span>
-                    <ChevronDown className="w-3 h-3 text-slate-500" />
+                    <ChevronDown className="w-3 h-3 text-zinc-400" />
                   </button>
 
                   {/* Dropdown Menu */}
                   {styleDropdownOpen && (
-                    <div className="absolute left-0 bottom-10 w-52 bg-white border border-slate-200 rounded-xl shadow-xl py-1 z-30 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="absolute left-0 bottom-10 w-52 bg-[#09090b] border border-zinc-800 rounded-xl shadow-2xl py-1 z-30 font-mono">
                       {[
                         "Writing Styles",
                         "Deterministic FOCUS SQL",
@@ -484,8 +388,8 @@ export default function AskPage() {
                           }}
                           className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
                             writingStyle === style
-                              ? "bg-blue-50 text-[#0062E0] font-bold"
-                              : "text-slate-700 hover:bg-slate-50"
+                              ? "bg-zinc-850 text-white font-bold"
+                              : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
                           }`}
                         >
                           {style}
@@ -500,39 +404,36 @@ export default function AskPage() {
               <div className="flex items-center gap-3">
                 {/* Citation Toggle */}
                 <label className="flex items-center gap-2 cursor-pointer select-none">
-                  {/* Purple Pill Toggle Switch matching Image 2 */}
                   <div
                     onClick={() => setCitationEnabled((p) => !p)}
                     className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer flex items-center ${
-                      citationEnabled ? "bg-[#7C3AED]" : "bg-slate-300"
+                      citationEnabled ? "bg-amber-400" : "bg-zinc-800"
                     }`}
                   >
                     <div
-                      className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
-                        citationEnabled ? "translate-x-4" : "translate-x-0"
+                      className={`w-4 h-4 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
+                        citationEnabled ? "translate-x-4 bg-black" : "translate-x-0 bg-zinc-400"
                       }`}
-                    >
-                      {citationEnabled && <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]" />}
-                    </div>
+                    />
                   </div>
-                  <span className="text-xs font-semibold text-slate-700">Citation</span>
+                  <span className="text-xs font-semibold text-zinc-400 font-mono">Citation</span>
                 </label>
 
-                {/* Dark Send Button with Up Arrow matching Image 2 */}
+                {/* Golden Send Button */}
                 <button
                   type="button"
                   onClick={() => handleAsk()}
                   disabled={!input.trim() || askCirra.isPending}
-                  className="w-8 h-8 rounded-lg bg-[#0F172A] hover:bg-black disabled:opacity-40 text-white flex items-center justify-center transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer"
+                  className="w-8 h-8 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-40 text-black flex items-center justify-center transition-all cursor-pointer shadow-[0_0_10px_rgba(245,158,11,0.3)]"
                   title="Send request"
                 >
-                  <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                  <ArrowUp className="w-4 h-4 stroke-[2.5] text-black" />
                 </button>
               </div>
             </div>
           </div>
 
-          <p className="text-center text-xs font-semibold text-[#335372] mt-2 drop-shadow-[0_1px_1px_rgba(255,255,255,0.9)]">
+          <p className="text-center text-xs font-medium text-zinc-500 mt-2 font-mono">
             Every number is sourced from your database — no hallucinated figures
           </p>
         </div>

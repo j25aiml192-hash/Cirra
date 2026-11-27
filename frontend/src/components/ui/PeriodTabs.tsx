@@ -20,7 +20,7 @@ export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
     <div
       role="tablist"
       aria-label="Select period"
-      className="inline-flex items-center p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] select-none shadow-inner"
+      className="inline-flex items-center p-1 rounded-full bg-zinc-900/90 border border-zinc-800 select-none font-mono text-xs"
     >
       {pills.map((pill) => {
         const isActive = value === pill.value;
@@ -31,10 +31,10 @@ export function PeriodTabs({ value, onChange }: PeriodTabsProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(pill.value)}
-            className={`px-4 sm:px-5 py-1.5 rounded-full text-xs font-semibold transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#181B20] ${
+            className={`px-3 sm:px-3.5 py-1 rounded-full text-xs transition-all duration-200 cursor-pointer focus:outline-none ${
               isActive
-                ? "bg-[#181B20] text-white shadow-xs"
-                : "text-[#4A5E73] hover:text-[#0A192F] hover:bg-white/40 font-medium"
+                ? "bg-zinc-100 hover:bg-white text-black font-bold shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                : "text-zinc-400 hover:text-white font-medium hover:bg-zinc-800/60"
             }`}
           >
             {pill.label}

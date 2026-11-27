@@ -145,7 +145,7 @@ export default function SavingsPage() {
       key: "action_type",
       header: "Action / Strategy",
       render: (val) => (
-        <span className="font-semibold text-[#0A192F] text-sm leading-snug">
+        <span className="font-semibold text-white text-sm leading-snug font-mono">
           {String(val)}
         </span>
       ),
@@ -154,7 +154,7 @@ export default function SavingsPage() {
       key: "baseline_cost",
       header: "Baseline Cost",
       render: (val) => (
-        <span className="font-medium text-xs sm:text-sm text-[#475569] tabular-nums">
+        <span className="font-medium text-xs sm:text-sm text-zinc-400 font-mono tabular-nums">
           ${formatNumber(Number(val))}
         </span>
       ),
@@ -163,7 +163,7 @@ export default function SavingsPage() {
       key: "realized_cost",
       header: "Realized Cost",
       render: (val) => (
-        <span className="font-medium text-xs sm:text-sm text-[#334155] tabular-nums">
+        <span className="font-medium text-xs sm:text-sm text-zinc-300 font-mono tabular-nums">
           ${formatNumber(Number(val))}
         </span>
       ),
@@ -172,7 +172,7 @@ export default function SavingsPage() {
       key: "savings_amount",
       header: "Monthly Savings",
       render: (val) => (
-        <span className="font-bold text-sm sm:text-base text-emerald-600 tabular-nums">
+        <span className="font-bold text-sm sm:text-base text-white font-mono tabular-nums">
           +${formatNumber(Number(val))}/mo
         </span>
       ),
@@ -181,7 +181,7 @@ export default function SavingsPage() {
       key: "confidence_badge",
       header: "Confidence",
       render: (val) => (
-        <Badge variant="indigo" className="text-[11px] font-semibold px-2 py-0.5">
+        <Badge variant="neutral" className="text-[11px] font-semibold px-2 py-0.5 font-mono">
           {String(val)}
         </Badge>
       ),
@@ -192,14 +192,14 @@ export default function SavingsPage() {
       render: (_val, row) => {
         if (row.status === "realized" || row.status === "verified") {
           return (
-            <Badge variant="success" className="text-[11px] font-semibold px-2 py-0.5">
+            <Badge variant="success" className="text-[11px] font-semibold px-2 py-0.5 font-mono">
               {row.status === "verified" ? "Verified" : "Realized"}
             </Badge>
           );
         }
         if (row.status === "approved" || row.status === "executing") {
           return (
-            <Badge variant="info" className="text-[11px] font-semibold px-2 py-0.5">
+            <Badge variant="info" className="text-[11px] font-semibold px-2 py-0.5 font-mono">
               {row.status === "executing" ? "Executing" : "Approved"}
             </Badge>
           );
@@ -207,23 +207,23 @@ export default function SavingsPage() {
         if (row.status === "pending_approval") {
           return (
             <div className="flex items-center gap-2">
-              <Badge variant="warning" className="text-[11px] font-semibold px-2 py-0.5">
+              <Badge variant="warning" className="text-[11px] font-semibold px-2 py-0.5 font-mono">
                 Pending Gate
               </Badge>
               <button
                 type="button"
                 onClick={() => approveActionMutation.mutate(row.id)}
                 disabled={approveActionMutation.isPending}
-                className="px-3 py-1 rounded-full text-xs font-semibold bg-[#181B20] text-white hover:bg-[#2D333B] active:scale-95 transition-all shadow-xs flex items-center gap-1 disabled:opacity-50"
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-white text-black hover:bg-zinc-200 active:scale-95 transition-all shadow-xs flex items-center gap-1 disabled:opacity-50 font-mono cursor-pointer"
               >
-                <Check className="w-3.5 h-3.5" />
+                <Check className="w-3.5 h-3.5 text-black" />
                 Approve
               </button>
             </div>
           );
         }
         return (
-          <Badge variant="neutral" className="text-[11px] font-semibold px-2 py-0.5">
+          <Badge variant="neutral" className="text-[11px] font-semibold px-2 py-0.5 font-mono">
             Identified
           </Badge>
         );
@@ -233,7 +233,7 @@ export default function SavingsPage() {
       key: "date",
       header: "Date",
       render: (val) => (
-        <span className="text-xs sm:text-sm font-medium text-[#64748B] tabular-nums">
+        <span className="text-xs sm:text-sm font-medium text-zinc-500 font-mono tabular-nums">
           {String(val)}
         </span>
       ),
@@ -241,49 +241,49 @@ export default function SavingsPage() {
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black text-white">
       <Topbar title="Savings" />
 
-      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+      <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
         {/* Unboxed Key Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 pb-2">
           {/* Total Monthly Savings */}
           <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-mono">
               Total Monthly Savings
             </div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-amber-400 tabular-nums font-mono">
               ${formatNumber(totalIdentified)}
-              <span className="text-sm font-medium text-[#5A6E85] ml-1">/mo</span>
+              <span className="text-sm font-medium text-zinc-500 ml-1">/mo</span>
             </div>
           </div>
 
           {/* Realized Savings */}
           <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-mono">
               Realized Savings
             </div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums font-mono">
               ${formatNumber(totalRealized)}
             </div>
           </div>
 
           {/* Pipeline Opportunities */}
           <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-mono">
               Pipeline Opportunities
             </div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-amber-300/90 tabular-nums font-mono">
               ${formatNumber(totalPipeline)}
             </div>
           </div>
 
           {/* Active Opportunities */}
           <div className="space-y-1">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#5A6E85]">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 font-mono">
               Active Opportunities
             </div>
-            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-[#0A192F] tabular-nums">
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-white tabular-nums font-mono">
               {entries.length}
             </div>
           </div>
@@ -293,7 +293,7 @@ export default function SavingsPage() {
         <div className="space-y-3.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             {/* Rounded Pill Bar */}
-            <div className="inline-flex items-center p-0.5 sm:p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] shadow-inner max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="inline-flex items-center p-0.5 sm:p-1 rounded-full bg-zinc-900/90 border border-zinc-800 max-w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
               {[
                 { id: "all", label: `All (${counts.all})` },
                 { id: "identified", label: `Identified (${counts.identified})` },
@@ -306,10 +306,10 @@ export default function SavingsPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setStatusFilter(tab.id)}
-                    className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap ${
+                    className={`px-3.5 sm:px-4 py-1.5 rounded-full text-xs transition-all whitespace-nowrap cursor-pointer ${
                       active
-                        ? "bg-[#181B20] text-white font-semibold shadow-xs"
-                        : "text-[#4A5E73] font-medium hover:text-[#0A192F] hover:bg-white/40"
+                        ? "bg-amber-400 text-black font-bold shadow-[0_0_10px_rgba(251,191,36,0.3)]"
+                        : "text-zinc-400 hover:text-white font-medium"
                     }`}
                   >
                     {tab.label}
@@ -320,13 +320,13 @@ export default function SavingsPage() {
 
             {/* Search Input */}
             <div className="relative w-full sm:w-56">
-              <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search actions..."
-                className="w-full h-8 pl-8 pr-3 rounded-full bg-white border border-[#D6E4F5] text-xs text-[#0A192F] placeholder:text-[#64748B] focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
+                className="w-full h-8 pl-8 pr-3 rounded-full bg-[#09090b] border border-zinc-800 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-amber-500/50 transition-all font-mono"
               />
             </div>
           </div>

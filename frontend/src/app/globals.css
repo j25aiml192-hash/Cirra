@@ -1,95 +1,199 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --bg-gradient-start: #DBE6E7;
-  --bg-gradient-mid:   #DBE6E7;
-  --bg-gradient-end:   #DBE6E7;
+  --bg-canvas:         #000000;
+  --bg-surface:        #09090b;
+  --bg-surface-warm:   #0d0d10;
+  --bg-surface-elevated: #141418;
 
-  --card-bg:           #FFFFFF;
-  --card-border:       #D6E4F5;
-  --card-border-hover: #BCD4F0;
+  --card-bg:           #09090b;
+  --card-border:       #1f1f23;
+  --card-border-hover: #2e2e34;
 
-  --text-navy:         #0A192F;
-  --text-primary:      #0F1E36;
-  --text-secondary:    #4A607A;
-  --text-muted:        #7E93AB;
+  /* Sherwin-Williams Alabaster SW 7008 (#EDEAE0) */
+  --color-alabaster:   #EDEAE0;
+  --text-ink:          #EDEAE0;
+  --text-ink-soft:     #DDD8CA;
+  --text-graphite:     #C7C1B0;
+  --text-slate:        #ABA491;
+  --text-muted:        #8C8573;
 
-  --brand-blue:        #0062E0;
-  --brand-blue-hover:  #0052C2;
-  --brand-blue-light:  #E8F2FE;
-  --brand-blue-border: #BCD9FC;
-
-  --color-aws:         #F58536;
-  --color-gcp:         #1A73E8;
-  --color-openai:      #10A37F;
-  --color-anthropic:   #9333EA;
+  --hairline:          #1f1f23;
+  --hairline-soft:     #17171a;
 
   --radius-card:       16px;
   --radius-pill:       9999px;
-
-  --shadow-subtle:     0 2px 10px -2px rgba(12, 45, 90, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-card:       0 4px 24px -4px rgba(12, 48, 96, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
-  --shadow-card-hover: 0 10px 32px -6px rgba(12, 48, 96, 0.10), 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 70px;
+  background-color: #000000;
+  color-scheme: dark;
 }
 
 body {
-  background: #FFFFFF;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
-  color: var(--text-primary);
+  background: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", system-ui, sans-serif;
+  color: #EDEAE0;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Background canvas for all pages with fading geometric lattice pattern */
+/* Background canvas for all pages */
 .cirra-bg-canvas {
-  background-color: #FFFFFF;
-  background-image: 
-    linear-gradient(to bottom, #FFFFFF 0%, rgba(255, 255, 255, 0.96) 20%, rgba(255, 255, 255, 0.65) 55%, rgba(255, 255, 255, 0.05) 100%),
-    url('/bg-pattern.svg');
-  background-repeat: no-repeat, repeat;
-  background-size: 100% 100%, 48px 48px;
-  background-attachment: fixed;
+  background-color: #000000;
+  color: #EDEAE0;
   min-height: 100vh;
 }
 
-/* Premium Card with subtle blue border and soft depth */
+/* Sherwin-Williams Alabaster (SW 7008: #EDEAE0) Universal Typography Enforcement */
+h1, h2, h3, h4, h5, h6,
+.hero-display, .display-lg, .display-md, .tagline, .body-strong {
+  color: #EDEAE0 !important;
+}
+
+/* Enforce SW 7008 Alabaster across all text hierarchy: primary, secondary & subtle */
+.text-white,
+.text-zinc-100,
+.text-zinc-200 {
+  color: #EDEAE0 !important;
+}
+
+.text-zinc-300 {
+  color: #DDD8CA !important;
+}
+
+.text-zinc-400 {
+  color: #C7C1B0 !important;
+}
+
+.hover\:text-white:hover {
+  color: #EDEAE0 !important;
+}
+
+/* 02 — Typography Scale: SF Pro Display + SF Pro Text (Inter substituted) */
+/* Weight 500 is deliberately absent */
+.app-typography {
+  font-family: "SF Pro Text", "SF Pro Display", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Enforce absence of weight 500 across app: mapped to 600 or 400 */
+.app-typography .font-medium,
+.app-typography [class*="font-medium"] {
+  font-weight: 600;
+}
+
+.hero-display {
+  font-size: 56px;
+  font-weight: 600;
+  line-height: 1.07;
+  letter-spacing: -0.28px;
+}
+
+.display-lg {
+  font-size: 40px;
+  font-weight: 600;
+  line-height: 1.10;
+  letter-spacing: 0;
+}
+
+.display-md {
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+}
+
+.lead {
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.14;
+  letter-spacing: 0.196px;
+}
+
+.lead-airy {
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.tagline {
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.19;
+  letter-spacing: 0.231px;
+}
+
+.body-strong {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.24;
+  letter-spacing: -0.374px;
+}
+
+.body-text,
+.app-typography p:not([class*="text-"]) {
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.374px;
+}
+
+.button-large {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.0;
+  letter-spacing: 0;
+}
+
+.button-utility {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.29;
+  letter-spacing: -0.224px;
+}
+
+.nav-link {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.0;
+  letter-spacing: -0.12px;
+}
+
+/* Editorial Dark Card with 1px hairline border */
 .cirra-card {
-  background: #FFFFFF;
-  border: 1px solid #D6E4F5;
+  background: #09090b;
+  border: 1px solid #1f1f23;
   border-radius: 16px;
-  box-shadow: 0 4px 24px -4px rgba(12, 48, 96, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
 .cirra-card:hover {
-  border-color: #BCD4F0;
-  box-shadow: 0 8px 30px -6px rgba(12, 48, 96, 0.08), 0 2px 6px rgba(0, 0, 0, 0.03);
+  border-color: #2e2e34;
 }
 
 /* Terminal Tree sidebar */
 .cirra-sidebar {
-  background: #F8FAFC;
-  border-right: 1px solid #CBD5E1;
-  color: #0F172A;
-  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.06);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: #09090b;
+  border-right: 1px solid #1f1f23;
+  color: #e4e4e7;
 }
 
 /* Metric typography */
 .cirra-metric {
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
-  color: #0A192F;
+  color: #ffffff;
 }
 
 /* Animated Moving Border & Floating Motion */
@@ -243,6 +347,29 @@ body {
 .animate-float-cloud-right-2 {
   animation: float-cloud-right-2 7.2s ease-in-out infinite 1.2s;
   will-change: transform;
+}
+
+/* Hide Next.js dev overlay indicator & sliding widgets that can obstruct the sidebar */
+#__next-build-watcher,
+[data-nextjs-toast],
+nextjs-portal,
+[data-nextjs-dev-tools],
+[data-nextjs-dev-tools-button],
+[data-nextjs-dialog-overlay],
+[data-nextjs-dialog-left-right],
+div[data-nextjs-dialog-left-right],
+div[data-nextjs-dev-tools-button],
+div[class*="nextjs-dev-tools"],
+div[id*="nextjs-dev-tools"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: fixed !important;
+  left: -99999px !important;
+  bottom: -99999px !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 

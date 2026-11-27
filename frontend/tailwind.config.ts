@@ -9,7 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        foreground: "#0A192F",
+        alabaster: {
+          DEFAULT: "#EDEAE0",
+          50: "#FAF9F6",
+          100: "#F5F3ED",
+          200: "#EDEAE0", // Sherwin-Williams SW 7008 Alabaster
+          300: "#DDD8CA",
+          400: "#C7C1B0",
+          500: "#ABA491",
+          600: "#8C8573",
+          700: "#6D6758",
+          800: "#4F4B40",
+          900: "#323029",
+        },
+        foreground: "#EDEAE0",
         background: "#050B18",
         border: "rgba(255, 255, 255, 0.12)",
         primary: "#0A192F",
@@ -53,6 +66,9 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
+          '"SF Pro Display"',
+          '"SF Pro Text"',
+          '"Inter"',
           "-apple-system",
           "BlinkMacSystemFont",
           '"Segoe UI"',
@@ -64,6 +80,29 @@ const config: Config = {
           '"Segoe UI Emoji"',
           '"Segoe UI Symbol"',
         ],
+        sf: [
+          '"SF Pro Display"',
+          '"SF Pro Text"',
+          '"Inter"',
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          "sans-serif",
+        ],
+      },
+      fontSize: {
+        'hero-display': ['56px', { lineHeight: '1.07', letterSpacing: '-0.28px', fontWeight: '600' }],
+        'display-lg': ['40px', { lineHeight: '1.10', letterSpacing: '0px', fontWeight: '600' }],
+        'display-md': ['34px', { lineHeight: '1.47', letterSpacing: '-0.374px', fontWeight: '600' }],
+        'lead': ['28px', { lineHeight: '1.14', letterSpacing: '0.196px', fontWeight: '400' }],
+        'lead-airy': ['24px', { lineHeight: '1.5', letterSpacing: '0px', fontWeight: '300' }],
+        'tagline': ['21px', { lineHeight: '1.19', letterSpacing: '0.231px', fontWeight: '600' }],
+        'body-strong': ['17px', { lineHeight: '1.24', letterSpacing: '-0.374px', fontWeight: '600' }],
+        'body-base': ['17px', { lineHeight: '1.47', letterSpacing: '-0.374px', fontWeight: '400' }],
+        'button-large': ['18px', { lineHeight: '1.0', letterSpacing: '0px', fontWeight: '300' }],
+        'button-utility': ['14px', { lineHeight: '1.29', letterSpacing: '-0.224px', fontWeight: '400' }],
+        'nav-link': ['12px', { lineHeight: '1.0', letterSpacing: '-0.12px', fontWeight: '400' }],
       },
       borderRadius: {
         card: "16px",

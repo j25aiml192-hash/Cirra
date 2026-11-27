@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export interface MagicBentoProps {
@@ -22,8 +23,9 @@ export interface MagicBentoCardProps {
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
-  onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   radius?: number;
+  href?: string;
 }
 
 interface ClickRipple {
@@ -39,13 +41,14 @@ export function MagicBentoCard({
   className,
   contentClassName,
   onClick,
-  radius = 20,
+  radius = 16,
+  href,
 }: MagicBentoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: -1000, y: -1000 });
   const [ripples, setRipples] = useState<ClickRipple[]>([]);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -61,7 +64,7 @@ export function MagicBentoCard({
     cardRef.current.style.setProperty("--glow-opacity", "0");
   };
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLElement>) => {
     if (cardRef.current) {
       const rect = cardRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -97,59 +100,38 @@ export function MagicBentoCard({
       ? "row-span-1"
       : "";
 
-  return (
-    <div
-      ref={cardRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      style={{
-        borderRadius: `${radius}px`,
-        ["--mouse-x" as string]: `${mousePos.x}px`,
-        ["--mouse-y" as string]: `${mousePos.y}px`,
-        ["--glow-opacity" as string]: "0",
-      }}
-      className={cn(
-        "magic-bento-card group relative bg-white overflow-hidden transition-all duration-200 select-none",
-        "border border-[#D1D5DB] hover:border-[#9CA3AF] shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]",
-        colSpanClass,
-        rowSpanClass,
-        className
-      )}
-    >
-      {/* 1. High-Visibility Cursor Spotlight Glow */}
+  const sharedProps = {
+    ref: cardRef,
+    onMouseMove: handleMouseMove,
+    onMouseLeave: handleMouseLeave,
+    onClick: handleClick,
+    style: {
+      borderRadius: `${radius}px`,
+      ["--mouse-x" as string]: `${mousePos.x}px`,
+      ["--mouse-y" as string]: `${mousePos.y}px`,
+      ["--glow-opacity" as string]: "0",
+    },
+    className: cn(
+      "magic-bento-card group relative bg-[#09090b] overflow-hidden transition-all duration-200 select-none",
+      "border border-zinc-800 hover:border-zinc-700 shadow-xl hover:shadow-2xl",
+      colSpanClass,
+      rowSpanClass,
+      className
+    ),
+  };
+
+  const innerContent = (
+    <>
+      {/* 1. Precision Cursor Spotlight Glow (Single Layer, No Double-Border Artifacts) */}
       <div
         className="pointer-events-none absolute inset-0 transition-opacity duration-200"
         style={{
           opacity: "var(--glow-opacity, 0)",
-          background: `radial-gradient(350px circle at var(--mouse-x) var(--mouse-y), rgba(15, 23, 42, 0.08) 0%, rgba(30, 41, 59, 0.03) 45%, transparent 70%)`,
+          background: `radial-gradient(350px circle at var(--mouse-x) var(--mouse-y), rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 45%, transparent 70%)`,
         }}
       />
 
-      {/* 2. High-Visibility Multi-Card Edge Light */}
-      <div
-        className="pointer-events-none absolute inset-0 transition-opacity duration-150 rounded-[inherit]"
-        style={{
-          opacity: "var(--glow-opacity, 0)",
-          boxShadow: `inset 0 0 0 1px transparent`,
-          background: `radial-gradient(320px circle at var(--mouse-x) var(--mouse-y), rgba(15, 23, 42, 0.95) 0%, rgba(51, 65, 85, 0.75) 30%, rgba(100, 116, 139, 0.4) 50%, transparent 70%)`,
-          WebkitMask: `linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)`,
-          WebkitMaskComposite: `xor`,
-          maskComposite: `exclude`,
-          padding: `2px`,
-        }}
-      />
-
-      {/* 3. Outer Edge Highlight Aura */}
-      <div
-        className="pointer-events-none absolute inset-[-1px] transition-opacity duration-200 rounded-[inherit]"
-        style={{
-          opacity: "var(--glow-opacity, 0)",
-          background: `radial-gradient(280px circle at var(--mouse-x) var(--mouse-y), rgba(15, 23, 42, 0.12) 0%, transparent 65%)`,
-        }}
-      />
-
-      {/* 4. Vivid Click Ripple Wave */}
+      {/* 2. Click Ripple Wave */}
       {ripples.map((ripple) => (
         <span
           key={ripple.id}
@@ -159,25 +141,35 @@ export function MagicBentoCard({
             top: ripple.y - 40,
             width: 80,
             height: 80,
-            background: "radial-gradient(circle, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.15) 50%, transparent 80%)",
+            background: "radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 50%, transparent 80%)",
             animationDuration: "650ms",
           }}
         />
       ))}
 
       {/* Card Content Container */}
-      <div className={cn("relative z-10 w-full h-full p-5 sm:p-6 flex flex-col justify-between", contentClassName)}>
+      <div className={cn("relative z-10 w-full h-full flex flex-col justify-between", contentClassName)}>
         {children}
       </div>
-    </div>
+    </>
   );
+
+  if (href) {
+    return (
+      <Link href={href} {...sharedProps} className={cn(sharedProps.className, "block cursor-pointer")}>
+        {innerContent}
+      </Link>
+    );
+  }
+
+  return <div {...sharedProps}>{innerContent}</div>;
 }
 
-export default function MagicBento({
+export function MagicBento({
   columns = 4,
-  rowHeight = 200,
-  gap = 12,
-  radius = 20,
+  rowHeight,
+  gap = 16,
+  radius = 16,
   enableBorderGlow = true,
   enableSpotlight = true,
   spotlightRadius = 300,
@@ -189,7 +181,7 @@ export default function MagicBento({
 
   const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
-    const cards = containerRef.current.querySelectorAll<HTMLDivElement>(".magic-bento-card");
+    const cards = containerRef.current.querySelectorAll<HTMLElement>(".magic-bento-card");
     const radiusDistance = spotlightRadius || 300;
 
     cards.forEach((card) => {
@@ -217,7 +209,7 @@ export default function MagicBento({
 
   const handleContainerMouseLeave = () => {
     if (!containerRef.current) return;
-    const cards = containerRef.current.querySelectorAll<HTMLDivElement>(".magic-bento-card");
+    const cards = containerRef.current.querySelectorAll<HTMLElement>(".magic-bento-card");
     cards.forEach((card) => {
       card.style.setProperty("--glow-opacity", "0");
     });
@@ -232,9 +224,8 @@ export default function MagicBento({
         gap: `${gap}px`,
       }}
       className={cn(
-        "magic-bento-grid w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 transition-all duration-300",
-        `lg:auto-rows-[${rowHeight}px]`,
-        className
+        "magic-bento-grid w-full grid transition-all duration-300",
+        className || "grid-cols-1 md:grid-cols-2 lg:grid-cols-4"
       )}
     >
       {React.Children.map(children, (child) => {
@@ -248,3 +239,5 @@ export default function MagicBento({
     </div>
   );
 }
+
+export default MagicBento;

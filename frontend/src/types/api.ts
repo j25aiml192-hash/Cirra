@@ -33,6 +33,8 @@ export interface DashboardSummary {
   anomalies_detected: number;
   potential_savings_monthly: number;
   active_connections: number;
+  total_tokens?: number;
+  mom_change?: number;
   monthly: MonthlySpendData[];
   topServices: TopService[];
   topAiKeys: TopAiKey[];

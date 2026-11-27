@@ -9,6 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { supabase } from "@/lib/supabase";
 import { apiFetch } from "@/lib/api";
 import { useAuthStore } from "@/store/authStore";
+import {
+  MailRoundedIcon,
+  LockKeypadIcon,
+  ArrowRightRoundedIcon,
+  ShieldSecurityIcon,
+} from "@/components/ui/cirra-icons";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -55,7 +61,14 @@ export default function LoginPage() {
           return;
         }
       } catch (directErr: any) {
-        // Fall back to client Supabase sign in if direct login encounters issue
+        const isOfflineSupabase =
+          !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+          process.env.NEXT_PUBLIC_SUPABASE_URL.includes("placeholder") ||
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY === "placeholder-anon-key";
+
+        if (isOfflineSupabase) {
+          throw new Error(directErr?.message || "Invalid email or password");
+        }
       }
 
       // 2. Client Supabase fallback
@@ -144,8 +157,11 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-[#334155]">Work Email</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#334155] flex items-center gap-1.5">
+                <MailRoundedIcon size={14} className="text-[#0062E0]" />
+                <span>Work Email</span>
+              </label>
               <Input
                 type="email"
                 placeholder="name@company.com"
@@ -154,8 +170,11 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-[#334155]">Password</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-[#334155] flex items-center gap-1.5">
+                <LockKeypadIcon size={14} className="text-[#0062E0]" />
+                <span>Password</span>
+              </label>
               <Input
                 type="password"
                 placeholder="••••••••"
@@ -164,10 +183,16 @@ export default function LoginPage() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing In..." : "Sign In"}
+            <Button type="submit" className="w-full flex items-center justify-center gap-2" disabled={isLoading}>
+              <span>{isLoading ? "Signing In..." : "Sign In"}</span>
+              <ArrowRightRoundedIcon size={16} />
             </Button>
           </form>
+
+          <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-medium text-[#7E93AB]">
+            <ShieldSecurityIcon size={13} className="text-[#0D824D]" />
+            <span>FOCUS 1.0 & RLS Security Enforced</span>
+          </div>
 
           <div className="relative my-4">
             <div className="absolute inset-0 flex items-center">

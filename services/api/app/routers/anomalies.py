@@ -39,6 +39,9 @@ async def list_anomalies(
 
     stmt = stmt.order_by(Anomaly.detected_at.desc()).limit(limit)
 
+    if db is None:
+        return []
+
     try:
         result = await db.execute(stmt)
         anomalies = result.scalars().all()

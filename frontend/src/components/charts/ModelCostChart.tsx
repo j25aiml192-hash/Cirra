@@ -12,6 +12,14 @@ import {
 } from "recharts";
 import { formatNumber } from "@/lib/utils";
 
+const BarChartAny = BarChart as any;
+const BarAny = Bar as any;
+const XAxisAny = XAxis as any;
+const YAxisAny = YAxis as any;
+const CartesianGridAny = CartesianGrid as any;
+const TooltipAny = Tooltip as any;
+const ResponsiveContainerAny = ResponsiveContainer as any;
+
 interface ModelCostChartProps {
   data: Array<{ model: string; cost: number }>;
 }
@@ -19,43 +27,43 @@ interface ModelCostChartProps {
 export function ModelCostChart({ data }: ModelCostChartProps) {
   return (
     <div className="h-64 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
+      <ResponsiveContainerAny width="100%" height="100%">
+        <BarChartAny
           layout="vertical"
           data={data}
           margin={{ top: 5, right: 20, left: 40, bottom: 5 }}
         >
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EBF2FA" />
-          <XAxis
+          <CartesianGridAny strokeDasharray="3 3" horizontal={false} stroke="#1f1f23" />
+          <XAxisAny
             type="number"
-            stroke="#475569"
+            stroke="#EDEAE0"
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(val) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+            tickFormatter={(val: number) => `$${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
           />
-          <YAxis
+          <YAxisAny
             type="category"
             dataKey="model"
-            stroke="#475569"
+            stroke="#EDEAE0"
             fontSize={12}
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip
+          <TooltipAny
             formatter={(value: number) => [`$${formatNumber(value)}`, "Cost"]}
             contentStyle={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: "#09090b",
               borderRadius: "12px",
-              border: "1px solid #BCD9FC",
-              color: "#0A192F",
+              border: "1px solid #27272a",
+              color: "#EDEAE0",
               fontSize: "12px",
-              boxShadow: "0 10px 30px -4px rgba(12,48,96,0.12)",
+              boxShadow: "0 10px 30px -4px rgba(0,0,0,0.5)",
             }}
           />
-          <Bar dataKey="cost" fill="#6366F1" radius={[0, 4, 4, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
+          <BarAny dataKey="cost" fill="#F59E0B" radius={[0, 4, 4, 0]} />
+        </BarChartAny>
+      </ResponsiveContainerAny>
     </div>
   );
 }

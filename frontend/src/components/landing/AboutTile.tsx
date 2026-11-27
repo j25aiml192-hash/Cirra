@@ -2,19 +2,21 @@
 
 import * as React from "react";
 import {
-  ShieldCheck,
-  Cpu,
-  Layers,
-  Sparkles,
   Zap,
   Lock,
-  Compass,
   ArrowRight,
   TrendingUp,
   Server,
   Network,
   CheckCircle2,
 } from "lucide-react";
+import {
+  FlagIcon,
+  AiChipIcon,
+  ShieldSecurityIcon,
+  LayersRoundedIcon,
+  SparklesAiIcon,
+} from "@/components/ui/cirra-icons";
 import GlyphSonar from "@/components/ui/GlyphSonar";
 
 type AboutTab = "mission" | "architecture" | "security";
@@ -134,7 +136,7 @@ export function AboutTile() {
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
-                <Compass className="w-3.5 h-3.5" />
+                <FlagIcon size={14} className="text-slate-400" />
                 The Mission
               </button>
               <button
@@ -146,7 +148,7 @@ export function AboutTile() {
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
-                <Cpu className="w-3.5 h-3.5" />
+                <AiChipIcon size={14} className="text-slate-400" />
                 Architecture & Ingestion
               </button>
               <button
@@ -158,7 +160,7 @@ export function AboutTile() {
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
                 }`}
               >
-                <ShieldCheck className="w-3.5 h-3.5" />
+                <ShieldSecurityIcon size={14} className="text-slate-400" />
                 Security & Isolation
               </button>
             </div>
@@ -170,7 +172,7 @@ export function AboutTile() {
                   <div className="md:col-span-7 flex flex-col justify-between bg-gradient-to-br from-white to-slate-50 p-6 rounded-2xl border border-slate-200/80 shadow-sm">
                     <div>
                       <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-200/60 text-blue-700 text-[11px] font-bold tracking-wide uppercase mb-3">
-                        <Sparkles className="w-3 h-3" /> Autonomous By Design
+                        <SparklesAiIcon size={12} className="text-slate-600" /> Autonomous By Design
                       </div>
                       <h3 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
                         Ending the Era of Reactive Monthly Surprise Bills
@@ -201,8 +203,8 @@ export function AboutTile() {
 
                   <div className="md:col-span-5 flex flex-col justify-between space-y-4">
                     <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-                      <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 mb-3">
-                        <Layers className="w-4 h-4" />
+                      <div className="w-9 h-9 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 mb-3">
+                        <LayersRoundedIcon size={16} className="text-slate-700" />
                       </div>
                       <h4 className="text-sm font-bold text-slate-900">Unified Attribution</h4>
                       <p className="mt-1 text-xs text-slate-600 leading-relaxed">
@@ -314,8 +316,8 @@ export function AboutTile() {
 
                   <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
                     <div>
-                      <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-3">
-                        <ShieldCheck className="w-5 h-5" />
+                      <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700 mb-3">
+                        <ShieldSecurityIcon size={20} className="text-slate-700" />
                       </div>
                       <h3 className="text-lg font-bold text-slate-900 tracking-tight">
                         SOC 2 Type II & Enterprise Compliance

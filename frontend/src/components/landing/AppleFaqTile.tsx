@@ -1,7 +1,14 @@
 "use client";
 
 import * as React from "react";
-import { ShieldCheck, Lock, Zap, Globe, Server, BarChart3 } from "lucide-react";
+import {
+  ShieldSecurityIcon,
+  LockKeypadIcon,
+  PackageClockIcon,
+  GlobeCheckIcon,
+  AiChipIcon,
+  BarChartGrowthIcon,
+} from "@/components/ui/cirra-icons";
 import { FaqAccordion, FAQItem } from "@/components/ui/faq-chat-accordion";
 
 const cirraFaqData: FAQItem[] = [
@@ -10,42 +17,42 @@ const cirraFaqData: FAQItem[] = [
     question: "Do you need write access to my cloud?",
     answer:
       "No. Cirra functions entirely on read-only cross-account IAM roles for AWS, read-only BigQuery Service Account keys for GCP, and read-only usage keys for AI providers. Write access is only requested if you explicitly opt-in to Action Center automated rightsizing, and even then, every action requires explicit human approval.",
-    icon: <ShieldCheck className="w-4 h-4" />,
+    icon: <ShieldSecurityIcon size={16} className="text-slate-600" />,
   },
   {
     id: 2,
     question: "Does Cirra see my prompt payloads?",
     answer:
       "No. Cirra's lightweight telemetry gateway and SDK wrappers only log metadata: token counts (prompt vs completion), model name, tenant ID, and latency. We never inspect, log, or store prompt text or completion payloads.",
-    icon: <Lock className="w-4 h-4" />,
+    icon: <LockKeypadIcon size={16} className="text-slate-600" />,
   },
   {
     id: 3,
     question: "How long until I see live cost data?",
     answer:
       "Within 5 to 10 minutes after connecting your cloud billing export or AI admin key. Cirra immediately begins ingesting your historical billing data, normalizes it into FOCUS 1.0 format, and surfaces immediate waste findings.",
-    icon: <Zap className="w-4 h-4" />,
+    icon: <PackageClockIcon size={16} className="text-slate-600" />,
   },
   {
     id: 4,
     question: "Which cloud & AI providers are supported?",
     answer:
       "Cirra currently supports AWS (CUR 2.0, CloudWatch), Google Cloud (BigQuery Billing, GKE), Microsoft Azure, Kubernetes (via OpenCost), OpenAI, Anthropic Claude, Amazon Bedrock, and Google Cloud Vertex AI.",
-    icon: <Globe className="w-4 h-4" />,
+    icon: <GlobeCheckIcon size={16} className="text-slate-600" />,
   },
   {
     id: 5,
     question: "Can Cirra be self-hosted in our VPC?",
     answer:
       "Yes. For teams with strict data sovereignty or compliance needs, Cirra Private can be deployed directly inside your own AWS or GCP VPC using our official Helm charts or Terraform modules, with local LLM integration for Ask Cirra.",
-    icon: <Server className="w-4 h-4" />,
+    icon: <AiChipIcon size={16} className="text-slate-600" />,
   },
   {
     id: 6,
     question: "How is Cirra different from AWS Cost Explorer?",
     answer:
       "AWS Cost Explorer only covers AWS, arrives 24 to 48 hours late, doesn't know about your OpenAI or Anthropic API keys, cannot attribute token costs to customer tenants, and doesn't offer human-in-the-loop remediation dry-runs or PR cost diffs.",
-    icon: <BarChart3 className="w-4 h-4" />,
+    icon: <BarChartGrowthIcon size={16} className="text-slate-600" />,
   },
 ];
 

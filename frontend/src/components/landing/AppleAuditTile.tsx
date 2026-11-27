@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRightRoundedIcon, CheckCircleRoundedIcon } from "@/components/ui/cirra-icons";
 import GlyphSonar from "@/components/ui/GlyphSonar";
 
 export function AppleAuditTile() {
@@ -45,15 +45,15 @@ export function AppleAuditTile() {
         {/* Deliverables */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-[14px] text-[#CBD5E1]">
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#38BDF8]" />
+            <CheckCircleRoundedIcon size={16} className="text-[#38BDF8]" />
             Top 10 highest-impact idle waste items
           </span>
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#38BDF8]" />
+            <CheckCircleRoundedIcon size={16} className="text-[#38BDF8]" />
             AI spend by key and foundation model
           </span>
           <span className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#38BDF8]" />
+            <CheckCircleRoundedIcon size={16} className="text-[#38BDF8]" />
             Untagged &amp; unallocated spend percentage
           </span>
         </div>
@@ -76,7 +76,7 @@ export function AppleAuditTile() {
             className="w-full sm:w-auto h-[46px] px-7 rounded-full text-[15px] font-semibold text-white bg-[#0062E0] hover:bg-[#0052C2] hover:scale-105 active:scale-95 shadow-[0_0_24px_rgba(0,98,224,0.45)] hover:shadow-[0_0_32px_rgba(0,98,224,0.65)] transition-all flex items-center justify-center gap-2 group cursor-pointer"
           >
             <span>Run free audit</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRightRoundedIcon size={16} className="text-white group-hover:translate-x-0.5 transition-transform" />
           </button>
         </form>
 

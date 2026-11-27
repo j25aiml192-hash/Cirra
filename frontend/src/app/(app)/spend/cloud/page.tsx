@@ -7,11 +7,13 @@ import {
   MultiCloudSpendChart,
   SpendVelocityChart,
 } from "@/components/charts/SpendAreaChart";
+import { SpendHeatmapChart } from "@/components/charts/SpendHeatmapChart";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useCloudSpend } from "@/hooks/useSpend";
 import { formatNumber } from "@/lib/utils";
 import type { CloudSpendRecord } from "@/types";
+import { ProviderLogo } from "@/components/ui/provider-logos";
 
 export default function CloudSpendPage() {
   const { data, isLoading } = useCloudSpend();
@@ -97,16 +99,30 @@ export default function CloudSpendPage() {
     });
   }, [data?.dailyVelocity, items, providerFilter]);
 
-  // Table columns styled to match the reference layout in the light palette
+  // Table columns redesigned with app brand logos & modern FinOps aesthetics
   const cloudColumns: Column<CloudSpendRecord>[] = [
     {
       key: "service",
       header: "Service",
       render: (val, row) => (
-        <div>
-          <div className="font-semibold text-[#0f172a] text-sm">{row.service}</div>
-          <div className="text-xs text-slate-600 font-normal mt-0.5">
-            {row.team ?? "Unallocated"}
+        <div className="flex items-center gap-3 py-1">
+          <div className="w-9 h-9 rounded-xl bg-zinc-900/90 border border-zinc-800/90 flex items-center justify-center p-1.5 shrink-0 shadow-inner group-hover:border-zinc-700">
+            <ProviderLogo
+              provider={row.provider}
+              name={row.service}
+              size={20}
+              className="shrink-0"
+            />
+          </div>
+          <div className="min-w-0">
+            <div className="font-semibold text-[#EDEAE0] text-sm tracking-tight truncate">
+              {row.service}
+            </div>
+            <div className="text-xs text-zinc-400 font-mono mt-0.5 flex items-center gap-1.5">
+              <span>{row.team ?? "Unallocated"}</span>
+              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-500 font-sans">FOCUS 1.0</span>
+            </div>
           </div>
         </div>
       ),
@@ -114,27 +130,20 @@ export default function CloudSpendPage() {
     {
       key: "provider",
       header: "Provider",
-      width: "110px",
+      width: "120px",
       render: (val) => (
-        <span
-          className={`inline-flex items-center text-xs font-bold px-2.5 py-0.5 rounded-md border ${
-            val === "AWS"
-              ? "bg-[#FFF4E5] text-[#B45309] border-[#FDE68A]"
-              : val === "GCP"
-              ? "bg-[#EBF3FE] text-[#0062E0] border-[#BCD9FC]"
-              : "bg-[#F0F5FD] text-[#4A607A] border-[#D6E4F5]"
-          }`}
-        >
-          {String(val)}
+        <span className="inline-flex items-center gap-1.5 text-xs font-mono font-bold px-2.5 py-1 rounded-full border bg-zinc-900/90 text-[#EDEAE0] border-zinc-800/90 shadow-sm">
+          <ProviderLogo provider={String(val)} size={13} className="shrink-0" />
+          <span>{String(val)}</span>
         </span>
       ),
     },
     {
       key: "region",
       header: "Region",
-      width: "120px",
+      width: "125px",
       render: (val) => (
-        <span className="font-mono text-[13px] text-slate-600 font-medium">
+        <span className="font-mono text-xs text-zinc-300 font-medium px-2 py-0.5 rounded bg-zinc-900/60 border border-zinc-800/70">
           {String(val)}
         </span>
       ),
@@ -142,25 +151,23 @@ export default function CloudSpendPage() {
     {
       key: "attributed",
       header: "Attribution",
-      width: "120px",
+      width: "110px",
       render: (val) =>
         val ? (
-          <div className="flex items-center gap-1.5 text-[13px] text-[#0D824D] font-semibold">
-            <CheckCircle className="w-3.5 h-3.5 text-[#0D824D]" />
-            <span>Tagged</span>
-          </div>
+          <span className="text-xs font-mono font-medium text-emerald-400">
+            Tagged
+          </span>
         ) : (
-          <div className="flex items-center gap-1.5 text-[13px] text-[#334155] font-medium">
-            <Tag className="w-3.5 h-3.5 text-[#334155]" />
-            <span>Untagged</span>
-          </div>
+          <span className="text-xs font-mono font-medium text-zinc-400">
+            Untagged
+          </span>
         ),
     },
     {
       key: "spend",
       header: "Spend",
       render: (val) => (
-        <span className="font-bold text-[#0f172a] cirra-metric text-sm">
+        <span className="font-bold text-[#EDEAE0] font-mono text-sm tracking-tight">
           ${formatNumber(Number(val))}
         </span>
       ),
@@ -169,7 +176,7 @@ export default function CloudSpendPage() {
       key: "priorPeriodSpend",
       header: "Prior Period",
       render: (val) => (
-        <span className="text-[#475569] font-medium text-[13px] cirra-metric">
+        <span className="text-zinc-400 font-medium text-xs font-mono">
           ${formatNumber(Number(val))}
         </span>
       ),
@@ -177,46 +184,73 @@ export default function CloudSpendPage() {
     {
       key: "change",
       header: "Change",
-      render: (val, row) => (
-        <span
-          className={`inline-flex items-center text-[13px] font-semibold px-2.5 py-0.5 rounded-full border shadow-xs ${
-            row.changePositive
-              ? "bg-[#E6F8F0] text-[#0D824D] border-[#B3ECCB]"
-              : "bg-[#FEECEC] text-[#DC2626] border-[#FECACA]"
-          }`}
-        >
-          {row.change}
-        </span>
-      ),
+      width: "110px",
+      render: (val, row) => {
+        const isDecrease = String(val).startsWith("-") || row.changePositive;
+        return (
+          <span
+            className={`inline-flex items-center text-xs font-mono font-bold px-2 py-0.5 rounded border ${
+              isDecrease
+                ? "bg-emerald-950/40 text-emerald-400 border-emerald-800/50"
+                : "bg-rose-950/30 text-rose-300 border-rose-800/40"
+            }`}
+          >
+            {row.change}
+          </span>
+        );
+      },
     },
     {
       key: "impactPercent",
       header: "Impact",
-      render: (val) => (
-        <div className="w-24">
-          <div className="flex justify-between text-[13px] font-semibold text-[#0f172a] mb-1">
-            <span>{val}%</span>
+      width: "130px",
+      render: (val) => {
+        const IMPACT_COLORS = [
+          "#21a387", // Jade Green
+          "#275966", // Slate Teal
+          "#e5431c", // Coral Red
+          "#f5bb1d", // Sunflower Gold
+          "#f4981e", // Tangerine Amber
+        ];
+        const numVal = Number(val) || 0;
+        const color =
+          numVal > 20
+            ? IMPACT_COLORS[0]
+            : numVal > 10
+            ? IMPACT_COLORS[1]
+            : numVal > 5
+            ? IMPACT_COLORS[2]
+            : IMPACT_COLORS[3];
+
+        return (
+          <div className="w-28 space-y-1.5">
+            <div className="flex justify-between items-center text-xs font-mono font-bold text-[#EDEAE0]">
+              <span>{numVal.toFixed(1)}%</span>
+            </div>
+            <div className="h-2 w-full bg-zinc-800/90 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500 shadow-sm"
+                style={{
+                  width: `${Math.min(100, Math.max(8, numVal * 3))}%`,
+                  backgroundColor: color,
+                }}
+              />
+            </div>
           </div>
-          <div className="h-1.5 w-full bg-[#EBF2FA] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-[#0062E0] to-[#6366F1] rounded-full"
-              style={{ width: `${val}%` }}
-            />
-          </div>
-        </div>
-      ),
+        );
+      },
     },
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-black text-white">
       <Topbar />
 
       <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-          {/* Provider pills matching reference design */}
-          <div className="inline-flex items-center p-1 rounded-full bg-[#E5EBF2] border border-[#D5E0EB] shadow-inner overflow-x-auto">
+          {/* Provider pills */}
+          <div className="inline-flex items-center p-1 rounded-full bg-zinc-900/90 border border-zinc-800 overflow-x-auto">
             {["all", "AWS", "GCP"].map((p) => {
               const active = providerFilter === p;
               return (
@@ -224,10 +258,10 @@ export default function CloudSpendPage() {
                   key={p}
                   type="button"
                   onClick={() => setProviderFilter(p)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap cursor-pointer ${
                     active
-                      ? "bg-[#181B20] text-white shadow-xs"
-                      : "text-[#4A5E73] font-medium hover:text-[#0A192F] hover:bg-white/40"
+                      ? "bg-emerald-600 text-white font-bold shadow-[0_0_12px_rgba(5,150,105,0.4)]"
+                      : "text-zinc-400 hover:text-white font-medium"
                   }`}
                 >
                   {p === "all" ? "All Providers" : p}
@@ -239,115 +273,94 @@ export default function CloudSpendPage() {
           {/* Search, Team dropdown & Export */}
           <div className="flex flex-wrap items-center gap-2.5 flex-1 max-w-xl justify-end">
             <div className="relative min-w-[180px] flex-1 max-w-xs">
-              <Search className="w-3.5 h-3.5 text-[#7E93AB] absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search resources..."
-                className="w-full h-9 pl-9 pr-4 text-xs sm:text-sm rounded-full border border-[#D6E4F5] bg-white text-[#0f172a] placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs"
+                className="w-full h-9 pl-9 pr-4 text-xs sm:text-sm rounded-full border border-zinc-800 bg-[#09090b] text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/50 transition-all font-mono"
               />
             </div>
 
             <select
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
-              className="h-9 px-4 text-xs sm:text-sm rounded-full border border-[#D6E4F5] bg-white text-[#334155] font-medium focus:outline-none focus:ring-2 focus:ring-[#0062E0]/20 focus:border-[#0062E0] transition-all shadow-xs cursor-pointer"
+              className="h-9 px-4 text-xs sm:text-sm rounded-full border border-zinc-800 bg-[#09090b] text-zinc-300 font-medium focus:outline-none focus:border-emerald-500/50 transition-all cursor-pointer font-mono"
             >
-            <option value="all">All Teams</option>
-            <option value="Core Platform">Core Platform</option>
-            <option value="Infrastructure">Infrastructure</option>
-            <option value="Data Lake">Data Lake</option>
-            <option value="Unallocated">Unallocated</option>
-          </select>
+              <option value="all" className="bg-[#09090b] text-white">All Teams</option>
+              <option value="Core Platform" className="bg-[#09090b] text-white">Core Platform</option>
+              <option value="Infrastructure" className="bg-[#09090b] text-white">Infrastructure</option>
+              <option value="Data Lake" className="bg-[#09090b] text-white">Data Lake</option>
+              <option value="Unallocated" className="bg-[#09090b] text-white">Unallocated</option>
+            </select>
 
-          <button
-            type="button"
-            onClick={handleExport}
-            className="h-8 px-3 rounded-xl border border-[#D6E4F5] text-sm font-semibold text-[#0A192F] bg-white hover:bg-[#F0F5FD] hover:border-[#BCD4F0] flex items-center gap-1.5 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
-            title="Export filtered line items to CSV"
-          >
-            <Download className="w-3.5 h-3.5 text-[#5A6E85]" />
-            <span>Export</span>
-          </button>
-        </div>
+            <button
+              type="button"
+              onClick={handleExport}
+              className="h-9 px-4 rounded-full text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-[0_0_12px_rgba(5,150,105,0.3)]"
+              title="Export filtered line items to CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-white" />
+              <span>Export</span>
+            </button>
+          </div>
       </div>
 
-      {/* Upper Charts Row: Total Multi-Cloud Spend & Spend Velocity side-by-side */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-        {/* Main Multi-Cloud Stacked Area Chart (8 cols) */}
-        <div className="lg:col-span-8 cirra-card p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 pb-3 border-b border-[#EBF2FA]">
-              <div>
-                <h3 className="font-semibold text-[#0A192F] text-base tracking-tight">
-                  Total Multi-Cloud Spend
-                </h3>
-                <p className="text-[13px] text-[#475569] mt-0.5">
-                  Aggregated hourly billing telemetry smoothed daily
-                </p>
-              </div>
+      {/* 1. FIRST: Spend Velocity & Ingestion Heatmap Matrix */}
+      <SpendHeatmapChart
+        title="$85,420 Spend Velocity"
+        subtitle="1,648 telemetry events ingested · ±4.2% daily velocity stability · 34 day streak"
+      />
 
-              {/* MTD Spend pill matching reference image top-right badge */}
-              <div className="bg-[#E6F8F0] border border-[#B3ECCB] px-3.5 py-1.5 rounded-xl text-left sm:text-right w-fit">
-                <div className="text-base sm:text-lg font-bold text-[#0D824D] cirra-metric leading-tight">
-                  ${data ? formatNumber(data.totalCost) : 0}
-                </div>
-                <div className="text-[10px] font-semibold text-[#0D824D] uppercase tracking-wider">
-                  Total Spend (MTD)
-                </div>
-              </div>
-            </div>
-
-            <MultiCloudSpendChart
-              data={multiCloudData}
-              loading={isLoading}
-              selectedProvider={providerFilter}
-            />
-          </div>
-        </div>
-
-        {/* Spend Velocity Chart (4 cols) */}
-        <div className="lg:col-span-4 cirra-card p-6 flex flex-col justify-between">
-          <div>
-            <div className="mb-3 pb-3 border-b border-[#EBF2FA]">
-              <h3 className="font-semibold text-[#0A192F] text-base tracking-tight">
-                Spend Velocity
+      {/* 2. THEN: Multi-Cloud Spend Trajectory Chart */}
+      <div className="bg-[#09090b] border border-zinc-800/80 hover:border-emerald-500/30 transition-colors rounded-2xl p-6 flex flex-col justify-between">
+        <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/80">
+            <div>
+              <h3 className="font-semibold text-white text-base tracking-tight font-mono">
+                Total Multi-Cloud Spend
               </h3>
-              <p className="text-[13px] text-[#475569] mt-0.5">
+              <p className="text-[13px] text-zinc-400 mt-0.5">
                 Aggregated hourly billing telemetry smoothed daily
               </p>
             </div>
 
-            <SpendVelocityChart
-              data={data?.dailyVelocity ?? []}
-              loading={isLoading}
-            />
+            {/* MTD Spend pill */}
+            <div className="bg-zinc-900 border border-zinc-800 px-3.5 py-1.5 rounded-xl text-left sm:text-right w-fit">
+              <div className="text-base sm:text-lg font-bold text-emerald-400 cirra-metric leading-tight font-mono">
+                ${data ? formatNumber(data.totalCost) : 0}
+              </div>
+              <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider font-mono">
+                Total Spend (MTD)
+              </div>
+            </div>
           </div>
+
+          <MultiCloudSpendChart
+            data={multiCloudData}
+            loading={isLoading}
+            selectedProvider={providerFilter}
+          />
         </div>
       </div>
 
       {/* Cloud Table Card: FOCUS Normalized Line Items */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h3 className="font-semibold text-[#0A192F] text-lg tracking-tight">
+          <h3 className="font-semibold text-white text-lg tracking-tight font-mono">
             FOCUS Normalized Line Items
           </h3>
-          <span className="text-[13px] font-medium text-[#64748b] bg-white border border-[#D6E4F5] px-2.5 py-1 rounded-lg shadow-xs">
+          <span className="text-[12px] font-mono font-medium text-zinc-400 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-full">
             {filteredItems.length} services found
           </span>
         </div>
 
-        <div className="cirra-card overflow-hidden">
+        <div className="bg-[#09090b] border border-zinc-800/80 rounded-2xl overflow-hidden">
           <DataTable
             columns={cloudColumns}
             data={filteredItems}
             loading={isLoading}
             emptyText="No matching cloud services found"
-            headerStyle={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: "#334155",
-            }}
           />
         </div>
       </div>

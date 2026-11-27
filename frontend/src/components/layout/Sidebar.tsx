@@ -4,43 +4,37 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
+  LayoutGrid,
   Cloud,
   Cpu,
   Sparkles,
   Layers,
   ShieldAlert,
-  TrendingDown,
-  CheckSquare,
-  Phone,
+  Wallet,
+  Zap,
+  PhoneCall,
   Settings,
-  Pin,
+  Search,
+  Bell,
+  MoreHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAnomalies } from "@/hooks/useAnomalies";
 
-export interface SidebarProps {
-  collapsed?: boolean;
-  pinned?: boolean;
-  onToggle?: () => void;
-  onHoverChange?: (hovered: boolean) => void;
-}
-
 interface NavItem {
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number | string }>;
   badge?: string;
-  badgeType?: "warning" | "info";
-  badgeColor?: string;
+  hasChevron?: boolean;
   matchPrefix?: boolean;
 }
 
-const MAIN_NAV_ITEMS: NavItem[] = [
+const ALL_NAV_ITEMS: NavItem[] = [
   {
     name: "Dashboard",
     href: "/dashboard",
-    icon: LayoutDashboard,
+    icon: LayoutGrid,
   },
   {
     name: "Cloud Spend",
@@ -61,11 +55,6 @@ const MAIN_NAV_ITEMS: NavItem[] = [
     name: "Allocation",
     href: "/allocation",
     icon: Layers,
-    badge:
-      process.env.NEXT_PUBLIC_ENABLE_SMART_ALLOCATION === "true"
-        ? "SMART"
-        : undefined,
-    badgeColor: "green",
   },
   {
     name: "Anomalies",
@@ -75,21 +64,18 @@ const MAIN_NAV_ITEMS: NavItem[] = [
   {
     name: "Savings",
     href: "/savings",
-    icon: TrendingDown,
+    icon: Wallet,
   },
   {
     name: "Actions",
     href: "/actions",
-    icon: CheckSquare,
+    icon: Zap,
   },
   {
     name: "Voice Calls",
     href: "/calls",
-    icon: Phone,
+    icon: PhoneCall,
   },
-];
-
-const BOTTOM_NAV_ITEMS: NavItem[] = [
   {
     name: "Settings",
     href: "/settings",
@@ -98,148 +84,105 @@ const BOTTOM_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export function Sidebar({ collapsed, pinned = false, onToggle, onHoverChange }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname();
-  const [isHovered, setIsHovered] = React.useState(false);
-  const isExpanded = pinned || isHovered || (collapsed === false && pinned);
+  const [filterQuery, setFilterQuery] = React.useState("");
 
   const { data: anomalies } = useAnomalies("open");
   const openCount = Array.isArray(anomalies) ? anomalies.length : 0;
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    onHoverChange?.(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    onHoverChange?.(false);
-  };
 
   const isItemActive = (item: NavItem) => {
     if (item.matchPrefix) {
       return pathname.startsWith("/settings");
     }
+    if (item.href === "/dashboard") {
+      return pathname === "/" || pathname === "/dashboard";
+    }
     return pathname === item.href;
   };
 
-  return (
-    <aside
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={cn(
-        "fixed left-3 top-3 bottom-3 z-50 flex flex-col justify-between select-none font-sans rounded-2xl overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        "bg-white border border-[#E2E8F0] shadow-[0_16px_45px_rgba(15,23,42,0.10),0_0_0_1px_rgba(0,0,0,0.03)]"
-      )}
-      style={{
-        width: isExpanded ? 240 : 72,
-      }}
-    >
-      {/* Top Section: Header + Main Navigation */}
-      <div className="flex flex-col flex-1 min-h-0">
-        {/* Header Block matching the NEXUS style banner */}
-        <div
-          className={cn(
-            "h-14 flex items-center bg-[#D2D9DF] transition-all px-3 flex-shrink-0",
-            !isExpanded ? "justify-center" : "justify-between"
-          )}
-        >
-          <Link
-            href="/"
-            title="Cirra Home"
-            className="flex items-center gap-2.5 group cursor-pointer min-w-0"
-          >
-            <img
-              src="/cirra-logo.png"
-              alt="Cirra"
-              className="w-8 h-8 rounded-lg object-contain flex-shrink-0 transition-transform group-hover:scale-105 shadow-sm"
-            />
-            {isExpanded && (
-              <span className="text-[15px] font-black tracking-wider text-[#0B1527] uppercase truncate font-sans">
-                CIRRA
-              </span>
-            )}
-          </Link>
+  const visibleItems = React.useMemo(() => {
+    if (!filterQuery.trim()) return ALL_NAV_ITEMS;
+    return ALL_NAV_ITEMS.filter((i) =>
+      i.name.toLowerCase().includes(filterQuery.toLowerCase())
+    );
+  }, [filterQuery]);
 
-          {isExpanded && onToggle && (
-            <button
-              type="button"
-              onClick={onToggle}
-              title={pinned ? "Unpin sidebar (hover mode)" : "Pin sidebar"}
-              className={cn(
-                "p-1.5 rounded-lg transition-colors flex-shrink-0",
-                pinned
-                  ? "text-[#1A56DB] bg-[#1A56DB]/10 hover:bg-[#1A56DB]/20"
-                  : "text-slate-600 hover:text-slate-900 hover:bg-black/5"
-              )}
-            >
-              <Pin className={cn("w-3.5 h-3.5 transition-transform", pinned && "rotate-45 fill-current")} />
-            </button>
-          )}
+  return (
+    <aside className="w-64 fixed left-0 top-0 bottom-0 h-screen bg-black border-r border-zinc-800/80 flex flex-col justify-between p-3 z-40 select-none overflow-y-auto font-sans scrollbar-none">
+      {/* Top Stack: Cirra Logo Brand + Find Search + Navigation Items */}
+      <div className="space-y-3.5">
+        {/* Cirra Logo & Brand Header */}
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-3 px-2.5 py-2.5 rounded-xl hover:bg-zinc-900/50 transition-colors group"
+        >
+          <img
+            src="/cirra-logo.png"
+            alt="Cirra Logo"
+            className="w-7 h-7 rounded-lg object-contain shadow-[0_0_10px_rgba(5,150,105,0.3)]"
+          />
+          <span className="text-xl font-bold tracking-tight text-white font-sans group-hover:text-emerald-400 transition-colors">
+            cirra
+          </span>
+        </Link>
+
+        {/* Vercel 'Find [F]' search input */}
+        <div className="relative px-0.5">
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <input
+            type="text"
+            value={filterQuery}
+            onChange={(e) => setFilterQuery(e.target.value)}
+            placeholder="Find"
+            className="w-full h-9 pl-9 pr-7 text-xs sm:text-sm font-mono bg-zinc-900/80 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-600/60 transition-colors"
+          />
+          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-500 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700/60 pointer-events-none">
+            F
+          </kbd>
         </div>
 
-        {/* Fine Dashed Divider under Header */}
-        <div className="border-b border-dashed border-[#CBD5E1] mx-3 my-2 flex-shrink-0" />
-
-        {/* Main Nav Items List */}
-        <div className="flex-1 overflow-y-auto px-2 space-y-1.5 py-1">
-          {MAIN_NAV_ITEMS.map((item) => {
+        {/* Navigation List - Larger, comfortable editorial typography */}
+        <nav className="space-y-1 pt-1">
+          {visibleItems.map((item) => {
             const active = isItemActive(item);
             const Icon = item.icon;
-            const badgeValue = item.name === "Anomalies" && openCount > 0 ? String(openCount) : item.badge;
-            const badgeType = item.name === "Anomalies" ? "warning" : item.badgeType;
+            const badgeValue =
+              item.name === "Anomalies" && openCount > 0
+                ? String(openCount)
+                : item.badge;
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                title={item.name}
                 className={cn(
-                  "group flex items-center transition-all duration-200 rounded-xl",
-                  !isExpanded ? "justify-center p-1" : "gap-3 px-2 py-1.5",
+                  "px-3.5 py-2.5 rounded-xl text-sm font-medium flex items-center justify-between transition-all group",
                   active
-                    ? isExpanded
-                      ? "bg-[#F0F5FF]"
-                      : ""
-                    : "hover:bg-[#F4F7FA]"
+                    ? "bg-zinc-900 text-white font-semibold border-l-[3px] border-emerald-600 pl-3 shadow-[0_0_15px_rgba(5,150,105,0.2)]"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900/50"
                 )}
               >
-                {/* Squircle Icon Badge */}
-                <div
-                  className={cn(
-                    "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200",
-                    active
-                      ? "bg-[#0B1527] text-white shadow-sm"
-                      : "bg-[#F0F4F8] text-[#0F1E36] group-hover:bg-[#E4EAF0]"
-                  )}
-                >
-                  <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />
-                </div>
-
-                {/* Text Label */}
-                {isExpanded && (
-                  <span
+                <div className="flex items-center gap-3 truncate">
+                  <Icon
+                    size={18}
                     className={cn(
-                      "text-[14px] truncate transition-colors whitespace-nowrap",
-                      active
-                        ? "text-[#1A56DB] font-semibold"
-                        : "text-[#0F1E36] font-medium group-hover:text-black"
+                      "flex-shrink-0 transition-colors",
+                      active ? "text-emerald-400" : "text-zinc-500 group-hover:text-zinc-300"
                     )}
-                  >
+                  />
+                  <span className="truncate text-[15px] font-medium tracking-tight">
                     {item.name}
                   </span>
-                )}
+                </div>
 
-                {/* Badge (e.g. Anomalies count or SMART beta) */}
-                {isExpanded && badgeValue && (
+                {badgeValue && (
                   <span
                     className={cn(
-                      "ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full select-none",
-                      item.badgeColor === "green"
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        : badgeType === "warning"
-                        ? "bg-[#FEF3C7] text-[#D97706]"
-                        : "bg-blue-100 text-blue-700"
+                      "ml-auto text-xs font-mono font-bold px-2 py-0.5 rounded-full",
+                      item.name === "Anomalies"
+                        ? "bg-emerald-950/90 text-emerald-300 border border-emerald-700/80 shadow-[0_0_8px_rgba(5,150,105,0.4)]"
+                        : "bg-zinc-800 text-zinc-300 border border-zinc-700"
                     )}
                   >
                     {badgeValue}
@@ -248,60 +191,46 @@ export function Sidebar({ collapsed, pinned = false, onToggle, onHoverChange }: 
               </Link>
             );
           })}
-        </div>
+        </nav>
       </div>
 
-      {/* Bottom Section: Dashed Divider + Settings Item */}
-      <div className="flex-shrink-0 px-2 pb-3">
-        <div className="border-t border-dashed border-[#CBD5E1] mx-1 my-2" />
+      {/* Bottom Stack: User Profile Pill */}
+      <div className="pt-3 border-t border-zinc-800/80">
+        {/* User Profile Pill: Avatar + Name + ... + Bell */}
+        <div className="flex items-center justify-between p-2 rounded-xl hover:bg-zinc-900/60 transition-colors group">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-full overflow-hidden border border-emerald-600/50 flex-shrink-0 shadow-[0_0_8px_rgba(5,150,105,0.25)] bg-zinc-800">
+              <img
+                src="/profile-avatar.jpg"
+                alt="hiten kumar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <span className="text-sm font-semibold text-zinc-200 truncate group-hover:text-white">
+              hiten kumar
+            </span>
+          </div>
 
-        {BOTTOM_NAV_ITEMS.map((item) => {
-          const active = isItemActive(item);
-          const Icon = item.icon;
-
-          return (
+          <div className="flex items-center gap-1.5 text-zinc-500">
             <Link
-              key={item.href}
-              href={item.href}
-              title={item.name}
-              className={cn(
-                "group flex items-center transition-all duration-200 rounded-xl",
-                !isExpanded ? "justify-center p-1" : "gap-3 px-2 py-1.5",
-                active
-                  ? isExpanded
-                    ? "bg-[#F0F5FF]"
-                    : ""
-                  : "hover:bg-[#F4F7FA]"
-              )}
+              href="/settings"
+              className="p-1 hover:text-white rounded transition-colors"
+              title="Organization Settings"
             >
-              {/* Squircle Icon Badge */}
-              <div
-                className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-200",
-                  active
-                    ? "bg-[#0B1527] text-white shadow-sm"
-                    : "bg-[#F0F4F8] text-[#0F1E36] group-hover:bg-[#E4EAF0]"
-                )}
-              >
-                <Icon className="w-5 h-5 transition-transform group-hover:scale-105" />
-              </div>
-
-              {/* Text Label */}
-              {isExpanded && (
-                <span
-                  className={cn(
-                    "text-[14px] truncate transition-colors whitespace-nowrap",
-                    active
-                      ? "text-[#1A56DB] font-semibold"
-                      : "text-[#0F1E36] font-medium group-hover:text-black"
-                  )}
-                >
-                  {item.name}
-                </span>
+              <MoreHorizontal className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/anomalies"
+              className="p-1 hover:text-white rounded transition-colors relative"
+              title="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+              {openCount > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.9)] absolute top-0.5 right-0.5" />
               )}
             </Link>
-          );
-        })}
+          </div>
+        </div>
       </div>
     </aside>
   );
