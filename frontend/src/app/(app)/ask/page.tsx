@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp, TrendingUp, Server, Layers } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
+import { ParticleTitle } from "@/components/ui/ParticleTitle";
+import { CirraOrbitLogo } from "@/components/ui/CirraOrbitLogo";
+import { AskCirraBackground } from "@/components/ask-cirra/AskCirraBackground";
 import { useAskCirra } from "@/hooks/useAsk";
 import { formatNumber } from "@/lib/utils";
 
@@ -105,15 +108,13 @@ export default function AskPage() {
   };
 
   return (
-    <div className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden select-none bg-black text-white">
+    <div className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden select-none bg-[#030817] text-[#EBF4FF]">
       <Topbar />
 
       {/* =========================================================================
-          DARK RUNWAY EDITORIAL CANVAS
+          DEEP SPACE AURORA CANVAS (EXCLUSIVE TO ASK CIRRA)
          ========================================================================= */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-black">
-        <div className="absolute inset-0 bg-[radial-gradient(#1f1f23_1px,transparent_1px)] [background-size:24px_24px] opacity-20" />
-      </div>
+      <AskCirraBackground />
 
       {/* =========================================================================
           MAIN INTERACTIVE CHAT CONTENT
@@ -122,24 +123,16 @@ export default function AskPage() {
         {messages.length === 0 ? (
           /* Empty State: Cirra Logo, Heading, & 3 Query Pills in 2 Rows */
           <div className="flex flex-col items-center gap-4 text-center my-auto py-8">
-            {/* CIRRA LOGO in squircle */}
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#09090b] border border-zinc-800 p-3 sm:p-3.5 flex items-center justify-center transition-transform hover:scale-105 duration-200">
-              <img
-                src="/cirra-logo.png"
-                alt="Cirra Logo"
-                className="w-full h-full object-contain rounded-xl"
+            {/* CIRRA ROTATING ORBIT & LOGO COMPOSITION */}
+            <CirraOrbitLogo />
+
+            {/* Main Animated Particle Heading (Entrance: 0ms) */}
+            <div className="w-full flex justify-center cirra-entrance-heading">
+              <ParticleTitle
+                text="Ask anything about your spend"
+                className="h-[76px] sm:h-[88px] max-w-2xl w-full"
               />
             </div>
-
-            {/* Main Heading */}
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono">
-              Ask anything about your spend
-            </h2>
-
-            {/* Descriptive Subtitle */}
-            <p className="text-zinc-400 font-medium text-sm sm:text-base max-w-md leading-relaxed font-sans">
-              Cirra queries your live data — every number comes from the database, never guessed
-            </p>
 
             {/* Suggestion Pills in 2 Rows */}
             <div className="flex flex-col items-center gap-2.5 w-full mt-4">
@@ -148,14 +141,14 @@ export default function AskPage() {
                 <button
                   type="button"
                   onClick={() => handleAsk("Why did OpenAI spend spike last week?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
+                  className="cirra-entrance-q1 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
                 >
                   Why did OpenAI spend spike last week?
                 </button>
                 <button
                   type="button"
                   onClick={() => handleAsk("Which team spent most on EC2 this month?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
+                  className="cirra-entrance-q2 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
                 >
                   Which team spent most on EC2 this month?
                 </button>
@@ -166,7 +159,7 @@ export default function AskPage() {
                 <button
                   type="button"
                   onClick={() => handleAsk("What's our unallocated spend?")}
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98"
+                  className="cirra-entrance-q3 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
                 >
                   What&apos;s our unallocated spend?
                 </button>
@@ -183,53 +176,53 @@ export default function AskPage() {
                 entry.columns && entry.columns.length > 0
                   ? entry.columns
                   : entry.rows && entry.rows.length > 0 && typeof entry.rows[0] === "object" && !Array.isArray(entry.rows[0])
-                  ? Object.keys(entry.rows[0])
-                  : [];
+                    ? Object.keys(entry.rows[0])
+                    : [];
 
               return (
                 <div key={index} className="space-y-4">
                   {/* User Question Bubble */}
                   <div className="flex justify-end">
-                    <div className="bg-white text-black font-semibold rounded-[18px_18px_4px_18px] px-5 py-3 text-sm max-w-[80%] font-mono">
+                    <div className="bg-gradient-to-r from-[#123B78] to-[#1856A8] text-[#EBF4FF] border border-[#287FE8]/40 font-semibold rounded-[18px_18px_4px_18px] px-5 py-3 text-sm max-w-[80%] font-mono shadow-[0_4px_18px_rgba(24,86,168,0.35)]">
                       {entry.question}
                     </div>
                   </div>
 
                   {/* AI Answer Bubble & Verified Proof */}
                   <div className="flex justify-start">
-                    <div className="bg-[#09090b] border border-zinc-800/80 rounded-[18px_18px_18px_4px] p-5 max-w-[92%] space-y-3.5 w-full sm:w-auto text-white">
-                      <div className="flex items-center justify-between text-xs pb-2 border-b border-zinc-800/80 gap-4">
-                        <div className="flex items-center gap-2 font-bold text-white font-mono">
+                    <div className="bg-[#0A1931]/95 border border-[#1856A8]/45 rounded-[18px_18px_18px_4px] p-5 max-w-[92%] space-y-3.5 w-full sm:w-auto text-[#EBF4FF] shadow-[0_4px_28px_rgba(3,8,23,0.85)]">
+                      <div className="flex items-center justify-between text-xs pb-2 border-b border-[#1856A8]/30 gap-4">
+                        <div className="flex items-center gap-2 font-bold text-[#EBF4FF] font-mono">
                           <img src="/cirra-logo.png" alt="Cirra" className="w-4 h-4 object-contain rounded" />
                           <span>Cirra Verified Response</span>
                         </div>
                         {entry.execution_time_ms !== undefined && (
-                          <span className="text-zinc-500 font-mono text-[11px] whitespace-nowrap">
+                          <span className="text-[#A4C2E8] font-mono text-[11px] whitespace-nowrap">
                             Query ran in {Math.round(entry.execution_time_ms)}ms
                           </span>
                         )}
                       </div>
 
-                      <p className="text-sm text-zinc-200 leading-relaxed font-normal font-sans">
+                      <p className="text-sm text-[#EBF4FF]/90 leading-relaxed font-normal font-sans">
                         {entry.answer}
                       </p>
 
                       {/* Collapsible SQL Code Block */}
                       {citationEnabled && sqlQuery && (
-                        <details open className="group rounded-xl bg-zinc-950 border border-zinc-800 p-3 text-xs text-white font-mono overflow-x-auto">
-                          <summary className="flex items-center justify-between cursor-pointer list-none text-zinc-400 text-[11px] font-mono font-semibold select-none">
+                        <details open className="group rounded-xl bg-[#030817]/90 border border-[#1856A8]/40 p-3 text-xs text-[#EBF4FF] font-mono overflow-x-auto shadow-inner">
+                          <summary className="flex items-center justify-between cursor-pointer list-none text-[#A4C2E8] text-[11px] font-mono font-semibold select-none">
                             <div className="flex items-center gap-2">
-                              <Terminal className="w-3.5 h-3.5 text-white" />
+                              <Terminal className="w-3.5 h-3.5 text-[#68B7FF]" />
                               <span>ClickHouse FOCUS SQL Citation</span>
                             </div>
-                            <span className="text-[10px] text-zinc-400 group-open:hidden">
+                            <span className="text-[10px] text-[#A4C2E8] group-open:hidden">
                               Show SQL
                             </span>
-                            <span className="text-[10px] text-zinc-400 hidden group-open:inline">
+                            <span className="text-[10px] text-[#A4C2E8] hidden group-open:inline">
                               Hide SQL
                             </span>
                           </summary>
-                          <pre className="mt-2 text-xs font-mono text-zinc-300 whitespace-pre-wrap break-all pt-2 border-t border-zinc-850">
+                          <pre className="mt-2 text-xs font-mono text-[#EBF4FF]/90 whitespace-pre-wrap break-all pt-2 border-t border-[#1856A8]/30">
                             <code>{sqlQuery}</code>
                           </pre>
                         </details>
@@ -237,10 +230,10 @@ export default function AskPage() {
 
                       {/* Row Results Table if row_count > 0 */}
                       {rowCount > 0 && entry.rows && entry.rows.length > 0 && (
-                        <div className="rounded-xl border border-zinc-800 overflow-hidden mt-3">
+                        <div className="rounded-xl border border-[#1856A8]/40 overflow-hidden mt-3">
                           <div className="overflow-x-auto max-h-60">
                             <table className="w-full text-xs text-left border-collapse">
-                              <thead className="bg-zinc-950 text-zinc-400 border-b border-zinc-800 sticky top-0 font-mono">
+                              <thead className="bg-[#030817] text-[#68B7FF] border-b border-[#1856A8]/40 sticky top-0 font-mono">
                                 <tr>
                                   {columns.map((col, cIdx) => (
                                     <th
@@ -252,9 +245,9 @@ export default function AskPage() {
                                   ))}
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-zinc-850 bg-[#09090b]">
+                              <tbody className="divide-y divide-[#1856A8]/20 bg-[#0A1931]/80">
                                 {entry.rows.slice(0, 15).map((row, rIdx) => (
-                                  <tr key={rIdx} className="hover:bg-zinc-900/50">
+                                  <tr key={rIdx} className="hover:bg-[#123B78]/35 transition-colors">
                                     {columns.map((col, cIdx) => {
                                       const cellVal = Array.isArray(row)
                                         ? row[cIdx]
@@ -262,7 +255,7 @@ export default function AskPage() {
                                       return (
                                         <td
                                           key={cIdx}
-                                          className="px-3 py-2 font-mono text-zinc-300 whitespace-nowrap"
+                                          className="px-3 py-2 font-mono text-[#EBF4FF] whitespace-nowrap"
                                         >
                                           {typeof cellVal === "number"
                                             ? formatNumber(cellVal)
@@ -276,7 +269,7 @@ export default function AskPage() {
                             </table>
                           </div>
                           {entry.rows.length > 15 && (
-                            <div className="text-[11px] text-zinc-500 px-3 py-1.5 bg-zinc-950 border-t border-zinc-800 text-center font-mono">
+                            <div className="text-[11px] text-[#A4C2E8] px-3 py-1.5 bg-[#030817] border-t border-[#1856A8]/40 text-center font-mono">
                               Showing first 15 of {rowCount} rows
                             </div>
                           )}
@@ -291,8 +284,8 @@ export default function AskPage() {
             {/* Typing Indicator */}
             {askCirra.isPending && (
               <div className="flex justify-start">
-                <div className="bg-[#09090b] border border-zinc-800 rounded-[16px_16px_16px_4px] px-3.5 py-2 text-xs text-zinc-300 font-mono flex items-center gap-2">
-                  <Bot className="w-3.5 h-3.5 text-white animate-pulse" />
+                <div className="bg-[#0A1931] border border-[#1856A8]/40 rounded-[16px_16px_16px_4px] px-3.5 py-2 text-xs text-[#A4C2E8] font-mono flex items-center gap-2 shadow-[0_2px_12px_rgba(3,8,23,0.6)]">
+                  <Bot className="w-3.5 h-3.5 text-[#68B7FF] animate-pulse" />
                   <span>Checking FOCUS query data...</span>
                 </div>
               </div>
@@ -302,9 +295,9 @@ export default function AskPage() {
         )}
 
         {/* =========================================================================
-            PROMPT INPUT CARD
+            PROMPT INPUT CARD (SPACIOUS TWO-SECTION COMPOSER)
            ========================================================================= */}
-        <div className="w-full mt-auto relative pt-2">
+        <div className="w-full mt-auto relative pt-4">
           {/* Hidden File Input */}
           <input
             type="file"
@@ -313,49 +306,48 @@ export default function AskPage() {
             className="hidden"
           />
 
-          {/* Prompt Card */}
-          <div className="w-full rounded-[22px] bg-[#09090b] border border-zinc-800/80 p-3.5 sm:p-4 transition-all focus-within:border-zinc-600">
+          {/* Prompt Composer Card */}
+          <div className="w-full rounded-[24px] bg-[#0A1931]/95 border border-[#1856A8]/45 px-5 py-4 sm:px-6 sm:py-5 transition-all focus-within:border-[#68B7FF]/75 focus-within:ring-2 focus-within:ring-[#287FE8]/20 shadow-[0_8px_32px_rgba(3,8,23,0.9),0_0_24px_rgba(18,59,120,0.25)] flex flex-col justify-between">
             {/* Attached file tag if any */}
             {attachedFile && (
-              <div className="mb-2 flex items-center gap-2 px-3 py-1 bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg w-max font-mono">
-                <Paperclip className="w-3 h-3 text-zinc-400" />
-                <span className="truncate max-w-[200px]">{attachedFile}</span>
+              <div className="mb-3 flex items-center gap-2 px-3 py-1.5 bg-[#030817] border border-[#1856A8]/40 text-[#A4C2E8] text-xs rounded-xl w-max font-mono">
+                <Paperclip className="w-3.5 h-3.5 text-[#68B7FF]" />
+                <span className="truncate max-w-[240px]">{attachedFile}</span>
                 <button
                   type="button"
                   onClick={() => setAttachedFile(null)}
-                  className="text-zinc-500 hover:text-white ml-1 font-bold"
+                  className="text-[#A4C2E8] hover:text-[#EBF4FF] ml-1.5 font-bold"
                 >
                   ×
                 </button>
               </div>
             )}
 
-            {/* Top Text Input Row */}
-            <div className="flex items-start gap-2.5">
-              <Sparkles className="w-4 h-4 text-zinc-400 mt-1 flex-shrink-0" />
+            {/* TOP SECTION — Spacious Textarea without decorative icons */}
+            <div className="w-full min-h-[64px] sm:min-h-[72px]">
               <textarea
                 ref={textareaRef}
-                rows={1}
+                rows={2}
                 value={input}
                 onChange={handleTextareaInput}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask AI a question or make a request..."
-                className="w-full bg-transparent text-white placeholder:text-zinc-500 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[28px] max-h-[160px] font-sans"
+                className="w-full bg-transparent text-[#EBF4FF] placeholder:text-[#A4C2E8]/60 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[56px] max-h-[220px] font-sans"
               />
             </div>
 
-            {/* Bottom Controls Toolbar */}
-            <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-zinc-800/80 flex-wrap gap-2">
-              {/* Left Buttons: Attach & Writing Styles */}
-              <div className="flex items-center gap-2">
+            {/* BOTTOM SECTION — Toolbar with clean separation */}
+            <div className="flex items-center justify-between mt-3 pt-3.5 border-t border-[#1856A8]/30 flex-wrap gap-2.5">
+              {/* Left Side: Attach Button & Writing Styles Dropdown */}
+              <div className="flex items-center gap-2.5">
                 {/* Attach Button */}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="h-8 px-3 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono"
+                  className="h-8 px-3 rounded-lg border border-[#1856A8]/40 bg-[#030817]/90 hover:bg-[#123B78]/55 hover:border-[#68B7FF]/60 text-[#A4C2E8] hover:text-[#EBF4FF] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono shadow-sm"
                   title="Attach file or logs"
                 >
-                  <Paperclip className="w-3.5 h-3.5 text-zinc-400" />
+                  <Paperclip className="w-3.5 h-3.5 text-[#68B7FF]" />
                   <span>Attach</span>
                 </button>
 
@@ -364,15 +356,15 @@ export default function AskPage() {
                   <button
                     type="button"
                     onClick={() => setStyleDropdownOpen((prev) => !prev)}
-                    className="h-8 px-3 rounded-lg border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono"
+                    className="h-8 px-3 rounded-lg border border-[#1856A8]/40 bg-[#030817]/90 hover:bg-[#123B78]/55 hover:border-[#68B7FF]/60 text-[#A4C2E8] hover:text-[#EBF4FF] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono shadow-sm"
                   >
                     <span>{writingStyle}</span>
-                    <ChevronDown className="w-3 h-3 text-zinc-400" />
+                    <ChevronDown className="w-3 h-3 text-[#68B7FF]" />
                   </button>
 
                   {/* Dropdown Menu */}
                   {styleDropdownOpen && (
-                    <div className="absolute left-0 bottom-10 w-52 bg-[#09090b] border border-zinc-800 rounded-xl shadow-2xl py-1 z-30 font-mono">
+                    <div className="absolute left-0 bottom-10 w-52 bg-[#0A1931] border border-[#1856A8]/60 rounded-xl shadow-[0_10px_32px_rgba(3,8,23,0.95),0_0_24px_rgba(24,86,168,0.3)] py-1 z-30 font-mono">
                       {[
                         "Writing Styles",
                         "Deterministic FOCUS SQL",
@@ -388,8 +380,8 @@ export default function AskPage() {
                           }}
                           className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
                             writingStyle === style
-                              ? "bg-zinc-850 text-white font-bold"
-                              : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                              ? "bg-gradient-to-r from-[#123B78] to-[#1856A8] text-[#EBF4FF] font-bold"
+                              : "text-[#A4C2E8] hover:bg-[#123B78]/45 hover:text-[#EBF4FF]"
                           }`}
                         >
                           {style}
@@ -400,44 +392,85 @@ export default function AskPage() {
                 </div>
               </div>
 
-              {/* Right Controls: Citation Toggle Switch & Send Button */}
+              {/* Right Side: Citation Toggle Switch & Send Button */}
               <div className="flex items-center gap-3">
                 {/* Citation Toggle */}
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <div
                     onClick={() => setCitationEnabled((p) => !p)}
                     className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer flex items-center ${
-                      citationEnabled ? "bg-amber-400" : "bg-zinc-800"
+                      citationEnabled
+                        ? "bg-gradient-to-r from-[#1856A8] to-[#287FE8] shadow-[0_0_12px_rgba(40,127,232,0.45)]"
+                        : "bg-[#030817] border border-[#1856A8]/40"
                     }`}
                   >
                     <div
                       className={`w-4 h-4 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
-                        citationEnabled ? "translate-x-4 bg-black" : "translate-x-0 bg-zinc-400"
+                        citationEnabled ? "translate-x-4 bg-[#EBF4FF]" : "translate-x-0 bg-[#A4C2E8]"
                       }`}
                     />
                   </div>
-                  <span className="text-xs font-semibold text-zinc-400 font-mono">Citation</span>
+                  <span className="text-xs font-semibold text-[#A4C2E8] font-mono">Citation</span>
                 </label>
 
-                {/* Golden Send Button */}
+                {/* Send Button */}
                 <button
                   type="button"
                   onClick={() => handleAsk()}
                   disabled={!input.trim() || askCirra.isPending}
-                  className="w-8 h-8 rounded-lg bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 disabled:opacity-40 text-black flex items-center justify-center transition-all cursor-pointer shadow-[0_0_10px_rgba(245,158,11,0.3)]"
+                  className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#1856A8] via-[#287FE8] to-[#68B7FF] hover:brightness-110 disabled:opacity-40 text-[#030817] flex items-center justify-center transition-all cursor-pointer shadow-[0_0_18px_rgba(40,127,232,0.5)]"
                   title="Send request"
                 >
-                  <ArrowUp className="w-4 h-4 stroke-[2.5] text-black" />
+                  <ArrowUp className="w-4 h-4 stroke-[2.5] text-[#030817]" />
                 </button>
               </div>
             </div>
           </div>
-
-          <p className="text-center text-xs font-medium text-zinc-500 mt-2 font-mono">
-            Every number is sourced from your database — no hallucinated figures
-          </p>
         </div>
       </div>
+
+      {/* Sequential Entrance Animations (Heading + 3 Questions) */}
+      <style>{`
+        @keyframes cirraStaggerFadeUp {
+          0% {
+            opacity: 0;
+            transform: translateY(16px);
+            filter: blur(4px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+            filter: blur(0px);
+          }
+        }
+        .cirra-entrance-heading {
+          opacity: 0;
+          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards;
+        }
+        .cirra-entrance-q1 {
+          opacity: 0;
+          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 700ms forwards;
+        }
+        .cirra-entrance-q2 {
+          opacity: 0;
+          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 1100ms forwards;
+        }
+        .cirra-entrance-q3 {
+          opacity: 0;
+          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 1500ms forwards;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cirra-entrance-heading,
+          .cirra-entrance-q1,
+          .cirra-entrance-q2,
+          .cirra-entrance-q3 {
+            opacity: 1 !important;
+            transform: none !important;
+            filter: none !important;
+            animation: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
