@@ -156,7 +156,11 @@ export function MagicBentoCard({
 
   if (href) {
     return (
-      <Link href={href} {...sharedProps} className={cn(sharedProps.className, "block cursor-pointer")}>
+      <Link
+        href={href}
+        {...(sharedProps as any)}
+        className={cn(sharedProps.className, "block cursor-pointer")}
+      >
         {innerContent}
       </Link>
     );
