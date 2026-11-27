@@ -42,8 +42,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Floating Capsule Dock Left Sidebar */}
         <Sidebar />
 
-        {/* Page Content docked to right of floating sidebar rail */}
-        <div className="pl-[82px] min-h-screen bg-black pt-14 relative z-10 transition-all duration-300">
+        {/* Page Content docked to right of floating sidebar rail (permanently clear of expanded sidebar) */}
+        <div className="pl-[208px] min-h-screen bg-black pt-14 relative z-10 transition-all duration-200">
           {children}
         </div>
 

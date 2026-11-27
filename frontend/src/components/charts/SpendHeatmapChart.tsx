@@ -168,9 +168,6 @@ export function SpendHeatmapChart({
             <h3 className="font-bold text-[#FFFFFF] text-base sm:text-[18px] tracking-tight">
               {title}
             </h3>
-            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-950/50 border border-emerald-800/60 px-2 py-0.5 rounded-full">
-              LIVE TELEMETRY
-            </span>
           </div>
           <p className="text-xs text-zinc-400 font-mono mt-1">
             {subtitle}

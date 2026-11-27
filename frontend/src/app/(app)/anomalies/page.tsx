@@ -8,6 +8,9 @@ import {
   CheckCircle,
   Search,
   Clock,
+  TrendingUp,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import {
   ChalkAnomalyIcon,
@@ -49,7 +52,7 @@ export default function AnomaliesPage() {
         typeof raw.explanation === "string"
           ? raw.explanation
           : raw.explanation?.summary ??
-            `Spend deviation detected on ${raw.series_key}`;
+          `Spend deviation detected on ${raw.series_key}`;
       const root_cause =
         typeof raw.explanation === "string"
           ? raw.explanation
@@ -57,12 +60,12 @@ export default function AnomaliesPage() {
 
       const formattedDate = raw.detected_at?.includes("T")
         ? new Date(raw.detected_at).toLocaleString("en-US", {
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZoneName: "short",
-          })
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          timeZoneName: "short",
+        })
         : raw.detected_at;
 
       return {
@@ -103,6 +106,8 @@ export default function AnomaliesPage() {
       const matchesSearch =
         !q ||
         (a.serviceName || "").toLowerCase().includes(q) ||
+        (a.provider || "").toLowerCase().includes(q) ||
+        (a.series_key || "").toLowerCase().includes(q) ||
         (typeof a.explanation === "string"
           ? a.explanation.toLowerCase().includes(q)
           : (a.explanation?.summary || "").toLowerCase().includes(q));
@@ -116,7 +121,7 @@ export default function AnomaliesPage() {
       await acknowledgeMutation.mutateAsync(id);
       setToastMessage("Alert dismissed");
     } catch {
-      // Ignore or log error
+      // Ignore
     }
     if (selectedAnomaly?.id === id) {
       setSelectedAnomaly(null);
@@ -128,7 +133,7 @@ export default function AnomaliesPage() {
       await resolveMutation.mutateAsync(id);
       setToastMessage("Anomaly marked as resolved");
     } catch {
-      // Ignore or log error
+      // Ignore
     }
     if (selectedAnomaly?.id === id) {
       setSelectedAnomaly(null);
@@ -164,99 +169,100 @@ export default function AnomaliesPage() {
   ).length;
 
   /* ─────────────────────────────────────────────────────────────────────────
-     STARTING VIEW PANEL: 4 Consolidated Cards (Warm Off-White / Soft Yellow-Gray)
+     TELEMETRY SUMMARY PANEL (CLASSY DARK THEME)
   ───────────────────────────────────────────────────────────────────────── */
   const TelemetryCardsPanel = (
-    <div className="sticky top-6 rounded-2xl bg-[#faf8f5] border border-[#e4dfd3] shadow-[0_18px_40px_rgba(0,0,0,0.45)] p-5 sm:p-6 space-y-5 text-[#1c1917]">
-      <div className="flex items-center justify-between pb-3.5 border-b border-[#e6e1d6]">
+    <div className="sticky top-6 rounded-2xl bg-[#09090b]/95 border border-zinc-800/90 shadow-2xl p-5 sm:p-6 space-y-5 text-white backdrop-blur-xl">
+      <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800/80">
         <div>
-          <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#1c1917]">
-            Telemetry Summary
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+            Telemetry Overview
           </span>
-          <p className="text-[11px] text-[#78716c] mt-0.5 font-sans">
-            Click View Details on any alert to read its full incident brief
+          <p className="text-[11px] text-zinc-400 mt-0.5 font-sans">
+            Click any row or View Details to inspect its incident brief
           </p>
         </div>
-        <span className="text-[10px] font-mono font-semibold text-[#57534e] bg-[#f0ebe0] border border-[#dfd8c8] px-2.5 py-1 rounded-full">
-          LIVE
+        <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/40 px-2.5 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+          LIVE SENTINEL
         </span>
       </div>
 
-      {/* 4 Compact Metric Tiles */}
+      {/* 4 Sleek Dark Metric Tiles */}
       <div className="grid grid-cols-2 gap-3.5 font-mono">
-        <div className="p-4 rounded-xl bg-[#f3efe6] border border-[#e5dfd2] space-y-1.5">
-          <div className="flex items-center justify-between text-[#78716c]">
+        <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+          <div className="flex items-center justify-between text-zinc-400">
             <span className="text-[10px] uppercase font-bold tracking-wider">
               Open Alerts
             </span>
-            <ChalkAnomalyIcon size={14} className="text-[#78716c]" />
+            <ChalkAnomalyIcon size={14} className="text-zinc-400" />
           </div>
-          <div className="text-2xl font-black text-[#18181b] tracking-tight">
+          <div className="text-2xl font-black text-white tracking-tight">
             {anomalies.length}
           </div>
-          <div className="text-[11px] text-[#78716c] font-sans">
+          <div className="text-[11px] text-zinc-400 font-sans">
             Requires review
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#f5eedc] border border-[#e4d8b8] space-y-1.5">
-          <div className="flex items-center justify-between text-[#6b5a2b]">
+        <div className="p-4 rounded-xl bg-rose-950/20 border border-rose-900/40 space-y-1.5 hover:border-rose-700/60 transition-colors">
+          <div className="flex items-center justify-between text-rose-400">
             <span className="text-[10px] uppercase font-bold tracking-wider">
               Critical
             </span>
-            <ChalkShieldIcon size={14} className="text-[#6b5a2b]" />
+            <ChalkShieldIcon size={14} className="text-rose-400" />
           </div>
-          <div className="text-2xl font-black text-[#18181b] tracking-tight">
+          <div className="text-2xl font-black text-rose-400 tracking-tight">
             {criticalCount}
           </div>
-          <div className="text-[11px] text-[#6b5a2b] font-sans">
-            &gt; 200% spend deviation
+          <div className="text-[11px] text-rose-300/80 font-sans">
+            &gt; 200% spend dev
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#f3efe6] border border-[#e5dfd2] space-y-1.5">
-          <div className="flex items-center justify-between text-[#78716c]">
+        <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+          <div className="flex items-center justify-between text-zinc-400">
             <span className="text-[10px] uppercase font-bold tracking-wider">
               Auto Resolved
             </span>
-            <ChalkCheckCircleIcon size={14} className="text-[#78716c]" />
+            <ChalkCheckCircleIcon size={14} className="text-zinc-400" />
           </div>
-          <div className="text-2xl font-black text-[#18181b] tracking-tight">
+          <div className="text-2xl font-black text-white tracking-tight">
             14
           </div>
-          <div className="text-[11px] text-[#78716c] font-sans">
+          <div className="text-[11px] text-zinc-400 font-sans">
             Resolved automatically
           </div>
         </div>
 
-        <div className="p-4 rounded-xl bg-[#f3efe6] border border-[#e5dfd2] space-y-1.5">
-          <div className="flex items-center justify-between text-[#78716c]">
+        <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+          <div className="flex items-center justify-between text-zinc-400">
             <span className="text-[10px] uppercase font-bold tracking-wider">
               Avg Time
             </span>
-            <ChalkClockIcon size={14} className="text-[#78716c]" />
+            <ChalkClockIcon size={14} className="text-zinc-400" />
           </div>
-          <div className="text-2xl font-black text-[#18181b] tracking-tight">
+          <div className="text-2xl font-black text-white tracking-tight">
             18m
           </div>
-          <div className="text-[11px] text-[#57534e] font-sans">
+          <div className="text-[11px] text-emerald-400 font-bold font-sans">
             -60% vs baseline
           </div>
         </div>
       </div>
 
-      {/* Kill Switch Circuit Summary */}
-      <div className="p-4 rounded-xl bg-[#f5eedc]/70 border border-[#e4d8b8] space-y-1.5">
-        <div className="flex items-center justify-between font-mono">
-          <span className="text-xs font-bold text-[#1c1917] flex items-center gap-1.5">
-            <ShieldAlert className="w-3.5 h-3.5 text-[#57534e]" />
+      {/* Kill Switch Safeguard Circuit Summary */}
+      <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-2 font-mono">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-zinc-200 flex items-center gap-1.5">
+            <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
             Kill Switch Circuit
           </span>
-          <span className="text-[11px] font-bold text-[#6b5a2b]">
-            {killSwitchCount} ready
+          <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">
+            {killSwitchCount} READY
           </span>
         </div>
-        <p className="text-xs text-[#57534e] font-sans leading-relaxed">
+        <p className="text-xs text-zinc-400 font-sans leading-relaxed">
           One-click emergency cut-off disables active API keys and suspends auto-scaling pools to halt runaway spikes.
         </p>
       </div>
@@ -264,7 +270,7 @@ export default function AnomaliesPage() {
   );
 
   /* ─────────────────────────────────────────────────────────────────────────
-     VIEW DETAILS PANEL: Single-Letter Incident Brief (Warm Off-White, No Nested Cards)
+     SINGLE-LETTER INCIDENT BRIEF PANEL (CLASSY DARK THEME)
   ───────────────────────────────────────────────────────────────────────── */
   const SingleLetterDetailPanel = selectedAnomaly ? (() => {
     const observed = selectedAnomaly.currentCost ?? 0;
@@ -274,30 +280,35 @@ export default function AnomaliesPage() {
       typeof selectedAnomaly.explanation === "string"
         ? selectedAnomaly.explanation
         : selectedAnomaly.explanation?.root_cause ||
-          selectedAnomaly.explanation?.summary ||
-          "Abnormal spend velocity detected against historical baseline.";
+        selectedAnomaly.explanation?.summary ||
+        "Abnormal spend velocity detected against historical baseline.";
     const showKillSwitch =
       selectedAnomaly.status === "open" &&
       (selectedAnomaly.severity === "critical" || selectedAnomaly.severity === "high");
 
     return (
-      <div className="sticky top-6 rounded-2xl bg-[#faf8f5] border border-[#ded8cb] shadow-[0_20px_45px_rgba(0,0,0,0.45)] p-6 sm:p-8 text-[#1c1917] space-y-6">
+      <div className="sticky top-6 rounded-2xl bg-[#09090b]/95 border border-zinc-800/90 shadow-2xl p-6 sm:p-7 text-white backdrop-blur-xl space-y-6">
         {/* Letter Header with Close (X) Button */}
-        <div className="flex items-start justify-between gap-4 pb-5 border-b border-[#e5dfd3]">
+        <div className="flex items-start justify-between gap-4 pb-4 border-b border-zinc-800/80">
           <div className="space-y-1.5 min-w-0">
-            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-[#78716c]">
+            <div className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-zinc-400">
               <span>Incident Brief</span>
               <span>·</span>
-              <span className="font-semibold text-[#6b5a2b]">
+              <span
+                className={cn(
+                  "font-semibold",
+                  selectedAnomaly.severity === "critical" ? "text-rose-400" : "text-amber-400"
+                )}
+              >
                 {selectedAnomaly.severity}
               </span>
               <span>·</span>
-              <span>{selectedAnomaly.status}</span>
+              <span className="text-zinc-500">{selectedAnomaly.status}</span>
             </div>
-            <h2 className="text-xl font-bold tracking-tight text-[#18181b] font-sans">
+            <h2 className="text-xl font-bold tracking-tight text-white font-sans">
               {selectedAnomaly.serviceName}
             </h2>
-            <p className="text-xs font-mono text-[#78716c]">
+            <p className="text-xs font-mono text-zinc-500">
               ID: {selectedAnomaly.id} · Series: {selectedAnomaly.series_key} · Detected {selectedAnomaly.detected_at}
             </p>
           </div>
@@ -307,31 +318,33 @@ export default function AnomaliesPage() {
             onClick={() => setSelectedAnomaly(null)}
             aria-label="Close incident brief"
             title="Close details and return to telemetry cards"
-            className="w-8 h-8 rounded-full bg-[#efebe3] hover:bg-[#e4ded2] border border-[#ded7c8] text-[#44403c] hover:text-[#18181b] flex items-center justify-center shrink-0 transition-colors cursor-pointer"
+            className="group relative px-3 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+            <X className="w-3.5 h-3.5 relative z-10 text-zinc-300" />
+            <span className="relative z-10">Close</span>
           </button>
         </div>
 
-        {/* Single-Letter Narrative Description */}
-        <div className="space-y-5 text-sm leading-relaxed text-[#292524] font-sans">
-          <p>
+        {/* Narrative Description (Direct, Classy Typography — NO text box) */}
+        <div className="space-y-4 text-xs sm:text-sm leading-relaxed text-zinc-300 font-sans">
+          <p className="text-zinc-200 font-medium">
             {rootCause}
           </p>
 
-          <p className="text-[13px] text-[#44403c]">
+          <p className="text-xs text-zinc-400">
             During the active billing window, observed spend reached{" "}
-            <span className="font-mono font-bold text-[#18181b]">
+            <span className="font-mono font-bold text-white">
               ${formatNumber(observed)}
             </span>{" "}
             compared to the 7-day statistical baseline of{" "}
-            <span className="font-mono font-semibold text-[#18181b]">
+            <span className="font-mono font-semibold text-zinc-300">
               ${formatNumber(expected)}
             </span>
             {excess > 0 && (
               <>
                 , representing an excess variance of{" "}
-                <span className="font-mono font-bold text-[#18181b]">
+                <span className="font-mono font-bold text-rose-400">
                   +${formatNumber(excess)}
                 </span>{" "}
                 ({selectedAnomaly.surgePercent} above threshold)
@@ -340,56 +353,64 @@ export default function AnomaliesPage() {
             .
           </p>
 
-          {/* Clean Hairline Ledger Rows (No separate cards) */}
-          <div className="border-t border-b border-[#e5dfd3] divide-y divide-[#ebe6dc] text-xs font-mono">
+          {/* Clean Hairline Ledger Rows */}
+          <div className="border-t border-b border-zinc-800/80 divide-y divide-zinc-800/60 text-xs font-mono">
             <div className="py-2.5 flex items-center justify-between">
-              <span className="text-[#78716c]">Provider / Scope</span>
-              <span className="font-semibold text-[#18181b] uppercase">
+              <span className="text-zinc-500">Provider / Scope</span>
+              <span className="font-semibold text-zinc-200 uppercase">
                 {selectedAnomaly.provider || "Multi-Cloud"}
               </span>
             </div>
             <div className="py-2.5 flex items-center justify-between">
-              <span className="text-[#78716c]">Target Key / Resource</span>
-              <span className="font-semibold text-[#18181b]">
+              <span className="text-zinc-500">Target Key / Resource</span>
+              <span className="font-semibold text-white">
                 {selectedAnomaly.api_key_id || selectedAnomaly.series_key}
               </span>
             </div>
             <div className="py-2.5 flex items-center justify-between">
-              <span className="text-[#78716c]">Detection Method</span>
-              <span className="text-[#44403c]">
+              <span className="text-zinc-500">Detection Method</span>
+              <span className="text-zinc-300">
                 MAD Z-Score Anomaly Engine
               </span>
             </div>
             <div className="py-2.5 flex items-center justify-between">
-              <span className="text-[#78716c]">Dispatch Status</span>
-              <span className="text-[#44403c]">
+              <span className="text-zinc-500">Dispatch Status</span>
+              <span className="text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5" />
                 Slack &amp; Sentinel Alert Logged
               </span>
             </div>
           </div>
 
-          <p className="text-xs text-[#78716c] leading-relaxed">
-            Recommended action: verify whether this workload burst is intentional. If unauthorized or caused by a retry loop, engage the Kill Switch to suspend the associated key or resolve the alert once mitigated.
-          </p>
+          <div className="pt-1 flex items-center justify-between text-xs">
+            <span className="text-zinc-500 font-mono">Full Incident Dossier</span>
+            <a
+              href={`/anomalies/${selectedAnomaly.id}`}
+              className="inline-flex items-center gap-1 text-xs font-mono text-zinc-300 hover:text-white underline underline-offset-4 decoration-zinc-700 hover:decoration-white transition-colors"
+            >
+              <span>Open incident page</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
 
-        {/* Letter Footer Actions */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#e5dfd3]">
+        {/* Footer Actions */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-zinc-800/80">
           <div className="flex items-center gap-2">
             {showKillSwitch && (
               <button
                 type="button"
                 onClick={() => setKillSwitchTarget(selectedAnomaly)}
-                className="px-4 py-2 rounded-full text-xs font-bold font-mono bg-[#f5eedc] hover:bg-[#ebe0c4] border border-[#dcd0b0] text-[#1c1917] transition-colors flex items-center gap-1.5 cursor-pointer"
+                className="px-4 py-2 rounded-full text-xs font-bold font-mono bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/40 text-rose-300 hover:text-white transition-all flex items-center gap-1.5 cursor-pointer shadow-[0_0_12px_rgba(244,63,94,0.25)]"
               >
-                <ShieldAlert className="w-3.5 h-3.5 text-[#6b5a2b]" />
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
                 <span>Kill Switch</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => handleDismiss(selectedAnomaly.id)}
-              className="px-3.5 py-2 rounded-full text-xs font-medium font-mono text-[#78716c] hover:text-[#18181b] hover:bg-[#efebe3] transition-colors cursor-pointer"
+              className="px-3.5 py-2 rounded-full text-xs font-medium font-mono text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
             >
               Dismiss
             </button>
@@ -398,9 +419,10 @@ export default function AnomaliesPage() {
           <button
             type="button"
             onClick={() => handleResolve(selectedAnomaly.id)}
-            className="px-5 py-2 rounded-full text-xs font-bold font-mono bg-[#18181b] hover:bg-black text-[#faf8f5] transition-colors cursor-pointer"
+            className="group relative px-5 py-2 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
           >
-            Resolve Anomaly
+            <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+            <span className="relative z-10">Resolve Anomaly</span>
           </button>
         </div>
       </div>
@@ -408,14 +430,25 @@ export default function AnomaliesPage() {
   })() : null;
 
   /* ─────────────────────────────────────────────────────────────────────────
-     KILL SWITCH & SPEND ALERTS LIST (Bright Warm Off-White / Soft Yellow-Gray)
+     MAIN LIST: SLEEK CLASSY DARK THEME DATA TABLE (NO TEXT BOXES)
   ───────────────────────────────────────────────────────────────────────── */
   const MainKillSwitchList = (
     <div className="space-y-4">
-      {/* Header */}
+      {/* Header Toolbar */}
       <div className="space-y-3">
+        <div>
+          <h2 className="text-lg font-bold text-white font-mono tracking-tight flex items-center gap-2">
+            <span>Active Spend Alerts &amp; Kill Switches</span>
+            <span className="text-xs font-mono text-zinc-400">
+              ({filteredAnomalies.length})
+            </span>
+          </h2>
+          <p className="text-xs text-zinc-400 font-sans mt-0.5">
+            Review anomalous spend surges and execute immediate emergency actions.
+          </p>
+        </div>
 
-        {/* Search & Filter Row */}
+        {/* Search & Segmented Filter Pill */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -428,127 +461,161 @@ export default function AnomaliesPage() {
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-[#09090b] p-1 rounded-lg border border-zinc-800 text-xs font-mono shrink-0">
+          <div className="inline-flex items-center gap-1 bg-black/40 backdrop-blur-xl p-1 rounded-full border border-white/10 text-xs font-mono shadow-inner shrink-0">
             {[
               { id: "all", label: `All (${anomalies.length})` },
               { id: "killswitch", label: `Kill Switch (${killSwitchCount})` },
               { id: "critical", label: `Critical (${criticalCount})` },
               { id: "high", label: `High (${highCount})` },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setSeverityFilter(tab.id as any)}
-                className={cn(
-                  "px-2.5 py-1 rounded-md text-[11px] font-mono transition-colors cursor-pointer",
-                  severityFilter === tab.id
-                    ? "bg-[#faf8f5] text-[#18181b] font-bold"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                {tab.label}
-              </button>
-            ))}
+            ].map((tab) => {
+              const isActive = severityFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSeverityFilter(tab.id as any)}
+                  className={cn(
+                    "relative px-3.5 py-1 rounded-full text-[11px] font-mono transition-all duration-200 cursor-pointer overflow-hidden focus:outline-none",
+                    isActive
+                      ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                  )}
+                >
+                  {isActive && (
+                    <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                  )}
+                  <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">{tab.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* Bright Warm Off-White / Soft Yellow-Gray Alert Cards */}
-      <div className="space-y-3">
+      {/* Classy Dark Theme Data Table (Image 1 Reference) */}
+      <div className="rounded-2xl border border-zinc-800/80 bg-[#09090b]/95 shadow-2xl backdrop-blur-xl overflow-hidden">
         {isLoading ? (
-          <div className="space-y-3">
-            <Skeleton className="h-28 w-full rounded-2xl bg-zinc-900" />
-            <Skeleton className="h-28 w-full rounded-2xl bg-zinc-900" />
-            <Skeleton className="h-28 w-full rounded-2xl bg-zinc-900" />
+          <div className="p-6 space-y-4">
+            <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
+            <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
+            <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
+            <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
           </div>
         ) : filteredAnomalies.length === 0 ? (
-          <EmptyState
-            icon={<ChalkCheckCircleIcon size={56} className="text-zinc-500" />}
-            title="Zero active anomalies matching filter"
-            description="All multi-cloud spend is running within forecasted boundaries."
-          />
+          <div className="p-12">
+            <EmptyState
+              icon={<ChalkCheckCircleIcon size={56} className="text-zinc-500" />}
+              title="Zero active anomalies matching filter"
+              description="All multi-cloud spend is running within forecasted boundaries."
+            />
+          </div>
         ) : (
-          filteredAnomalies.map((anomaly) => {
-            const isCritical = anomaly.severity === "critical";
-            const isHigh = anomaly.severity === "high";
-            const isSelected = selectedAnomaly?.id === anomaly.id;
-            const showKillSwitch =
-              anomaly.status === "open" && (isHigh || isCritical);
-            const excess =
-              anomaly.currentCost != null &&
-              anomaly.expectedCost != null &&
-              anomaly.currentCost > anomaly.expectedCost
-                ? anomaly.currentCost - anomaly.expectedCost
-                : 0;
+          <div className="overflow-x-auto">
+            <table className="w-full text-left font-mono text-xs">
+              <thead className="bg-zinc-900/60 border-b border-zinc-800/80 text-[11px] uppercase tracking-wider text-zinc-400 select-none">
+                <tr>
+                  <th className="py-3.5 px-4 font-semibold">Service</th>
+                  <th className="py-3.5 px-3 font-semibold">Provider</th>
+                  <th className="py-3.5 px-3 font-semibold">Severity</th>
+                  <th className="py-3.5 px-3 font-semibold">Observed</th>
+                  <th className="py-3.5 px-3 font-semibold">Baseline</th>
+                  <th className="py-3.5 px-3 font-semibold">Surge</th>
+                  <th className="py-3.5 px-4 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60">
+                {filteredAnomalies.map((anomaly) => {
+                  const isCritical = anomaly.severity === "critical";
+                  const isHigh = anomaly.severity === "high";
+                  const isSelected = selectedAnomaly?.id === anomaly.id;
+                  const showKillSwitch =
+                    anomaly.status === "open" && (isHigh || isCritical);
 
-            return (
-              <div
-                key={anomaly.id}
-                className={cn(
-                  "rounded-2xl p-5 transition-all duration-200 border flex flex-col gap-3.5",
-                  isSelected
-                    ? "bg-zinc-900/90 border-zinc-600 shadow-lg"
-                    : "bg-[#09090b] border-zinc-800/90 hover:border-zinc-700"
-                )}
-              >
-                {/* Top Row: Provider Icon + Service Name + Plain Severity/Surge */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0">
-                      <ProviderLogo
-                        provider={anomaly.provider}
-                        name={anomaly.serviceName}
-                        size={18}
-                      />
-                    </div>
-                    <div className="min-w-0">
-                      <h4 className="font-bold text-white text-sm font-mono tracking-tight truncate">
-                        {anomaly.serviceName}
-                      </h4>
-                      <div className="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5 mt-0.5">
-                        <span className={cn("uppercase font-semibold", isCritical ? "text-zinc-200" : "text-zinc-400")}>
+                  return (
+                    <tr
+                      key={anomaly.id}
+                      onClick={() => setSelectedAnomaly(anomaly)}
+                      className={cn(
+                        "group transition-colors cursor-pointer",
+                        isSelected
+                          ? "bg-zinc-800/60 ring-1 ring-inset ring-zinc-700"
+                          : "hover:bg-zinc-900/70"
+                      )}
+                    >
+                      {/* SERVICE */}
+                      <td className="py-3.5 px-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1.5 shrink-0 group-hover:scale-105 transition-transform shadow-xs">
+                            <ProviderLogo
+                              provider={anomaly.provider}
+                              name={anomaly.serviceName}
+                              size={18}
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-bold text-white text-xs font-mono tracking-tight truncate max-w-[200px]">
+                              {anomaly.serviceName}
+                            </div>
+                            <div className="text-[10px] text-zinc-500 font-mono truncate max-w-[180px]">
+                              {anomaly.series_key}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* PROVIDER */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] text-zinc-300 font-mono">
+                          {anomaly.provider}
+                        </span>
+                      </td>
+
+                      {/* SEVERITY */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span
+                          className={cn(
+                            "px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider",
+                            isCritical
+                              ? "border border-rose-500/30 bg-rose-950/50 text-rose-400"
+                              : isHigh
+                                ? "border border-amber-500/30 bg-amber-950/50 text-amber-400"
+                                : "border border-zinc-700/50 bg-zinc-800/50 text-zinc-300"
+                          )}
+                        >
                           {anomaly.severity}
                         </span>
-                        <span>·</span>
-                        <span className="font-semibold text-zinc-300">
-                          {anomaly.surgePercent}
+                      </td>
+
+                      {/* OBSERVED */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span className="font-mono font-bold text-white text-xs">
+                          ${formatNumber(anomaly.currentCost)}
                         </span>
-                      </div>
-                    </div>
-                  </div>
+                      </td>
 
-                  {/* Clean Cost Figures */}
-                  <div className="text-right font-mono shrink-0">
-                    <div className="text-sm font-bold text-white">
-                      ${formatNumber(anomaly.currentCost)}
-                    </div>
-                    <div className="text-[11px] text-zinc-500">
-                      vs ${formatNumber(anomaly.expectedCost)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Plain Summary */}
-                <p className="text-xs text-zinc-300 font-sans leading-relaxed">
-                  {typeof anomaly.explanation === "string"
-                    ? anomaly.explanation
-                    : anomaly.explanation?.summary}
-                </p>
-
-                {/* Bottom Row: Timestamp + Excess + Actions */}
-                <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-800/80">
-                  <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-500">
-                    <Clock className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>{anomaly.detected_at}</span>
-                    {excess > 0 && (
-                      <>
-                        <span>·</span>
-                        <span className="font-semibold text-zinc-300">
-                          +${formatNumber(excess)} excess
+                      {/* BASELINE */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span className="font-mono text-zinc-400 text-xs">
+                          ${formatNumber(anomaly.expectedCost)}
                         </span>
-                      </>
-                    )}
-                  </div>
+                      </td>
+
+                      {/* SURGE */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold text-[11px]",
+                            isCritical
+                              ? "bg-rose-500/10 border border-rose-500/25 text-rose-400"
+                              : isHigh
+                                ? "bg-amber-500/10 border border-amber-500/25 text-amber-400"
+                                : "bg-zinc-800 border border-zinc-700 text-zinc-300"
+                          )}
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          <span>{anomaly.surgePercent}</span>
+                        </span>
+                      </td>
 
                   <div className="flex items-center gap-2">
                     {showKillSwitch && (
@@ -571,10 +638,11 @@ export default function AnomaliesPage() {
                     <button
                       type="button"
                       onClick={() => setSelectedAnomaly(anomaly)}
-                      className="px-3.5 py-1.5 rounded-full text-xs font-bold font-mono bg-white text-black hover:bg-zinc-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
                     >
-                      <Eye className="w-3.5 h-3.5" />
-                      <span>View Details</span>
+                      <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                      <Eye className="w-3.5 h-3.5 relative z-10 text-zinc-200" />
+                      <span className="relative z-10">View Details</span>
                     </button>
                   </div>
                 </div>
@@ -596,60 +664,60 @@ export default function AnomaliesPage() {
         {/* Page Hero Header */}
         <div className="space-y-1 pt-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
-            <span>Active Spend Alerts &amp; Kill Switches</span>
+            Spend Anomalies &amp; Alert Center
           </h1>
           <p className="text-xs sm:text-sm text-zinc-400 font-sans max-w-3xl leading-relaxed">
             Real-time anomaly detection monitoring multi-cloud and AI inference spend to prevent runaway budget spikes.
           </p>
         </div>
 
-        {/* ── EQUAL 50/50 SPLIT LAYOUT ── */}
+        {/* ── 2-COLUMN SPLIT: LEFT TABLE + RIGHT TELEMETRY/BRIEF ── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-6 order-2 lg:order-1">
+          <div className="lg:col-span-7 xl:col-span-7 order-2 lg:order-1">
             {MainKillSwitchList}
           </div>
-          <div className="lg:col-span-6 order-1 lg:order-2">
+          <div className="lg:col-span-5 xl:col-span-5 order-1 lg:order-2">
             {SecondaryPanel}
           </div>
         </div>
 
-        {/* Kill Switch Confirmation Modal */}
+        {/* Kill Switch Confirmation Modal (Classy Dark Theme) */}
         {killSwitchTarget && (
-          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-[#faf8f5] border border-[#ded8cb] rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl text-[#1c1917]">
-              <div className="flex items-center justify-between border-b border-[#e5dfd3] pb-3">
+          <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-[#09090b] border border-zinc-800/90 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl text-white">
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                 <div className="flex items-center gap-2">
-                  <ShieldAlert className="w-5 h-5 text-[#6b5a2b]" />
-                  <h3 className="font-bold text-[#18181b] text-base font-mono">
+                  <ShieldAlert className="w-5 h-5 text-rose-400" />
+                  <h3 className="font-bold text-white text-base font-mono">
                     Kill Switch Confirmation
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setKillSwitchTarget(null)}
-                  className="text-[#78716c] hover:text-[#18181b] p-1 cursor-pointer"
+                  className="text-zinc-400 hover:text-white p-1 cursor-pointer transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <p className="text-xs sm:text-sm text-[#44403c] leading-relaxed font-sans">
+              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
                 This will trigger an emergency cut-off for{" "}
-                <span className="font-semibold text-[#18181b]">
+                <span className="font-semibold text-white">
                   {killSwitchTarget.provider || "provider"}
                 </span>{" "}
                 key{" "}
-                <span className="font-mono font-bold text-[#18181b]">
+                <span className="font-mono font-bold text-white">
                   {killSwitchTarget.api_key_id || "associated with this anomaly"}
                 </span>
                 . This action will be logged and can be reviewed in the Actions tab.
               </p>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-[#e5dfd3]">
+              <div className="flex justify-end gap-2 pt-3 border-t border-zinc-800/80">
                 <button
                   type="button"
                   onClick={() => setKillSwitchTarget(null)}
-                  className="px-4 py-2 rounded-full text-xs font-medium text-[#78716c] hover:bg-[#efebe3] hover:text-[#18181b] transition-colors font-mono cursor-pointer"
+                  className="px-4 py-2 rounded-full text-xs font-medium text-zinc-400 hover:bg-zinc-900 hover:text-white transition-colors font-mono cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -657,7 +725,7 @@ export default function AnomaliesPage() {
                   type="button"
                   onClick={handleConfirmKillSwitch}
                   disabled={isProposing}
-                  className="px-4 py-2 rounded-full text-xs font-bold bg-[#18181b] hover:bg-black text-[#faf8f5] transition-colors disabled:opacity-50 font-mono cursor-pointer"
+                  className="px-4 py-2 rounded-full text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition-colors disabled:opacity-50 font-mono cursor-pointer shadow-[0_0_14px_rgba(244,63,94,0.35)]"
                 >
                   {isProposing ? "Proposing..." : "Trigger Kill Switch"}
                 </button>
@@ -668,13 +736,13 @@ export default function AnomaliesPage() {
 
         {/* Toast notification */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#faf8f5] text-[#18181b] text-xs px-4 py-3 rounded-full border border-[#ded8cb] font-mono animate-in fade-in slide-in-from-bottom-2 shadow-2xl">
-            <CheckCircle className="w-4 h-4 text-[#44403c] flex-shrink-0" />
+          <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-[#09090b] text-white text-xs px-4 py-3 rounded-full border border-zinc-800 font-mono animate-in fade-in slide-in-from-bottom-2 shadow-2xl">
+            <CheckCircle className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <span>{toastMessage}</span>
             <button
               type="button"
               onClick={() => setToastMessage(null)}
-              className="ml-2 text-[#78716c] hover:text-[#18181b] cursor-pointer"
+              className="ml-2 text-zinc-400 hover:text-white cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

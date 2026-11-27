@@ -1,11 +1,21 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Sparkles, Bot, Terminal, Paperclip, ChevronDown, ArrowUp, TrendingUp, Server, Layers } from "lucide-react";
+import {
+  Sparkles,
+  Bot,
+  Terminal,
+  Paperclip,
+  ChevronDown,
+  ArrowUp,
+  User,
+  CheckCircle2,
+  Loader2,
+  Copy,
+  Check,
+} from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { ParticleTitle } from "@/components/ui/ParticleTitle";
-import { CirraOrbitLogo } from "@/components/ui/CirraOrbitLogo";
-import { AskCirraBackground } from "@/components/ask-cirra/AskCirraBackground";
+import { GlassFold } from "@/components/ui/glass-fold";
 import { useAskCirra } from "@/hooks/useAsk";
 import { formatNumber } from "@/lib/utils";
 
@@ -19,6 +29,12 @@ interface ChatEntry {
   rows?: any[];
 }
 
+const SUGGESTED_QUERIES = [
+  { label: "Why did OpenAI spend spike?", query: "Why did OpenAI spend spike last week?" },
+  { label: "Top EC2 spend by team", query: "Which team spent most on EC2 this month?" },
+  { label: "Unallocated cluster spend", query: "What is our unallocated spend across clusters?" },
+];
+
 export default function AskPage() {
   const [messages, setMessages] = useState<ChatEntry[]>([]);
   const [input, setInput] = useState("");
@@ -26,6 +42,7 @@ export default function AskPage() {
   const [writingStyle, setWritingStyle] = useState("Writing Styles");
   const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
   const [attachedFile, setAttachedFile] = useState<string | null>(null);
+  const [copiedSqlIdx, setCopiedSqlIdx] = useState<number | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const styleMenuRef = useRef<HTMLDivElement>(null);
@@ -107,370 +124,377 @@ export default function AskPage() {
     }
   };
 
+  const handleCopySql = (sql: string, idx: number) => {
+    navigator.clipboard.writeText(sql);
+    setCopiedSqlIdx(idx);
+    setTimeout(() => setCopiedSqlIdx(null), 2000);
+  };
+
+  const renderComposer = (isCenter = false) => (
+    <div className="w-full rounded-2xl sm:rounded-3xl bg-black/50 backdrop-blur-2xl border border-white/20 p-4 sm:p-5 shadow-[0_16px_48px_rgba(0,0,0,0.65),inset_0_1px_1px_rgba(255,255,255,0.25)] flex flex-col justify-between transition-all focus-within:border-[#96d7ff]/70 focus-within:shadow-[0_16px_48px_rgba(0,0,0,0.65),0_0_24px_rgba(30,60,200,0.35)] text-left">
+      {/* Attached file tag if any */}
+      {attachedFile && (
+        <div className="mb-2.5 flex items-center gap-2 px-3 py-1.5 bg-white/[0.08] border border-white/15 text-zinc-300 text-xs rounded-xl w-max font-mono">
+          <Paperclip className="w-3.5 h-3.5 text-[#96d7ff]" />
+          <span className="truncate max-w-[240px]">{attachedFile}</span>
+          <button
+            type="button"
+            onClick={() => setAttachedFile(null)}
+            className="text-zinc-400 hover:text-white ml-1.5 font-bold"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
+      {/* Input Textarea */}
+      <div className="w-full min-h-[50px] sm:min-h-[58px]">
+        <textarea
+          ref={textareaRef}
+          rows={2}
+          value={input}
+          onChange={handleTextareaInput}
+          onKeyDown={handleKeyDown}
+          placeholder="Ask AI a question or request cost analysis..."
+          className="w-full bg-transparent text-white placeholder:text-zinc-400/70 text-xs sm:text-sm resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-mono min-h-[46px] max-h-[180px]"
+        />
+      </div>
+
+      {/* Bottom Toolbar */}
+      <div className="flex items-center justify-between mt-2.5 pt-3 border-t border-white/10 flex-wrap gap-2.5">
+        {/* Left Controls */}
+        <div className="flex items-center gap-2">
+          {/* Attach File */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-8 px-3 rounded-lg border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white flex items-center gap-1.5 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm active:scale-95"
+            title="Attach file or logs"
+          >
+            <Paperclip className="w-3.5 h-3.5 text-[#96d7ff]" />
+            <span>Attach</span>
+          </button>
+
+          {/* Style Dropdown */}
+          <div className="relative" ref={styleMenuRef}>
+            <button
+              type="button"
+              onClick={() => setStyleDropdownOpen((prev) => !prev)}
+              className="h-8 px-3 rounded-lg border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] text-zinc-300 hover:text-white flex items-center gap-1.5 text-xs font-mono font-medium transition-all cursor-pointer shadow-sm active:scale-95"
+            >
+              <span>{writingStyle}</span>
+              <ChevronDown className="w-3 h-3 text-[#96d7ff]" />
+            </button>
+
+            {styleDropdownOpen && (
+              <div className="absolute left-0 bottom-10 w-52 bg-[#06081e]/95 backdrop-blur-2xl border border-white/20 rounded-xl shadow-2xl py-1 z-30 font-mono">
+                {[
+                  "Writing Styles",
+                  "Deterministic FOCUS SQL",
+                  "Executive Summary",
+                  "Anomaly Root-Cause",
+                ].map((style) => (
+                  <button
+                    key={style}
+                    type="button"
+                    onClick={() => {
+                      setWritingStyle(style);
+                      setStyleDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
+                      writingStyle === style
+                        ? "bg-white/[0.15] text-white font-bold"
+                        : "text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+                    }`}
+                  >
+                    {style}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Controls */}
+        <div className="flex items-center gap-3">
+          {/* Citation Toggle */}
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <div
+              onClick={() => setCitationEnabled((p) => !p)}
+              className={`w-8 h-4.5 rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer flex items-center ${
+                citationEnabled
+                  ? "bg-[#1e3cc8] shadow-[0_0_10px_rgba(30,60,200,0.5)]"
+                  : "bg-white/10 border border-white/15"
+              }`}
+            >
+              <div
+                className={`w-3.5 h-3.5 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
+                  citationEnabled ? "translate-x-3.5 bg-white" : "translate-x-0 bg-zinc-400"
+                }`}
+              />
+            </div>
+            <span className="text-xs font-mono font-medium text-zinc-300">Citation</span>
+          </label>
+
+          {/* Send Button */}
+          <button
+            type="button"
+            onClick={() => handleAsk()}
+            disabled={!input.trim() || askCirra.isPending}
+            className="w-8 h-8 rounded-xl bg-white text-black hover:bg-zinc-200 disabled:opacity-40 flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
+            title="Send query"
+          >
+            <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden select-none bg-[#030817] text-[#EBF4FF]">
+    <div className="relative min-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden select-none bg-black text-white">
       <Topbar />
 
-      {/* =========================================================================
-          DEEP SPACE AURORA CANVAS (EXCLUSIVE TO ASK CIRRA)
-         ========================================================================= */}
-      <AskCirraBackground />
+      {/* ── 1. WEBGL GLASSFOLD SHADER BACKGROUND (EXTENDS BEHIND SIDEBAR & MORE AT LEFT, LESS AT RIGHT) ── */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <GlassFold
+          color1="#1e3cc8"
+          color2="#06081e"
+          color3="#96d7ff"
+          speed={0.38}
+          scale={1.3}
+          noise={0.08}
+          offsetX={-0.3}
+          offsetY={0.2}
+          className="w-full h-full object-cover"
+        />
+        {/* Horizontal gradient: dense & vibrant folds on the LEFT (behind sidebar), fading into velvet obsidian on the RIGHT */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/25 to-black/85 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/60 pointer-events-none" />
+      </div>
 
-      {/* =========================================================================
-          MAIN INTERACTIVE CHAT CONTENT
-         ========================================================= */}
-      <div className="relative z-10 max-w-3xl w-full mx-auto px-4 pt-6 pb-12 flex flex-col flex-1">
+      {/* Hidden File Input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
+      {/* ── 2. MAIN INTERACTIVE CHAT CONTENT (GOLDEN RATIO CENTERED IN EMPTY STATE) ── */}
+      <div className="relative z-10 max-w-4xl w-full mx-auto px-4 sm:px-6 pt-4 pb-6 flex flex-col flex-1">
         {messages.length === 0 ? (
-          /* Empty State: Cirra Logo, Heading, & 3 Query Pills in 2 Rows */
-          <div className="flex flex-col items-center gap-4 text-center my-auto py-8">
-            {/* CIRRA ROTATING ORBIT & LOGO COMPOSITION */}
-            <CirraOrbitLogo />
-
-            {/* Main Animated Particle Heading (Entrance: 0ms) */}
-            <div className="w-full flex justify-center cirra-entrance-heading">
-              <ParticleTitle
-                text="Ask anything about your spend"
-                className="h-[76px] sm:h-[88px] max-w-2xl w-full"
+          /* Empty State: Golden Ratio Center Layout with Boxes, Pre-prompts first, then Typing section */
+          <div className="flex flex-col items-center justify-center text-center my-auto w-full max-w-2xl mx-auto space-y-5 pt-4 pb-10">
+            {/* Solid White Box behind Cirra Logo */}
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-white shadow-[0_12px_32px_rgba(255,255,255,0.2),0_4px_16px_rgba(0,0,0,0.6)] flex items-center justify-center p-3 transition-transform hover:scale-105">
+              <img
+                src="/cirra-3d-logo.png"
+                alt="Cirra"
+                className="w-full h-full object-contain"
               />
             </div>
 
-            {/* Suggestion Pills in 2 Rows */}
-            <div className="flex flex-col items-center gap-2.5 w-full mt-4">
-              {/* Row 1: Two Pills */}
-              <div className="flex flex-wrap items-center justify-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => handleAsk("Why did OpenAI spend spike last week?")}
-                  className="cirra-entrance-q1 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
-                >
-                  Why did OpenAI spend spike last week?
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAsk("Which team spent most on EC2 this month?")}
-                  className="cirra-entrance-q2 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
-                >
-                  Which team spent most on EC2 this month?
-                </button>
-              </div>
+            {/* Transparent White Box behind Ask Cirra & Written Portion */}
+            <div className="rounded-2xl bg-white/[0.06] backdrop-blur-2xl border border-white/10 px-8 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.15)] text-center space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-white font-mono drop-shadow-sm">
+                Ask Cirra
+              </h1>
+              <p className="text-xs sm:text-sm text-zinc-300 font-mono">
+                Deterministic SQL intelligence for cloud & AI cost control.
+              </p>
+            </div>
 
-              {/* Row 2: One Centered Pill */}
-              <div className="flex items-center justify-center">
+            {/* 3 Pre-Prompts in a Single Line BEFORE Typing Section (Clean Fit, No Ellipses) */}
+            <div className="flex items-center justify-center gap-2.5 max-w-full w-full">
+              {SUGGESTED_QUERIES.map((item, idx) => (
                 <button
+                  key={idx}
                   type="button"
-                  onClick={() => handleAsk("What's our unallocated spend?")}
-                  className="cirra-entrance-q3 px-5 sm:px-6 py-2.5 rounded-full bg-[#0A1931]/90 border border-[#1856A8]/40 hover:border-[#68B7FF]/70 hover:bg-[#123B78]/60 text-[#A4C2E8] hover:text-[#EBF4FF] font-mono font-medium text-xs sm:text-sm transition-all duration-200 cursor-pointer active:scale-98 shadow-[0_2px_14px_rgba(3,8,23,0.7)]"
+                  onClick={() => handleAsk(item.query)}
+                  className="flex-1 min-w-0 px-3.5 py-2 rounded-full bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl border border-white/15 hover:border-white/30 text-[11px] sm:text-xs font-mono text-zinc-200 hover:text-white transition-all cursor-pointer shadow-sm active:scale-95 text-center whitespace-nowrap overflow-hidden text-ellipsis"
+                  title={item.query}
                 >
-                  What&apos;s our unallocated spend?
+                  <span className="block truncate">{item.label}</span>
                 </button>
-              </div>
+              ))}
+            </div>
+
+            {/* Typing Section (Composer) Centered Below Pre-Prompts */}
+            <div className="w-full pt-1">
+              {renderComposer(true)}
             </div>
           </div>
         ) : (
-          /* Response Area: User & Assistant Bubble Stream */
-          <div className="flex-1 space-y-6 overflow-y-auto pr-2 pb-6 max-h-[calc(100vh-250px)]">
-            {messages.map((entry, index) => {
-              const sqlQuery = entry.sql_used;
-              const rowCount = entry.row_count ?? (entry.rows ? entry.rows.length : 0);
-              const columns =
-                entry.columns && entry.columns.length > 0
-                  ? entry.columns
-                  : entry.rows && entry.rows.length > 0 && typeof entry.rows[0] === "object" && !Array.isArray(entry.rows[0])
-                    ? Object.keys(entry.rows[0])
-                    : [];
+          /* Active Chat Stream with Messages & Bottom Composer */
+          <div className="flex flex-col flex-1 justify-between h-full">
+            {/* Messages Scroll Area */}
+            <div className="flex-1 space-y-6 overflow-y-auto pr-1 pb-6 max-h-[calc(100vh-240px)]">
+              {messages.map((entry, index) => {
+                const sqlQuery = entry.sql_used;
+                const rowCount = entry.row_count ?? (entry.rows ? entry.rows.length : 0);
+                const columns =
+                  entry.columns && entry.columns.length > 0
+                    ? entry.columns
+                    : entry.rows && entry.rows.length > 0 && typeof entry.rows[0] === "object" && !Array.isArray(entry.rows[0])
+                      ? Object.keys(entry.rows[0])
+                      : [];
 
-              return (
-                <div key={index} className="space-y-4">
-                  {/* User Question Bubble */}
-                  <div className="flex justify-end">
-                    <div className="bg-gradient-to-r from-[#123B78] to-[#1856A8] text-[#EBF4FF] border border-[#287FE8]/40 font-semibold rounded-[18px_18px_4px_18px] px-5 py-3 text-sm max-w-[80%] font-mono shadow-[0_4px_18px_rgba(24,86,168,0.35)]">
-                      {entry.question}
+                return (
+                  <div key={index} className="space-y-4">
+                    {/* User Message Bubble */}
+                    <div className="flex justify-end items-start gap-2.5">
+                      <div className="bg-white/[0.14] backdrop-blur-2xl text-white border border-white/25 font-mono rounded-2xl rounded-tr-sm px-5 py-3 text-xs sm:text-sm max-w-[80%] shadow-[0_4px_20px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.3)]">
+                        {entry.question}
+                      </div>
+                      <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* AI Answer Bubble & Verified Proof */}
-                  <div className="flex justify-start">
-                    <div className="bg-[#0A1931]/95 border border-[#1856A8]/45 rounded-[18px_18px_18px_4px] p-5 max-w-[92%] space-y-3.5 w-full sm:w-auto text-[#EBF4FF] shadow-[0_4px_28px_rgba(3,8,23,0.85)]">
-                      <div className="flex items-center justify-between text-xs pb-2 border-b border-[#1856A8]/30 gap-4">
-                        <div className="flex items-center gap-2 font-bold text-[#EBF4FF] font-mono">
-                          <img src="/cirra-logo.png" alt="Cirra" className="w-4 h-4 object-contain rounded" />
-                          <span>Cirra Verified Response</span>
-                        </div>
-                        {entry.execution_time_ms !== undefined && (
-                          <span className="text-[#A4C2E8] font-mono text-[11px] whitespace-nowrap">
-                            Query ran in {Math.round(entry.execution_time_ms)}ms
-                          </span>
-                        )}
+                    {/* Cirra AI Response Card */}
+                    <div className="flex justify-start items-start gap-2.5">
+                      <div className="w-8 h-8 rounded-full bg-[#1e3cc8]/70 backdrop-blur-md border border-[#96d7ff]/40 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                        <Bot className="w-4 h-4 text-[#96d7ff]" />
                       </div>
 
-                      <p className="text-sm text-[#EBF4FF]/90 leading-relaxed font-normal font-sans">
-                        {entry.answer}
-                      </p>
-
-                      {/* Collapsible SQL Code Block */}
-                      {citationEnabled && sqlQuery && (
-                        <details open className="group rounded-xl bg-[#030817]/90 border border-[#1856A8]/40 p-3 text-xs text-[#EBF4FF] font-mono overflow-x-auto shadow-inner">
-                          <summary className="flex items-center justify-between cursor-pointer list-none text-[#A4C2E8] text-[11px] font-mono font-semibold select-none">
-                            <div className="flex items-center gap-2">
-                              <Terminal className="w-3.5 h-3.5 text-[#68B7FF]" />
-                              <span>ClickHouse FOCUS SQL Citation</span>
-                            </div>
-                            <span className="text-[10px] text-[#A4C2E8] group-open:hidden">
-                              Show SQL
-                            </span>
-                            <span className="text-[10px] text-[#A4C2E8] hidden group-open:inline">
-                              Hide SQL
-                            </span>
-                          </summary>
-                          <pre className="mt-2 text-xs font-mono text-[#EBF4FF]/90 whitespace-pre-wrap break-all pt-2 border-t border-[#1856A8]/30">
-                            <code>{sqlQuery}</code>
-                          </pre>
-                        </details>
-                      )}
-
-                      {/* Row Results Table if row_count > 0 */}
-                      {rowCount > 0 && entry.rows && entry.rows.length > 0 && (
-                        <div className="rounded-xl border border-[#1856A8]/40 overflow-hidden mt-3">
-                          <div className="overflow-x-auto max-h-60">
-                            <table className="w-full text-xs text-left border-collapse">
-                              <thead className="bg-[#030817] text-[#68B7FF] border-b border-[#1856A8]/40 sticky top-0 font-mono">
-                                <tr>
-                                  {columns.map((col, cIdx) => (
-                                    <th
-                                      key={cIdx}
-                                      className="px-3 py-2 font-bold whitespace-nowrap"
-                                    >
-                                      {col}
-                                    </th>
-                                  ))}
-                                </tr>
-                              </thead>
-                              <tbody className="divide-y divide-[#1856A8]/20 bg-[#0A1931]/80">
-                                {entry.rows.slice(0, 15).map((row, rIdx) => (
-                                  <tr key={rIdx} className="hover:bg-[#123B78]/35 transition-colors">
-                                    {columns.map((col, cIdx) => {
-                                      const cellVal = Array.isArray(row)
-                                        ? row[cIdx]
-                                        : (row as Record<string, unknown>)[col];
-                                      return (
-                                        <td
-                                          key={cIdx}
-                                          className="px-3 py-2 font-mono text-[#EBF4FF] whitespace-nowrap"
-                                        >
-                                          {typeof cellVal === "number"
-                                            ? formatNumber(cellVal)
-                                            : String(cellVal ?? "")}
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                      <div className="bg-black/50 backdrop-blur-2xl border border-white/15 rounded-2xl rounded-tl-sm p-5 max-w-[90%] space-y-4 w-full shadow-[0_12px_36px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.15)] text-zinc-100">
+                        {/* Response Header */}
+                        <div className="flex items-center justify-between text-xs pb-3 border-b border-white/10 gap-4">
+                          <div className="flex items-center gap-2 font-bold text-white font-mono">
+                            <CheckCircle2 className="w-4 h-4 text-[#96d7ff]" />
+                            <span>Cirra Verified Response</span>
                           </div>
-                          {entry.rows.length > 15 && (
-                            <div className="text-[11px] text-[#A4C2E8] px-3 py-1.5 bg-[#030817] border-t border-[#1856A8]/40 text-center font-mono">
-                              Showing first 15 of {rowCount} rows
-                            </div>
+                          {entry.execution_time_ms !== undefined && (
+                            <span className="text-zinc-400 font-mono text-[11px] whitespace-nowrap">
+                              Executed in {Math.round(entry.execution_time_ms)}ms
+                            </span>
                           )}
                         </div>
-                      )}
+
+                        {/* Answer Body */}
+                        <p className="text-xs sm:text-sm text-zinc-200 leading-relaxed font-mono whitespace-pre-wrap">
+                          {entry.answer}
+                        </p>
+
+                        {/* Collapsible SQL Citation */}
+                        {citationEnabled && sqlQuery && (
+                          <details open className="group rounded-xl bg-black/60 border border-white/10 p-3 text-xs font-mono overflow-x-auto shadow-inner">
+                            <summary className="flex items-center justify-between cursor-pointer list-none text-zinc-300 text-[11px] font-mono font-semibold select-none">
+                              <div className="flex items-center gap-2">
+                                <Terminal className="w-3.5 h-3.5 text-[#96d7ff]" />
+                                <span>ClickHouse FOCUS SQL Citation</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCopySql(sqlQuery, index);
+                                  }}
+                                  className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                                >
+                                  {copiedSqlIdx === index ? (
+                                    <>
+                                      <Check className="w-3 h-3 text-emerald-400" />
+                                      <span>Copied</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3 h-3" />
+                                      <span>Copy SQL</span>
+                                    </>
+                                  )}
+                                </button>
+                                <span className="text-[10px] text-zinc-500 group-open:hidden">
+                                  Show
+                                </span>
+                                <span className="text-[10px] text-zinc-500 hidden group-open:inline">
+                                  Hide
+                                </span>
+                              </div>
+                            </summary>
+                            <pre className="mt-2.5 text-xs font-mono text-[#96d7ff] whitespace-pre-wrap break-all pt-2.5 border-t border-white/10">
+                              <code>{sqlQuery}</code>
+                            </pre>
+                          </details>
+                        )}
+
+                        {/* Results Table if row_count > 0 */}
+                        {rowCount > 0 && entry.rows && entry.rows.length > 0 && (
+                          <div className="rounded-xl border border-white/10 overflow-hidden mt-3 bg-black/60">
+                            <div className="overflow-x-auto max-h-60">
+                              <table className="w-full text-xs text-left border-collapse font-mono">
+                                <thead className="bg-white/[0.06] text-[#96d7ff] border-b border-white/10 sticky top-0">
+                                  <tr>
+                                    {columns.map((col, cIdx) => (
+                                      <th
+                                        key={cIdx}
+                                        className="px-3 py-2 font-bold whitespace-nowrap"
+                                      >
+                                        {col}
+                                      </th>
+                                    ))}
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                  {entry.rows.slice(0, 15).map((row, rIdx) => (
+                                    <tr key={rIdx} className="hover:bg-white/[0.04] transition-colors">
+                                      {columns.map((col, cIdx) => {
+                                        const cellVal = Array.isArray(row)
+                                          ? row[cIdx]
+                                          : (row as Record<string, unknown>)[col];
+                                        return (
+                                          <td
+                                            key={cIdx}
+                                            className="px-3 py-2 font-mono text-zinc-200 whitespace-nowrap"
+                                          >
+                                            {typeof cellVal === "number"
+                                              ? formatNumber(cellVal)
+                                              : String(cellVal ?? "")}
+                                          </td>
+                                        );
+                                      })}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                            {entry.rows.length > 15 && (
+                              <div className="text-[11px] text-zinc-400 px-3 py-1.5 bg-white/[0.03] border-t border-white/10 text-center font-mono">
+                                Showing first 15 of {rowCount} rows
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
 
-            {/* Typing Indicator */}
-            {askCirra.isPending && (
-              <div className="flex justify-start">
-                <div className="bg-[#0A1931] border border-[#1856A8]/40 rounded-[16px_16px_16px_4px] px-3.5 py-2 text-xs text-[#A4C2E8] font-mono flex items-center gap-2 shadow-[0_2px_12px_rgba(3,8,23,0.6)]">
-                  <Bot className="w-3.5 h-3.5 text-[#68B7FF] animate-pulse" />
-                  <span>Checking FOCUS query data...</span>
+              {/* Typing Indicator */}
+              {askCirra.isPending && (
+                <div className="flex justify-start items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-full bg-[#1e3cc8]/70 backdrop-blur-md border border-[#96d7ff]/40 flex items-center justify-center shrink-0 shadow-sm">
+                    <Bot className="w-4 h-4 text-[#96d7ff] animate-pulse" />
+                  </div>
+                  <div className="bg-black/50 backdrop-blur-xl border border-white/15 rounded-2xl rounded-tl-sm px-4 py-2.5 text-xs text-zinc-300 font-mono flex items-center gap-2 shadow-lg">
+                    <Loader2 className="w-3.5 h-3.5 text-[#96d7ff] animate-spin" />
+                    <span>Querying ClickHouse FOCUS ledger...</span>
+                  </div>
                 </div>
-              </div>
-            )}
-            <div ref={chatBottomRef} />
+              )}
+              <div ref={chatBottomRef} />
+            </div>
+
+            {/* Bottom Composer in Active Chat Mode (Spacious padding so it NEVER overlaps screen edge) */}
+            <div className="w-full mt-auto relative pt-2 pb-6 sm:pb-8">
+              {renderComposer(false)}
+            </div>
           </div>
         )}
-
-        {/* =========================================================================
-            PROMPT INPUT CARD (SPACIOUS TWO-SECTION COMPOSER)
-           ========================================================================= */}
-        <div className="w-full mt-auto relative pt-4">
-          {/* Hidden File Input */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            className="hidden"
-          />
-
-          {/* Prompt Composer Card */}
-          <div className="w-full rounded-[24px] bg-[#0A1931]/95 border border-[#1856A8]/45 px-5 py-4 sm:px-6 sm:py-5 transition-all focus-within:border-[#68B7FF]/75 focus-within:ring-2 focus-within:ring-[#287FE8]/20 shadow-[0_8px_32px_rgba(3,8,23,0.9),0_0_24px_rgba(18,59,120,0.25)] flex flex-col justify-between">
-            {/* Attached file tag if any */}
-            {attachedFile && (
-              <div className="mb-3 flex items-center gap-2 px-3 py-1.5 bg-[#030817] border border-[#1856A8]/40 text-[#A4C2E8] text-xs rounded-xl w-max font-mono">
-                <Paperclip className="w-3.5 h-3.5 text-[#68B7FF]" />
-                <span className="truncate max-w-[240px]">{attachedFile}</span>
-                <button
-                  type="button"
-                  onClick={() => setAttachedFile(null)}
-                  className="text-[#A4C2E8] hover:text-[#EBF4FF] ml-1.5 font-bold"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-
-            {/* TOP SECTION — Spacious Textarea without decorative icons */}
-            <div className="w-full min-h-[64px] sm:min-h-[72px]">
-              <textarea
-                ref={textareaRef}
-                rows={2}
-                value={input}
-                onChange={handleTextareaInput}
-                onKeyDown={handleKeyDown}
-                placeholder="Ask AI a question or make a request..."
-                className="w-full bg-transparent text-[#EBF4FF] placeholder:text-[#A4C2E8]/60 text-sm sm:text-[15px] resize-none outline-none border-none p-0 focus:ring-0 leading-relaxed font-normal min-h-[56px] max-h-[220px] font-sans"
-              />
-            </div>
-
-            {/* BOTTOM SECTION — Toolbar with clean separation */}
-            <div className="flex items-center justify-between mt-3 pt-3.5 border-t border-[#1856A8]/30 flex-wrap gap-2.5">
-              {/* Left Side: Attach Button & Writing Styles Dropdown */}
-              <div className="flex items-center gap-2.5">
-                {/* Attach Button */}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="h-8 px-3 rounded-lg border border-[#1856A8]/40 bg-[#030817]/90 hover:bg-[#123B78]/55 hover:border-[#68B7FF]/60 text-[#A4C2E8] hover:text-[#EBF4FF] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono shadow-sm"
-                  title="Attach file or logs"
-                >
-                  <Paperclip className="w-3.5 h-3.5 text-[#68B7FF]" />
-                  <span>Attach</span>
-                </button>
-
-                {/* Writing Styles Dropdown */}
-                <div className="relative" ref={styleMenuRef}>
-                  <button
-                    type="button"
-                    onClick={() => setStyleDropdownOpen((prev) => !prev)}
-                    className="h-8 px-3 rounded-lg border border-[#1856A8]/40 bg-[#030817]/90 hover:bg-[#123B78]/55 hover:border-[#68B7FF]/60 text-[#A4C2E8] hover:text-[#EBF4FF] flex items-center gap-1.5 text-xs font-semibold transition-colors cursor-pointer font-mono shadow-sm"
-                  >
-                    <span>{writingStyle}</span>
-                    <ChevronDown className="w-3 h-3 text-[#68B7FF]" />
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {styleDropdownOpen && (
-                    <div className="absolute left-0 bottom-10 w-52 bg-[#0A1931] border border-[#1856A8]/60 rounded-xl shadow-[0_10px_32px_rgba(3,8,23,0.95),0_0_24px_rgba(24,86,168,0.3)] py-1 z-30 font-mono">
-                      {[
-                        "Writing Styles",
-                        "Deterministic FOCUS SQL",
-                        "Executive Summary",
-                        "Anomaly Root-Cause",
-                      ].map((style) => (
-                        <button
-                          key={style}
-                          type="button"
-                          onClick={() => {
-                            setWritingStyle(style);
-                            setStyleDropdownOpen(false);
-                          }}
-                          className={`w-full text-left px-3.5 py-2 text-xs font-medium transition-colors ${
-                            writingStyle === style
-                              ? "bg-gradient-to-r from-[#123B78] to-[#1856A8] text-[#EBF4FF] font-bold"
-                              : "text-[#A4C2E8] hover:bg-[#123B78]/45 hover:text-[#EBF4FF]"
-                          }`}
-                        >
-                          {style}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Side: Citation Toggle Switch & Send Button */}
-              <div className="flex items-center gap-3">
-                {/* Citation Toggle */}
-                <label className="flex items-center gap-2 cursor-pointer select-none">
-                  <div
-                    onClick={() => setCitationEnabled((p) => !p)}
-                    className={`w-9 h-5 rounded-full p-0.5 transition-colors duration-200 ease-in-out cursor-pointer flex items-center ${
-                      citationEnabled
-                        ? "bg-gradient-to-r from-[#1856A8] to-[#287FE8] shadow-[0_0_12px_rgba(40,127,232,0.45)]"
-                        : "bg-[#030817] border border-[#1856A8]/40"
-                    }`}
-                  >
-                    <div
-                      className={`w-4 h-4 rounded-full shadow-sm transform transition-transform duration-200 ease-in-out flex items-center justify-center ${
-                        citationEnabled ? "translate-x-4 bg-[#EBF4FF]" : "translate-x-0 bg-[#A4C2E8]"
-                      }`}
-                    />
-                  </div>
-                  <span className="text-xs font-semibold text-[#A4C2E8] font-mono">Citation</span>
-                </label>
-
-                {/* Send Button */}
-                <button
-                  type="button"
-                  onClick={() => handleAsk()}
-                  disabled={!input.trim() || askCirra.isPending}
-                  className="w-8 h-8 rounded-lg bg-gradient-to-r from-[#1856A8] via-[#287FE8] to-[#68B7FF] hover:brightness-110 disabled:opacity-40 text-[#030817] flex items-center justify-center transition-all cursor-pointer shadow-[0_0_18px_rgba(40,127,232,0.5)]"
-                  title="Send request"
-                >
-                  <ArrowUp className="w-4 h-4 stroke-[2.5] text-[#030817]" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-
-      {/* Sequential Entrance Animations (Heading + 3 Questions) */}
-      <style>{`
-        @keyframes cirraStaggerFadeUp {
-          0% {
-            opacity: 0;
-            transform: translateY(16px);
-            filter: blur(4px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-            filter: blur(0px);
-          }
-        }
-        .cirra-entrance-heading {
-          opacity: 0;
-          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards;
-        }
-        .cirra-entrance-q1 {
-          opacity: 0;
-          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 700ms forwards;
-        }
-        .cirra-entrance-q2 {
-          opacity: 0;
-          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 1100ms forwards;
-        }
-        .cirra-entrance-q3 {
-          opacity: 0;
-          animation: cirraStaggerFadeUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 1500ms forwards;
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .cirra-entrance-heading,
-          .cirra-entrance-q1,
-          .cirra-entrance-q2,
-          .cirra-entrance-q3 {
-            opacity: 1 !important;
-            transform: none !important;
-            filter: none !important;
-            animation: none !important;
-          }
-        }
-      `}</style>
     </div>
   );
 }

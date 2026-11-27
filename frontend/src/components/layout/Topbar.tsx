@@ -116,15 +116,15 @@ export function Topbar({ title, subtitle }: TopbarProps) {
       {/* Specular Ambient Sheen */}
       <div className="absolute inset-0 bg-gradient-to-b from-white/[0.06] via-transparent to-transparent pointer-events-none" />
 
-      {/* Left: Cirra Brand Header (62px width exactly aligned with Sidebar dock) */}
-      <div className="flex items-center min-w-0 relative z-10">
+      {/* Left: Cirra Brand Header */}
+      <div className="flex items-center min-w-0 relative z-10 pl-1">
         <Link
           href="/dashboard"
-          className="w-[62px] h-14 flex items-center justify-center shrink-0 group focus:outline-none"
+          className="h-14 flex items-center shrink-0 group focus:outline-none pr-3"
           title="Cirra FinOps Cloud"
         >
           {/* Golden Ratio Squircle Badge on Navbar */}
-          <div className="w-[38px] h-[38px] rounded-[13px] bg-white flex items-center justify-center p-1 shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform overflow-hidden">
+          <div className="w-[34px] h-[34px] rounded-[11px] bg-white flex items-center justify-center p-1 shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform overflow-hidden">
             <img
               src="/cirra-mark.png"
               alt="Cirra Logo"
@@ -134,7 +134,7 @@ export function Topbar({ title, subtitle }: TopbarProps) {
         </Link>
 
         {/* Brand Name & Page Title */}
-        <div className="flex items-center gap-3 pl-2 min-w-0">
+        <div className="flex items-center gap-2.5 min-w-0">
           <span className="text-[15px] font-black tracking-tight text-white font-mono leading-none">
             CIRRA
           </span>

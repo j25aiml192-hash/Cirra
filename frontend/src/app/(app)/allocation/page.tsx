@@ -28,6 +28,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Topbar } from "@/components/layout/Topbar";
 import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { ProviderLogo } from "@/components/ui/provider-logos";
 import { apiFetch } from "@/lib/api";
 import { formatNumber } from "@/lib/utils";
 import type { AllocationRule, AllocationCoverage, SuggestedRule } from "@/types";
@@ -331,6 +332,40 @@ export default function AllocationPage() {
   const smartRules = smartRulesQuery.data ?? [];
   const ruleTemplates = ruleTemplatesQuery.data ?? [];
 
+  // Real brand logo resolver for Allocation Rules (AWS, GCP, OpenAI, Supabase, Kubernetes, Azure)
+  const getRuleLogo = (rule: AllocationRule) => {
+    const match = (rule.match_value || "").toLowerCase();
+    const team = (rule.assign_team || "").toLowerCase();
+    const feature = (rule.assign_feature || "").toLowerCase();
+    const all = `${match} ${team} ${feature}`;
+
+    if (all.includes("aws") || all.includes("core-platform") || all.includes("ec2") || all.includes("s3") || all.includes("lambda")) {
+      return <ProviderLogo provider="aws" size={18} />;
+    }
+    if (all.includes("gcp") || all.includes("google") || all.includes("bigquery") || all.includes("gke")) {
+      return <ProviderLogo provider="gcp" size={18} />;
+    }
+    if (all.includes("ai") || all.includes("openai") || all.includes("gpt") || all.includes("agent") || all.includes("swarm")) {
+      return <ProviderLogo provider="openai" size={18} />;
+    }
+    if (all.includes("anthropic") || all.includes("claude")) {
+      return <ProviderLogo provider="anthropic" size={18} />;
+    }
+    if (all.includes("db") || all.includes("database") || all.includes("postgres") || all.includes("sql") || all.includes("data lake")) {
+      return <ProviderLogo provider="supabase" size={18} />;
+    }
+    if (all.includes("groq") || all.includes("lpu")) {
+      return <ProviderLogo provider="groq" size={18} />;
+    }
+    if (all.includes("k8s") || all.includes("kubernetes")) {
+      return <ProviderLogo provider="kubernetes" size={18} />;
+    }
+    if (all.includes("azure")) {
+      return <ProviderLogo provider="azure" size={18} />;
+    }
+    return <ProviderLogo provider="aws" size={18} />;
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <Topbar />
@@ -348,69 +383,128 @@ export default function AllocationPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
           {/* ════ LEFT COLUMN (lg:col-span-7): Coverage, Rules Hierarchy & Smart Lock ════ */}
           <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-            {/* ── SECTION 0: Segmented 90-Day Attribution SLA / Coverage Card (Floating) ── */}
-            <div className="bg-[#0b0c10]/95 backdrop-blur-xl border border-zinc-800/80 hover:border-zinc-700/90 transition-all duration-300 rounded-2xl p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.1)]">
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-4">
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-white font-mono text-base tracking-tight">
-                    Attribution Coverage
-                  </span>
+            {/* ── SECTION 0: Attribution Coverage Timeline — connected to page content ── */}
+            <div className="bg-[#0b0c10]/95 backdrop-blur-xl border border-zinc-800/80 hover:border-zinc-700/90 transition-all duration-300 rounded-2xl p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.1)] space-y-5">
+
+              {/* Header: meaningful name + live metrics */}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-zinc-800/80">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2.5">
+                    <span className="font-bold text-white font-mono text-base tracking-tight">
+                      Attribution Coverage
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-[11px] font-mono font-bold">
+                      <span>↗</span>
+                      <span>+5.2%</span>
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-zinc-900 border border-zinc-700 text-zinc-400">
+                      SLA 99.4%
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 font-sans">
+                    Monthly attributed vs unallocated spend — Jan through Jun 2025
+                  </p>
                 </div>
-                <div className="font-mono text-sm font-bold text-white flex items-center gap-2">
-                  <span className="text-emerald-400">{coveragePct.toFixed(1)}%</span>
-                  <span className="text-zinc-500 text-xs font-normal">
-                    ({unallocatedPct}% unallocated)
-                  </span>
+                <div className="font-mono text-right shrink-0">
+                  <div className="text-2xl font-black text-white tracking-tight">{coveragePct.toFixed(1)}%</div>
+                  <div className="text-[11px] text-zinc-500 font-normal">{unallocatedPct}% unallocated</div>
                 </div>
               </div>
 
-              {/* Segmented Ticks Container (exact match to 90-day status bar reference) */}
-              <div className="py-2">
-                <div className="flex items-center gap-[3px] sm:gap-[4px] w-full overflow-hidden">
-                  {Array.from({ length: 65 }).map((_, idx) => {
-                    // ~84% attributed emerald, ~14% dimmed unallocated on left, 1 minor anomaly spike (coral)
-                    const isAnomaly = idx === 18; // Historical unallocated spike
-                    const isUnallocated = idx < 9; // Unallocated older period
-                    const isAttributed = !isUnallocated && !isAnomaly;
+              {/* Stacked area coverage chart — attributed (blue) vs unallocated (zinc) */}
+              <div className="w-full">
+                <svg className="w-full h-40" viewBox="0 0 460 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="attrGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.55" />
+                      <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.08" />
+                    </linearGradient>
+                    <linearGradient id="unallocGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#52525b" stopOpacity="0.5" />
+                      <stop offset="100%" stopColor="#27272a" stopOpacity="0.05" />
+                    </linearGradient>
+                    <pattern id="hatch" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+                      <line x1="0" y1="0" x2="0" y2="5" stroke="#3b82f6" strokeWidth="1.2" strokeOpacity="0.4" />
+                    </pattern>
+                  </defs>
 
+                  {/* Y-axis grid lines */}
+                  {[25, 50, 75, 100].map((pct) => {
+                    const y = 118 - (pct / 100) * 110;
                     return (
-                      <div
-                        key={idx}
-                        title={
-                          isAnomaly
-                            ? `Day -${65 - idx}: $1,240 untagged spike (anomaly)`
-                            : isUnallocated
-                              ? `Day -${65 - idx}: Unallocated spend telemetry`
-                              : `Day -${65 - idx}: 99.4% spend attributed`
-                        }
-                        className={`h-7 sm:h-8 flex-1 rounded-[2px] transition-all duration-200 cursor-pointer ${isAnomaly
-                          ? "bg-[#ff4d6d] hover:bg-[#ff758f] hover:scale-110 shadow-[0_0_6px_rgba(255,77,109,0.5)]"
-                          : isAttributed
-                            ? "bg-[#059669] hover:bg-[#10b981] hover:scale-110 shadow-[0_0_4px_rgba(5,150,105,0.3)]"
-                            : "bg-[#18181b] hover:bg-[#27272a]"
-                          }`}
-                      />
+                      <g key={pct}>
+                        <line x1="8" y1={y} x2="452" y2={y} stroke="#27272a" strokeWidth="0.75" strokeDasharray="3 4" />
+                        <text x="6" y={y + 3.5} fill="#52525b" fontSize="8" fontFamily="monospace" textAnchor="end">{pct}</text>
+                      </g>
                     );
                   })}
-                </div>
+
+                  {/* Attributed spend area — full height bars with fill + hatch overlay */}
+                  {[
+                    { x: 14, attr: 78, total: 100 },
+                    { x: 45, attr: 83, total: 100 },
+                    { x: 76, attr: 80, total: 100 },
+                    { x: 107, attr: 82, total: 100 },
+                    { x: 138, attr: 79, total: 100 },
+                    { x: 169, attr: 84, total: 100 },
+                    { x: 200, attr: 86, total: 100 },
+                    { x: 231, attr: 85, total: 100 },
+                    { x: 262, attr: 83, total: 100 },
+                    { x: 293, attr: 84, total: 100 },
+                    { x: 324, attr: 87, total: 100 },
+                    { x: 355, attr: 85, total: 100 },
+                    { x: 386, attr: 84, total: 100 },
+                    { x: 417, attr: 84, total: 100 },
+                  ].map((bar, i) => {
+                    const totalH = Math.round((bar.total / 100) * 110);
+                    const attrH = Math.round((bar.attr / 100) * 110);
+                    const unallocH = totalH - attrH;
+                    return (
+                      <g key={i} className="group cursor-pointer">
+                        {/* Unallocated segment — top (zinc) */}
+                        <rect x={bar.x} y={118 - totalH} width={18} height={unallocH} rx={2} fill="#3f3f46" fillOpacity={0.6} />
+                        {/* Attributed segment — bottom (blue gradient + hatch) */}
+                        <rect x={bar.x} y={118 - attrH} width={18} height={attrH} rx={2} fill="url(#attrGrad)" />
+                        <rect x={bar.x} y={118 - attrH} width={18} height={attrH} rx={2} fill="url(#hatch)" />
+                        {/* Hover glow border */}
+                        <rect
+                          x={bar.x} y={118 - totalH} width={18} height={totalH} rx={2}
+                          fill="transparent" stroke="#3b82f6" strokeWidth={0}
+                          className="group-hover:stroke-blue-400/60 group-hover:[stroke-width:1.5] transition-all"
+                        />
+                      </g>
+                    );
+                  })}
+
+                  {/* Baseline */}
+                  <line x1="8" y1="118" x2="452" y2="118" stroke="#27272a" strokeWidth="1" />
+
+                  {/* Month labels */}
+                  <text x="23" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jan</text>
+                  <text x="85" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Feb</text>
+                  <text x="147" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Mar</text>
+                  <text x="209" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Apr</text>
+                  <text x="271" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">May</text>
+                  <text x="333" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jun</text>
+                  <text x="395" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jul</text>
+                </svg>
               </div>
 
-              {/* Bottom Row: 90 days ago · Attributed Metrics · Today */}
-              <div className="flex items-center justify-between text-xs font-mono text-zinc-500 mt-3 pt-2 border-t border-zinc-900">
-                <span>90 days ago</span>
-
-                <div className="hidden sm:flex items-center gap-6">
-                  <span className="flex items-center text-emerald-400 font-medium">
-                    <span className="w-2 h-2 bg-emerald-500 rounded-full inline-block mr-1.5 shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+              {/* Bottom legend + SLA */}
+              <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1 border-t border-zinc-900">
+                <div className="flex items-center gap-5">
+                  <span className="flex items-center gap-1.5 text-zinc-200 font-medium">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block shadow-[0_0_6px_rgba(59,130,246,0.7)]" />
                     ${formatNumber(attributedSpend)} attributed
                   </span>
-                  <span className="flex items-center text-zinc-400">
-                    <span className="w-2 h-2 bg-zinc-600 rounded-full inline-block mr-1.5" />
+                  <span className="flex items-center gap-1.5 text-zinc-400">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-zinc-600 inline-block" />
                     ${formatNumber(unallocatedSpend)} unallocated
                   </span>
                 </div>
-
-                <span className="text-zinc-400 font-medium">Today</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-emerald-400 font-semibold">↑ Trending +5.2% coverage this quarter</span>
+                </div>
               </div>
             </div>
 
@@ -545,9 +639,9 @@ export default function AllocationPage() {
                       className="bg-[#0c0d10] hover:bg-[#111317] border border-zinc-800/90 hover:border-zinc-700/80 rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-4 transition-all duration-200 group"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        {/* Outlined file / document icon matching reference */}
-                        <div className="text-zinc-400 group-hover:text-zinc-200 transition-colors shrink-0">
-                          <FileText className="w-5 h-5 text-zinc-300" />
+                        {/* Real provider / platform logo matching reference */}
+                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1.5 shrink-0 shadow-xs">
+                          {getRuleLogo(rule)}
                         </div>
 
                         <div className="min-w-0 space-y-0.5">
@@ -1053,7 +1147,7 @@ export default function AllocationPage() {
                   </div>
                   <div className="text-xs font-bold text-white">All Suggestions Evaluated</div>
                   <p className="text-[11px] text-zinc-400 max-w-xs mx-auto font-sans">
-                    Cirra&apos;s continuous discovery engine is monitoring FOCUS telemetry streams for new allocation patterns.
+                    Cirra&apos;s continuous discovery engine is monitoring spend streams for new allocation patterns.
                   </p>
                 </div>
               ) : (
@@ -1061,47 +1155,49 @@ export default function AllocationPage() {
                   {suggestions.map((sug) => (
                     <div
                       key={sug.id}
-                      className="bg-gradient-to-b from-[#f6f3eb] via-[#efebe3] to-[#e4e0d8] rounded-2xl p-4 sm:p-5 border border-[#ded8cb] shadow-[0_15px_35px_-5px_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.9)] space-y-3.5 transition-all hover:border-[#cfc7b7] hover:shadow-[0_20px_40px_-5px_rgba(0,0,0,0.45)]"
+                      className="bg-[#0f1014] rounded-2xl p-4 sm:p-5 border border-zinc-800/80 hover:border-zinc-700 shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)] space-y-3.5 transition-all"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <code className="text-xs font-mono font-bold text-[#1c1917] bg-[#e3ded2] border border-[#d3ccbe] px-2.5 py-1 rounded-lg truncate max-w-[220px] shadow-inner">
+                        <code className="text-xs font-mono font-bold text-zinc-100 bg-zinc-900 border border-zinc-700/80 px-2.5 py-1 rounded-lg truncate max-w-[220px] shadow-inner">
                           {sug.pattern}
                         </code>
-                        <span className="text-xs font-bold font-mono text-[#047857] shrink-0">
+                        <span className="text-xs font-bold font-mono text-emerald-400 shrink-0">
                           ${formatNumber(sug.estimatedSpend)}/mo
                         </span>
                       </div>
 
                       <div className="text-[11px] font-mono space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="text-[#78716c]">Suggested Team:</span>
-                          <span className="font-semibold text-[#1c1917]">{sug.suggestedTeam}</span>
+                          <span className="text-zinc-500">Suggested Team:</span>
+                          <span className="font-semibold text-zinc-200">{sug.suggestedTeam}</span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-[#78716c]">Confidence:</span>
-                          <span className="font-semibold text-[#047857]">
+                          <span className="text-zinc-500">Confidence:</span>
+                          <span className="font-semibold text-emerald-400">
                             {(sug.confidence * 100).toFixed(0)}%
                           </span>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 pt-2 border-t border-[#ded7cb]">
+                      <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
                         <button
                           type="button"
                           onClick={() => handleConfirmSuggestion(sug)}
                           disabled={createRuleMutation.isPending}
-                          className="flex-1 py-1.5 rounded-full bg-[#18181b] hover:bg-black text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all font-mono cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.2)] hover:scale-[1.01] whitespace-nowrap"
+                          className="group relative flex-1 py-1.5 rounded-full overflow-hidden text-xs font-mono font-bold transition-all duration-300 flex items-center justify-center gap-1.5 text-white border border-white/25 bg-white/[0.14] hover:bg-white/[0.22] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] active:scale-[0.98] cursor-pointer whitespace-nowrap"
                         >
-                          <Check className="w-3.5 h-3.5 text-white stroke-[3] shrink-0" />
-                          <span>Confirm</span>
+                          <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
+                          <Check className="w-3.5 h-3.5 stroke-[3] shrink-0 relative z-10 text-white" />
+                          <span className="relative z-10">Confirm</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDismissSuggestion(sug.id)}
-                          className="px-3.5 py-1.5 rounded-full bg-[#e3ded2] hover:bg-[#d8d2c4] border border-[#d0c8b9] text-[#44403c] text-xs font-medium hover:text-[#1c1917] transition-colors font-mono cursor-pointer flex items-center justify-center gap-1.5 whitespace-nowrap shrink-0"
+                          className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-zinc-300 hover:text-white border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-[0.98] cursor-pointer whitespace-nowrap shrink-0"
                         >
-                          <X className="w-3.5 h-3.5 shrink-0" />
-                          <span>Dismiss</span>
+                          <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
+                          <X className="w-3.5 h-3.5 shrink-0 relative z-10" />
+                          <span className="relative z-10">Dismiss</span>
                         </button>
                       </div>
                     </div>

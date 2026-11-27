@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   ZoomIn,
   ZoomOut,
@@ -17,7 +17,9 @@ import {
   Activity,
   Shield,
   Clock,
-  Sparkles
+  Sparkles,
+  ArrowLeft,
+  CheckCircle2,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { ProviderLogo } from "@/components/ui/provider-logos";
@@ -58,20 +60,35 @@ export default function AiSpendPage() {
   const [viewMode, setViewMode] = useState<"visualizer" | "records">("visualizer");
   const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
 
-  // Canvas pan & zoom state
+  // Canvas pan & zoom state (calibrated so first view never overlaps floating telemetry card)
   const [zoom, setZoom] = useState<number>(0.8);
-  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 30, y: 15 });
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 20, y: 15 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  // Floating coordinates for the 5 schema tables
-  const [tablePositions, setTablePositions] = useState<Record<string, { x: number; y: number }>>({
-    key_openai_prod_copilot: { x: 20, y: 120 },
-    key_anthropic_agent_swarm: { x: 340, y: 30 },
-    key_openai_support_bot: { x: 340, y: 360 },
-    key_openai_rag_indexer: { x: 670, y: 50 },
-    key_anthropic_triage_fast: { x: 670, y: 380 },
-  });
+  // Spaced-out default coordinates so all 5 tables and the floating card never overlap on first view
+  const getDefaultPosition = useCallback((index: number): { x: number; y: number } => {
+    const positions: Array<{ x: number; y: number }> = [
+      { x: 20, y: 30 },
+      { x: 305, y: 30 },
+      { x: 590, y: 30 },
+      { x: 160, y: 410 },
+      { x: 450, y: 410 },
+    ];
+    const match = positions[index];
+    if (match) {
+      return match;
+    }
+    const col = index % 3;
+    const row = Math.floor(index / 3);
+    return {
+      x: 20 + col * 290,
+      y: 30 + row * 410,
+    };
+  }, []);
+
+  // Floating coordinates for the schema tables
+  const [tablePositions, setTablePositions] = useState<Record<string, { x: number; y: number }>>({});
 
   const [draggingTable, setDraggingTable] = useState<string | null>(null);
   const [tableDragOffset, setTableDragOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -82,7 +99,7 @@ export default function AiSpendPage() {
   const tables: ApiKeySchemaTable[] = useMemo(() => {
     return rawItems.map((item, index) => {
       const sanitizedId = item.apiKeyId.replace(/-/g, "_");
-      const defaultPos = Object.values(tablePositions)[index] || { x: 40 + index * 180, y: 100 };
+      const defaultPos = getDefaultPosition(index);
       const currentPos = tablePositions[sanitizedId] || defaultPos;
 
       return {
@@ -101,7 +118,7 @@ export default function AiSpendPage() {
         rateLimit: item.model.includes("mini") || item.model.includes("haiku") ? "20,000 RPM" : "10,000 RPM",
         x: currentPos.x,
         y: currentPos.y,
-        width: 270,
+        width: 255,
         columns: [
           { name: "key_id", type: "uuid", isPk: true },
           { name: "model_binding", type: "varchar(64)", isFk: true },
@@ -116,57 +133,88 @@ export default function AiSpendPage() {
         ],
       };
     });
-  }, [rawItems, tablePositions]);
+  }, [rawItems, tablePositions, getDefaultPosition]);
 
   // Schema relationship connector lines between the tables
   const relationships = useMemo(() => {
     if (tables.length < 2) return [];
-    return [
-      {
+    const rels: Array<{ id: string; fromTable: string; fromCol: string; toTable: string; toCol: string }> = [];
+
+    if (tables[0] && tables[1]) {
+      rels.push({
+        id: "rel_0_1",
+        fromTable: tables[0].id,
+        fromCol: "key_id",
+        toTable: tables[1].id,
+        toCol: "key_id",
+      });
+    }
+    if (tables[1] && tables[2]) {
+      rels.push({
         id: "rel_1_2",
-        fromTable: tables[0]?.id ?? "",
-        fromCol: "key_id",
-        toTable: tables[1]?.id ?? "",
-        toCol: "key_id",
-      },
-      {
+        fromTable: tables[1].id,
+        fromCol: "model_binding",
+        toTable: tables[2].id,
+        toCol: "model_binding",
+      });
+    }
+    if (tables[0] && tables[2]) {
+      rels.push({
+        id: "rel_0_2",
+        fromTable: tables[0].id,
+        fromCol: "team_attributed",
+        toTable: tables[2].id,
+        toCol: "team_attributed",
+      });
+    }
+    if (tables.length > 3 && tables[1] && tables[3]) {
+      rels.push({
         id: "rel_1_3",
-        fromTable: tables[0]?.id ?? "",
-        fromCol: "key_id",
-        toTable: tables[2]?.id ?? "",
-        toCol: "key_id",
-      },
-      {
+        fromTable: tables[1].id,
+        fromCol: "model_binding",
+        toTable: tables[3].id,
+        toCol: "model_binding",
+      });
+    }
+    if (tables.length > 4 && tables[2] && tables[4]) {
+      rels.push({
         id: "rel_2_4",
-        fromTable: tables[1]?.id ?? "",
+        fromTable: tables[2].id,
         fromCol: "model_binding",
-        toTable: tables[3]?.id ?? "",
+        toTable: tables[4].id,
         toCol: "model_binding",
-      },
-      {
-        id: "rel_3_5",
-        fromTable: tables[2]?.id ?? "",
-        fromCol: "model_binding",
-        toTable: tables[4]?.id ?? "",
-        toCol: "model_binding",
-      },
-    ].filter((r) => r.fromTable && r.toTable);
+      });
+    }
+    return rels;
   }, [tables]);
 
-  const getPortCoords = (tableId: string, colName: string, isFromSide: boolean) => {
+  // Dynamically resolve port handles to the closer side so lines never disconnect or pierce through
+  const getPortCoords = (tableId: string, colName: string, targetTableId: string) => {
     const table = tables.find((t) => t.id === tableId);
-    if (!table) return { x: 0, y: 0 };
+    const targetTable = tables.find((t) => t.id === targetTableId);
+    if (!table) return { x: 0, y: 0, side: "right" as const };
+
     const colIndex = table.columns.findIndex((c) => c.name === colName);
-    const colOffset = colIndex >= 0 ? 38 + colIndex * 26 + 13 : 38;
-    const x = isFromSide ? table.x + table.width : table.x;
+    const colOffset = colIndex >= 0 ? 38 + colIndex * 26 + 13 : 45;
     const y = table.y + colOffset;
-    return { x, y };
+
+    const tableCenterX = table.x + table.width / 2;
+    const targetCenterX = targetTable ? targetTable.x + targetTable.width / 2 : tableCenterX + 100;
+
+    if (targetCenterX < tableCenterX) {
+      return { x: table.x, y, side: "left" as const };
+    }
+    return { x: table.x + table.width, y, side: "right" as const };
   };
 
-  const getOrthogonalPath = (from: { x: number; y: number }, to: { x: number; y: number }) => {
-    const deltaX = to.x - from.x;
-    const midX = from.x + (deltaX > 40 ? deltaX * 0.5 : 25);
-    return `M ${from.x} ${from.y} L ${midX} ${from.y} L ${midX} ${to.y} L ${to.x} ${to.y}`;
+  const getConnectorPath = (
+    from: { x: number; y: number; side: "left" | "right" },
+    to: { x: number; y: number; side: "left" | "right" }
+  ) => {
+    const dx = Math.max(40, Math.abs(to.x - from.x) * 0.45);
+    const c1x = from.side === "right" ? from.x + dx : from.x - dx;
+    const c2x = to.side === "right" ? to.x + dx : to.x - dx;
+    return `M ${from.x} ${from.y} C ${c1x} ${from.y}, ${c2x} ${to.y}, ${to.x} ${to.y}`;
   };
 
   // Canvas pan & drag handlers
@@ -196,11 +244,13 @@ export default function AiSpendPage() {
 
   const handleTableMouseDown = (e: React.MouseEvent, tableId: string) => {
     e.stopPropagation();
-    const table = tablePositions[tableId] || { x: 0, y: 0 };
+    const table = tables.find((t) => t.id === tableId);
+    const currentX = table?.x ?? 50;
+    const currentY = table?.y ?? 80;
     setDraggingTable(tableId);
     setTableDragOffset({
-      x: e.clientX - table.x * zoom,
-      y: e.clientY - table.y * zoom,
+      x: e.clientX - currentX * zoom,
+      y: e.clientY - currentY * zoom,
     });
   };
 
@@ -257,11 +307,10 @@ export default function AiSpendPage() {
             <button
               type="button"
               onClick={() => setViewMode("visualizer")}
-              className={`relative overflow-hidden flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                viewMode === "visualizer"
-                  ? "text-white font-bold border border-white/25 bg-white/[0.14] backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
-                  : "text-zinc-400 hover:text-white font-medium"
-              }`}
+              className={`relative overflow-hidden flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${viewMode === "visualizer"
+                ? "text-white font-bold border border-white/25 bg-white/[0.14] backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                : "text-zinc-400 hover:text-white font-medium"
+                }`}
             >
               {viewMode === "visualizer" && (
                 <div className="absolute top-0 inset-x-1 h-[45%] rounded-t-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
@@ -272,11 +321,10 @@ export default function AiSpendPage() {
             <button
               type="button"
               onClick={() => setViewMode("records")}
-              className={`relative overflow-hidden flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                viewMode === "records"
-                  ? "text-white font-bold border border-white/25 bg-white/[0.14] backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
-                  : "text-zinc-400 hover:text-white font-medium"
-              }`}
+              className={`relative overflow-hidden flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${viewMode === "records"
+                ? "text-white font-bold border border-white/25 bg-white/[0.14] backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                : "text-zinc-400 hover:text-white font-medium"
+                }`}
             >
               {viewMode === "records" && (
                 <div className="absolute top-0 inset-x-1 h-[45%] rounded-t-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
@@ -316,11 +364,11 @@ export default function AiSpendPage() {
               style={{ zIndex: 5 }}
             >
               {relationships.map((rel) => {
-                const fromCoords = getPortCoords(rel.fromTable, rel.fromCol, true);
-                const toCoords = getPortCoords(rel.toTable, rel.toCol, false);
+                const fromCoords = getPortCoords(rel.fromTable, rel.fromCol, rel.toTable);
+                const toCoords = getPortCoords(rel.toTable, rel.toCol, rel.fromTable);
                 const isHighlighted =
                   activeTableId === rel.fromTable || activeTableId === rel.toTable;
-                const pathData = getOrthogonalPath(fromCoords, toCoords);
+                const pathData = getConnectorPath(fromCoords, toCoords);
 
                 return (
                   <g key={rel.id}>
@@ -328,26 +376,27 @@ export default function AiSpendPage() {
                       d={pathData}
                       fill="none"
                       stroke="#09090b"
-                      strokeWidth="5"
+                      strokeWidth="6"
                       strokeLinecap="round"
                     />
                     <path
                       d={pathData}
                       fill="none"
-                      stroke={isHighlighted ? "#34d399" : "#52525b"}
-                      strokeWidth={isHighlighted ? "2" : "1.25"}
+                      stroke={isHighlighted ? "#10b981" : "#52525b"}
+                      strokeWidth={isHighlighted ? "2.5" : "1.5"}
+                      className="transition-colors duration-200"
                     />
                     <circle
                       cx={fromCoords.x}
                       cy={fromCoords.y}
-                      r={isHighlighted ? "4" : "3"}
-                      className="fill-emerald-400 stroke-zinc-900 stroke-[1.5px]"
+                      r={isHighlighted ? "4.5" : "3.5"}
+                      className={isHighlighted ? "fill-emerald-400 stroke-zinc-950 stroke-2" : "fill-zinc-400 stroke-zinc-900 stroke-1"}
                     />
                     <circle
                       cx={toCoords.x}
                       cy={toCoords.y}
-                      r={isHighlighted ? "4" : "3"}
-                      className="fill-emerald-400 stroke-zinc-900 stroke-[1.5px]"
+                      r={isHighlighted ? "4.5" : "3.5"}
+                      className={isHighlighted ? "fill-emerald-400 stroke-zinc-950 stroke-2" : "fill-zinc-400 stroke-zinc-900 stroke-1"}
                     />
                   </g>
                 );
@@ -369,11 +418,10 @@ export default function AiSpendPage() {
                     width: `${table.width}px`,
                     zIndex: isSelected ? 20 : 10,
                   }}
-                  className={`schema-table-node absolute rounded-xl bg-[#121215] border transition-all duration-150 shadow-2xl backdrop-blur-md cursor-pointer select-none ${
-                    isSelected
-                      ? "border-emerald-500/80 ring-2 ring-emerald-500/20 shadow-[0_10px_35px_rgba(16,185,129,0.18)]"
-                      : "border-zinc-800/90 hover:border-zinc-700/90 shadow-black/90"
-                  }`}
+                  className={`schema-table-node absolute rounded-xl bg-[#121215] border transition-all duration-150 shadow-2xl backdrop-blur-md cursor-pointer select-none ${isSelected
+                    ? "border-emerald-500/80 ring-2 ring-emerald-500/20 shadow-[0_10px_35px_rgba(16,185,129,0.18)]"
+                    : "border-zinc-800/90 hover:border-zinc-700/90 shadow-black/90"
+                    }`}
                 >
                   {/* Supabase Style Header: Centered Table Title */}
                   <div className="flex items-center justify-center px-3.5 py-2.5 border-b border-zinc-800/80 bg-zinc-900/50 rounded-t-xl">
@@ -401,13 +449,12 @@ export default function AiSpendPage() {
 
                         {/* Column Name */}
                         <span
-                          className={`truncate pl-1.5 ${
-                            col.isPk
-                              ? "text-zinc-100 font-semibold"
-                              : col.isFk
+                          className={`truncate pl-1.5 ${col.isPk
+                            ? "text-zinc-100 font-semibold"
+                            : col.isFk
                               ? "text-zinc-200"
                               : "text-zinc-300"
-                          }`}
+                            }`}
                         >
                           {col.name}
                         </span>
@@ -424,73 +471,162 @@ export default function AiSpendPage() {
             })}
           </div>
 
-          {/* Floating Telemetry Stats Card on Right (Warm White / Ivory Clean Theme) */}
-          <div className="absolute top-6 right-6 w-72 rounded-2xl bg-[#faf8f5] border border-[#e5e0d8] shadow-[0_20px_45px_rgba(0,0,0,0.45),0_2px_8px_rgba(0,0,0,0.15)] p-4 z-30 space-y-3.5 select-none transition-all duration-300 hover:border-[#d6cfc4]">
-            <div className="flex items-center justify-between border-b border-[#e8e3db] pb-2.5">
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#18181b] shadow-sm" />
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#18181b]">
-                  Telemetry Overview
-                </span>
-              </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#ede8e0] border border-[#ded7cc] text-[#27272a]">
-                LIVE
-              </span>
-            </div>
-
-            {/* Run-Rate Metric */}
-            <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
-                Total AI Run-Rate
-              </span>
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
-                  ${formatNumber(data?.totalCostUsd ?? 42180)}
+          {/* Floating Window on Right (Fixed Position Warm White / Ivory Clean Theme) */}
+          <div className="absolute top-5 right-5 w-[285px] 2xl:w-80 rounded-2xl bg-[#faf8f5] border border-[#e5e0d8] shadow-[0_20px_45px_rgba(0,0,0,0.45),0_2px_8px_rgba(0,0,0,0.15)] p-4 sm:p-5 z-30 select-none transition-all duration-300 hover:border-[#d6cfc4] text-[#18181b]">
+            {activeTable ? (
+              /* SELECTED TABLE DETAILS (BRIGHT THEME) */
+              <div className="space-y-3.5 animate-in fade-in duration-200">
+                {/* Header with Title and Close X Button */}
+                <div className="flex items-center justify-between border-b border-[#e8e3db] pb-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shrink-0 animate-pulse" />
+                    <span
+                      className="text-xs font-mono font-bold tracking-tight text-[#18181b] truncate max-w-[190px]"
+                      title={activeTable.title}
+                    >
+                      {activeTable.title}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTableId(null)}
+                    title="Close details and return to Telemetry Overview"
+                    className="w-6 h-6 rounded-full bg-[#ede8e0] hover:bg-[#e2dcd2] text-[#52525b] hover:text-[#18181b] flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
-                  +18.4%
-                </span>
-              </div>
-              <p className="text-[10px] font-mono text-[#71717a]">
-                OpenAI + Anthropic APIs
-              </p>
-            </div>
 
-            {/* Billable Tokens Metric */}
-            <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
-                Billable Tokens
-              </span>
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
-                  {(Number(data?.totalTokens ?? 2590000000) / 1000000000).toFixed(1)}B
+                {/* Attributed Spend Metric Card */}
+                <div className="p-3.5 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
+                    Attributed Monthly Spend
+                  </span>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
+                      ${formatNumber(activeTable.cost)}
+                    </div>
+                    <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
+                      {activeTable.rateLimit}
+                    </span>
+                  </div>
+                  <p className="text-[10px] font-mono text-[#71717a]">
+                    Inference cost attributed to this key
+                  </p>
                 </div>
-                <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
-                  +24.1%
-                </span>
-              </div>
-              <p className="text-[10px] font-mono text-[#71717a]">
-                Prompt + completion volume
-              </p>
-            </div>
 
-            {/* Cache Optimization Metric */}
-            <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
-              <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
-                Cache Optimization
-              </span>
-              <div className="flex items-baseline justify-between">
-                <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
-                  {data?.cachedTokensPercent ?? 64.8}%
+                {/* Structured Ledger Attributes */}
+                <div className="divide-y divide-[#e8e3db] border-t border-b border-[#e8e3db] py-1 text-xs font-mono">
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Foundation Model</span>
+                    <span className="font-bold text-[#18181b]">{activeTable.model}</span>
+                  </div>
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Provider</span>
+                    <span className="font-semibold text-[#18181b] uppercase">{activeTable.provider}</span>
+                  </div>
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Attributed Team</span>
+                    <span className="font-bold text-emerald-800">{activeTable.team}</span>
+                  </div>
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Workload Tier</span>
+                    <span className="text-[#27272a]">{activeTable.customer}</span>
+                  </div>
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Tokens (In / Out)</span>
+                    <span className="font-semibold text-[#18181b]">{activeTable.tokensDisplay}</span>
+                  </div>
+                  <div className="py-1.5 flex items-center justify-between">
+                    <span className="text-[#71717a]">Cache Hit Rate</span>
+                    <span className="font-bold text-[#18181b]">{activeTable.cache}</span>
+                  </div>
                 </div>
-                <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
-                  Saved ~$8.4k
-                </span>
+
+                {/* Return to Overview Button */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTableId(null)}
+                  className="w-full py-2 rounded-xl bg-[#ede8e0] hover:bg-[#e2dcd2] border border-[#ded7cc] text-[#27272a] text-xs font-mono font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>Return to Telemetry Overview</span>
+                </button>
               </div>
-              <p className="text-[10px] font-mono text-[#71717a]">
-                Context cache hit ratio
-              </p>
-            </div>
+            ) : (
+              /* TELEMETRY OVERVIEW (DEFAULT BRIGHT THEME) */
+              <div className="space-y-3.5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between border-b border-[#e8e3db] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#18181b] shadow-sm" />
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#18181b]">
+                      Telemetry Overview
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#ede8e0] border border-[#ded7cc] text-[#27272a]">
+                    LIVE
+                  </span>
+                </div>
+
+                {/* Run-Rate Metric */}
+                <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
+                    Total AI Run-Rate
+                  </span>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
+                      ${formatNumber(data?.totalCostUsd ?? 42180)}
+                    </div>
+                    <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
+                      +18.4%
+                    </span>
+                  </div>
+                  <p className="text-[10px] font-mono text-[#71717a]">
+                    OpenAI + Anthropic APIs
+                  </p>
+                </div>
+
+                {/* Billable Tokens Metric */}
+                <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
+                    Billable Tokens
+                  </span>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
+                      {(Number(data?.totalTokens ?? 2590000000) / 1000000000).toFixed(1)}B
+                    </div>
+                    <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
+                      +24.1%
+                    </span>
+                  </div>
+                  <p className="text-[10px] font-mono text-[#71717a]">
+                    Prompt + completion volume
+                  </p>
+                </div>
+
+                {/* Cache Optimization Metric */}
+                <div className="p-3 rounded-xl bg-[#f2eee7] border border-[#e2dcd2] space-y-1">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#71717a] font-semibold">
+                    Cache Optimization
+                  </span>
+                  <div className="flex items-baseline justify-between">
+                    <div className="text-2xl font-black font-mono text-[#09090b] tracking-tight">
+                      {data?.cachedTokensPercent ?? 64.8}%
+                    </div>
+                    <span className="text-[10px] font-mono text-[#18181b] font-bold bg-[#e4ded4] px-1.5 py-0.5 rounded border border-[#d3ccbf]">
+                      Saved ~$8.4k
+                    </span>
+                  </div>
+                  <p className="text-[10px] font-mono text-[#71717a]">
+                    Context cache hit ratio
+                  </p>
+                </div>
+
+                <p className="text-[10px] font-mono text-[#a1a1aa] text-center pt-0.5">
+                  Click any schema table to inspect its telemetry
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Canvas Bottom Zoom Controls */}
@@ -526,61 +662,15 @@ export default function AiSpendPage() {
             <button
               type="button"
               onClick={() => {
-                setZoom(0.88);
-                setPan({ x: 30, y: 20 });
+                setZoom(0.8);
+                setPan({ x: 20, y: 15 });
               }}
-              title="Fit Screen"
+              title="Fit Screen (80%)"
               className="p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
             >
               <Maximize2 className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Table Details Popover on Click */}
-          {activeTable && (
-            <div className="absolute bottom-6 left-6 max-w-sm rounded-xl bg-zinc-950/95 border border-zinc-800 p-4 shadow-2xl backdrop-blur-md z-30 space-y-2 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="font-mono text-xs font-bold text-white">{activeTable.title}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setActiveTableId(null)}
-                  className="text-zinc-400 hover:text-white cursor-pointer"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <div className="space-y-1.5 text-xs font-mono">
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Foundation Model:</span>
-                  <span className="text-white font-bold">{activeTable.model}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Provider:</span>
-                  <span className="text-zinc-200">{activeTable.provider}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Attributed Team:</span>
-                  <span className="text-emerald-400">{activeTable.team}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Tokens (In / Out):</span>
-                  <span className="text-zinc-300">{activeTable.tokensDisplay}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-zinc-400">Cache Rate:</span>
-                  <span className="text-cyan-300">{activeTable.cache}</span>
-                </div>
-                <div className="flex justify-between pt-1 border-t border-zinc-800/80">
-                  <span className="text-zinc-400">Attributed Cost:</span>
-                  <span className="text-white font-bold">${formatNumber(activeTable.cost)}</span>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       ) : (
         /* Tabular Data View with Clickable Arrow Row Expansion (Per-Day 30-Day Info) */
@@ -619,9 +709,8 @@ export default function AiSpendPage() {
                     <React.Fragment key={t.id}>
                       <tr
                         onClick={() => toggleRowExpansion(t.id)}
-                        className={`hover:bg-zinc-800/40 transition-colors cursor-pointer ${
-                          isExpanded ? "bg-zinc-800/25" : ""
-                        }`}
+                        className={`hover:bg-zinc-800/40 transition-colors cursor-pointer ${isExpanded ? "bg-zinc-800/25" : ""
+                          }`}
                       >
                         {/* Expand/Collapse Arrow Button */}
                         <td className="py-3 px-3 text-center">
