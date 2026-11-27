@@ -107,25 +107,31 @@ export default function ActionsPage() {
         </div>
 
         {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 p-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-xs font-medium self-start">
+        <div className="flex items-center gap-1 p-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-xs font-mono shadow-inner self-start">
           {[
             { id: "all", label: "All Actions" },
             { id: "proposed", label: "Proposed" },
             { id: "executed", label: "Executed" },
             { id: "rolled_back", label: "Rolled Back" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-                statusFilter === tab.id
-                  ? "bg-amber-400 text-black font-bold shadow-[0_0_10px_rgba(251,191,36,0.3)]"
-                  : "text-zinc-400 hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isActive = statusFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`relative overflow-hidden px-3.5 py-1 rounded-full transition-all cursor-pointer ${
+                  isActive
+                    ? "text-white font-bold border border-white/25 bg-white/[0.14] backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                    : "text-zinc-400 hover:text-white font-medium"
+                }`}
+              >
+                {isActive && (
+                  <div className="absolute top-0 inset-x-1 h-[45%] rounded-t-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+                )}
+                <span className="relative z-10">{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

@@ -13,7 +13,6 @@ import {
   Wallet,
   Zap,
   PhoneCall,
-  Settings,
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -74,12 +73,9 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
-const SETTINGS_ITEM: NavItem = {
-  name: "Settings",
-  href: "/settings",
-  icon: Settings,
-  matchPrefix: true,
-};
+
+
+
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -108,7 +104,7 @@ export function Sidebar() {
       )}
     >
       {/* Attached Glassmorphic Dock - Translucent, Frosted Glass with Specular Light Rim */}
-      <div className="relative rounded-b-[26px] rounded-t-none bg-[#09090b]/55 backdrop-blur-2xl backdrop-saturate-[180%] border-x border-b border-white/[0.12] border-t-0 shadow-[0_24px_50px_rgba(0,0,0,0.7),inset_1px_0_0_0_rgba(255,255,255,0.08),inset_-1px_0_0_0_rgba(255,255,255,0.08),inset_0_-1px_1px_0_rgba(255,255,255,0.12)] p-2 flex flex-col justify-between overflow-hidden">
+      <div className="relative w-full rounded-b-[26px] rounded-t-none bg-[#09090b]/55 backdrop-blur-2xl backdrop-saturate-[180%] border-x border-b border-white/[0.12] border-t-0 shadow-[0_24px_50px_rgba(0,0,0,0.7),inset_1px_0_0_0_rgba(255,255,255,0.08),inset_-1px_0_0_0_rgba(255,255,255,0.08),inset_0_-1px_1px_0_rgba(255,255,255,0.12)] p-2 flex flex-col justify-between overflow-hidden">
         {/* Subtle Specular Sheen Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] via-transparent to-white/[0.02] pointer-events-none rounded-b-[26px]" />
 
@@ -125,14 +121,14 @@ export function Sidebar() {
                 href={item.href}
                 title={item.name}
                 className={cn(
-                  "group relative flex items-center h-11 transition-all duration-200 cursor-pointer overflow-hidden",
+                  "group relative flex items-center h-11 transition-all duration-200 cursor-pointer overflow-hidden w-full",
                   active
                     ? isHovered
                       ? "bg-white text-black font-bold rounded-2xl px-2.5 shadow-none"
-                      : "bg-white text-black font-bold rounded-2xl justify-center w-full shadow-none"
+                      : "bg-white text-black font-bold rounded-2xl justify-center shadow-none"
                     : isHovered
                     ? "text-zinc-200 hover:text-white hover:bg-white/[0.08] rounded-2xl px-2.5"
-                    : "text-zinc-400 hover:text-white rounded-2xl justify-center w-full"
+                    : "text-zinc-400 hover:text-white rounded-2xl justify-center"
                 )}
               >
                 {/* Icon Container: Glassmorphic Squircle (Centered via Golden Ratio) */}
@@ -178,58 +174,6 @@ export function Sidebar() {
             );
           })}
         </nav>
-
-        {/* Glass Divider above Settings */}
-        <div className="my-2 border-t border-white/[0.1] mx-1 relative z-10" />
-
-        {/* Bottom: Settings item */}
-        {(() => {
-          const active = isItemActive(SETTINGS_ITEM);
-          const Icon = SETTINGS_ITEM.icon;
-
-          return (
-            <Link
-              href={SETTINGS_ITEM.href}
-              title={SETTINGS_ITEM.name}
-              className={cn(
-                "group relative flex items-center h-11 transition-all duration-200 cursor-pointer overflow-hidden relative z-10",
-                active
-                  ? isHovered
-                    ? "bg-white text-black font-bold rounded-2xl px-2.5 shadow-none"
-                    : "bg-white text-black font-bold rounded-2xl justify-center w-full shadow-none"
-                  : isHovered
-                  ? "text-zinc-200 hover:text-white hover:bg-white/[0.08] rounded-2xl px-2.5"
-                  : "text-zinc-400 hover:text-white rounded-2xl justify-center w-full"
-              )}
-            >
-              <div
-                className={cn(
-                  "w-[38px] h-[38px] rounded-[13px] flex items-center justify-center shrink-0 transition-all duration-200",
-                  active
-                    ? isHovered
-                      ? "text-black"
-                      : "text-black"
-                    : isHovered
-                    ? "bg-white/[0.05] border border-white/[0.08] text-zinc-300 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]"
-                    : "bg-white/[0.04] border border-white/[0.07] text-zinc-400 group-hover:text-white group-hover:border-white/[0.18] group-hover:bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]"
-                )}
-              >
-                <Icon size={19} />
-              </div>
-
-              {isHovered && (
-                <span
-                  className={cn(
-                    "ml-3 text-[13.5px] font-medium tracking-tight whitespace-nowrap transition-all duration-200 truncate",
-                    active ? "text-black font-semibold" : "text-zinc-200 group-hover:text-white"
-                  )}
-                >
-                  {SETTINGS_ITEM.name}
-                </span>
-              )}
-            </Link>
-          );
-        })()}
       </div>
     </aside>
   );

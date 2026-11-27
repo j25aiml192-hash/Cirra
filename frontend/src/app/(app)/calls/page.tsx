@@ -209,8 +209,11 @@ export default function VoiceCallsPage() {
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-white hidden sm:inline">
-                      {isExpanded ? "Hide Transcript" : "View Transcript"}
+                    <span className="relative overflow-hidden px-3.5 py-1.5 rounded-full text-xs font-mono font-medium text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] hidden sm:inline-flex items-center">
+                      <span className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                      <span className="relative z-10">
+                        {isExpanded ? "Hide Transcript" : "View Transcript"}
+                      </span>
                     </span>
                     <div className="text-zinc-500 p-1">
                       {isExpanded ? (

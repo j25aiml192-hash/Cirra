@@ -249,8 +249,8 @@ export default function CloudSpendPage() {
       <main className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto select-none">
         {/* Filter Bar */}
         <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-          {/* Provider pills */}
-          <div className="inline-flex items-center p-1 rounded-full bg-zinc-900/90 border border-zinc-800 overflow-x-auto">
+          {/* Provider pills in Liquid Glass */}
+          <div className="inline-flex items-center p-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 overflow-x-auto shadow-inner">
             {["all", "AWS", "GCP"].map((p) => {
               const active = providerFilter === p;
               return (
@@ -258,13 +258,16 @@ export default function CloudSpendPage() {
                   key={p}
                   type="button"
                   onClick={() => setProviderFilter(p)}
-                  className={`px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap cursor-pointer ${
+                  className={`relative px-4 sm:px-5 py-1.5 rounded-full text-xs transition-all whitespace-nowrap cursor-pointer overflow-hidden ${
                     active
-                      ? "bg-emerald-600 text-white font-bold shadow-[0_0_12px_rgba(5,150,105,0.4)]"
-                      : "text-zinc-400 hover:text-white font-medium"
+                      ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                      : "text-zinc-400 hover:text-white font-medium hover:bg-white/[0.06]"
                   }`}
                 >
-                  {p === "all" ? "All Providers" : p}
+                  {active && (
+                    <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                  )}
+                  <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">{p === "all" ? "All Providers" : p}</span>
                 </button>
               );
             })}
@@ -297,11 +300,12 @@ export default function CloudSpendPage() {
             <button
               type="button"
               onClick={handleExport}
-              className="h-9 px-4 rounded-full text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer shadow-[0_0_12px_rgba(5,150,105,0.3)]"
+              className="relative h-9 px-4 rounded-full text-xs font-bold text-white bg-white/[0.12] hover:bg-white/[0.20] border border-white/25 backdrop-blur-xl flex items-center gap-1.5 transition-all active:scale-[0.98] cursor-pointer overflow-hidden shadow-[inset_0_1px_1px_rgba(255,255,255,0.5),inset_0_-1px_1px_rgba(0,0,0,0.3)]"
               title="Export filtered line items to CSV"
             >
-              <Download className="w-3.5 h-3.5 text-white" />
-              <span>Export</span>
+              <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
+              <Download className="w-3.5 h-3.5 text-white relative z-10" />
+              <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">Export</span>
             </button>
           </div>
       </div>

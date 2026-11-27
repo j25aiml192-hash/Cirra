@@ -8,6 +8,7 @@ import {
   AlertTriangle,
   X,
   ExternalLink,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -231,6 +232,20 @@ export function Topbar({ title, subtitle }: TopbarProps) {
             </div>
           )}
         </div>
+
+        {/* Settings Button */}
+        <Link
+          href="/settings"
+          title="Settings"
+          className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all relative border",
+            pathname.startsWith("/settings")
+              ? "bg-white text-black border-white shadow-[0_0_12px_rgba(255,255,255,0.3)]"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.08] border-transparent hover:border-white/[0.1]"
+          )}
+        >
+          <Settings className="w-4 h-4" />
+        </Link>
 
         {/* User Profile Avatar (Hiten Kumar) */}
         <Link

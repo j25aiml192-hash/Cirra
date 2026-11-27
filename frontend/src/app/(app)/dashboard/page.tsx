@@ -282,10 +282,11 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2.5">
             <Link
               href="/settings/connections"
-              className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 text-xs font-mono font-medium transition-all flex items-center gap-1.5 hover:border-emerald-500/40"
+              className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98]"
             >
-              <Plus className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Connect Provider</span>
+              <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+              <Plus className="w-3.5 h-3.5 text-emerald-400 relative z-10" />
+              <span className="relative z-10">Connect Provider</span>
             </Link>
             <Link
               href="/ask"
@@ -328,23 +329,31 @@ export default function DashboardPage() {
 
             {/* Right Controls: Filters */}
             <div className="flex items-center gap-2.5 self-end sm:self-auto">
-              {/* Sliders / Filter icon button */}
-              <div className="flex items-center gap-1 bg-[#09090b] p-1 rounded-lg border border-zinc-800 text-xs font-mono">
-                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 mx-1" />
-                {providers.map((p) => (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setSelectedProvider(p)}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-mono transition-all cursor-pointer ${
-                      selectedProvider === p
-                        ? "bg-zinc-800 text-white font-bold"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+              {/* Sliders / Filter in Liquid Glass */}
+              <div className="flex items-center gap-1 bg-black/40 backdrop-blur-xl p-1 rounded-full border border-white/10 text-xs font-mono shadow-inner">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 mx-1.5" />
+                {providers.map((p) => {
+                  const isActive = selectedProvider === p;
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => setSelectedProvider(p)}
+                      className={cn(
+                        "relative px-3 py-1 rounded-full text-[11px] font-mono transition-all duration-200 cursor-pointer overflow-hidden",
+                        "focus:outline-none focus:ring-0",
+                        isActive
+                          ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                          : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+                      )}
+                    >
+                      {isActive && (
+                        <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                      )}
+                      <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">{p}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -557,39 +566,47 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
-                    {/* View Switcher: Candlestick (Image 1) vs Bars (Image 2) */}
-                    <div className="inline-flex items-center p-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-xs">
+                    {/* View Switcher: Candlestick vs Bars in Liquid Glass */}
+                    <div className="inline-flex items-center p-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-xs shadow-inner">
                       <button
                         type="button"
                         onClick={() => setChartView("candles")}
                         className={cn(
-                          "px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5",
+                          "relative px-3.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 overflow-hidden",
+                          "focus:outline-none focus:ring-0",
                           chartView === "candles"
-                            ? "bg-zinc-100 hover:bg-white text-black font-bold shadow-sm"
-                            : "text-zinc-400 hover:text-white"
+                            ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
                         )}
                         title="Candlestick OHLC Volatility Chart"
                       >
-                        <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                        {chartView === "candles" && (
+                          <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                        )}
+                        <svg className="w-3.5 h-3.5 relative z-10" viewBox="0 0 16 16" fill="currentColor">
                           <path d="M4 1v2H2.5v7H4v5h1v-5h1.5V3H5V1H4zm7 3v3H9.5v6H11v3h1v-3h1.5V7H12V4h-1z" />
                         </svg>
-                        <span>Candles</span>
+                        <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">Candles</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setChartView("bars")}
                         className={cn(
-                          "px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5",
+                          "relative px-3.5 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer flex items-center gap-1.5 overflow-hidden",
+                          "focus:outline-none focus:ring-0",
                           chartView === "bars"
-                            ? "bg-zinc-100 hover:bg-white text-black font-bold shadow-sm"
-                            : "text-zinc-400 hover:text-white"
+                            ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                            : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
                         )}
                         title="Stacked Multi-Cloud Bar Matrix"
                       >
-                        <svg className="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+                        {chartView === "bars" && (
+                          <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                        )}
+                        <svg className="w-3.5 h-3.5 relative z-10" viewBox="0 0 16 16" fill="currentColor">
                           <path d="M2 11h2v4H2v-4zm5-6h2v10H7V5zm5-4h2v14h-2V1z" />
                         </svg>
-                        <span>Bars</span>
+                        <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">Bars</span>
                       </button>
                     </div>
 
