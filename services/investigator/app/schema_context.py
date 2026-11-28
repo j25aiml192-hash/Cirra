@@ -47,11 +47,14 @@ You have access to exactly two tables in ClickHouse:
 
 ClickHouse Query Guidelines:
 - Dialect is ClickHouse SQL.
+- Always use `lower(provider) = 'openai'`, `lower(provider) = 'anthropic'`, `lower(provider) = 'aws'`, `lower(provider) = 'gcp'`, etc. for provider filtering because ClickHouse is case-sensitive and values are stored in lowercase.
 - Use `sum(billed_cost)` for cloud infrastructure spend.
 - Use `sum(cost_usd)` for AI / LLM spend.
 - For "this month", use date filter: `charge_period_start >= toStartOfMonth(now())` (for cost_facts) or `ts >= toStartOfMonth(now())` (for ai_usage_facts).
 - For "last 30 days", use: `charge_period_start >= now() - INTERVAL 30 DAY` or `ts >= now() - INTERVAL 30 DAY`.
+- For "last week" or recent trends, use: `ts >= now() - INTERVAL 14 DAY` or `charge_period_start >= now() - INTERVAL 14 DAY`.
 - For date grouping, use: `toDate(charge_period_start) AS day` or `toDate(ts) AS day`.
+- For questions about why a spike or increase occurred, group by day, model, or api_key_id and order by total cost DESC.
 - Always include `tenant_id = '{tenant_id}'` in the WHERE clause.
 - Do NOT join postgres tables or any tables outside `cost_facts` and `ai_usage_facts`.
 - Only SELECT statements are permitted.
