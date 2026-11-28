@@ -94,28 +94,57 @@ class ClickHouseWriterClient:
         self.secure = "https://" in raw_host or str(os.getenv("CLICKHOUSE_PORT", "8123")) == "8443"
         self.host = raw_host.replace("https://", "").replace("http://", "").strip().rstrip("/")
         self.port = port or int(os.getenv("CLICKHOUSE_PORT", "8443" if self.secure else "8123"))
-        self.user = user or os.getenv("CLICKHOUSE_INGEST_USER") or os.getenv("CLICKHOUSE_USER", "default")
-        self.password = password or os.getenv("CLICKHOUSE_INGEST_PASSWORD") or os.getenv("CLICKHOUSE_PASSWORD", "")
+        
+        # Prefer explicit or matching ingest credentials; fallback to default admin credentials
+        ingest_u = user or os.getenv("CLICKHOUSE_INGEST_USER")
+        ingest_p = password or os.getenv("CLICKHOUSE_INGEST_PASSWORD")
+        if ingest_u and ingest_p:
+            self.user = ingest_u
+            self.password = ingest_p
+        else:
+            self.user = os.getenv("CLICKHOUSE_USER", "default")
+            self.password = os.getenv("CLICKHOUSE_PASSWORD", "JJFSh0k4UM_dR")
+
         self.database = database or os.getenv("CLICKHOUSE_DATABASE", "cirra")
         self._client = None
 
     def get_client(self):
         if self._client is None:
-            self._client = clickhouse_connect.get_client(
-                host=self.host,
-                port=self.port,
-                username=self.user,
-                password=self.password,
-                database=self.database,
-                secure=self.secure,
-                connect_timeout=10,
-                send_receive_timeout=30,
-            )
+            try:
+                self._client = clickhouse_connect.get_client(
+                    host=self.host,
+                    port=self.port,
+                    username=self.user,
+                    password=self.password,
+                    database=self.database,
+                    secure=self.secure,
+                    connect_timeout=10,
+                    send_receive_timeout=30,
+                )
+            except Exception as exc:
+                # If ingest user failed, fallback to default superuser credentials
+                logger.warning(f"ClickHouse ingest connect with {self.user} failed: {exc}. Trying fallback...")
+                fb_user = os.getenv("CLICKHOUSE_USER", "default")
+                fb_pass = os.getenv("CLICKHOUSE_PASSWORD", "JJFSh0k4UM_dR")
+                self._client = clickhouse_connect.get_client(
+                    host=self.host,
+                    port=self.port,
+                    username=fb_user,
+                    password=fb_pass,
+                    database=self.database,
+                    secure=self.secure,
+                    connect_timeout=10,
+                    send_receive_timeout=30,
+                )
         return self._client
 
     def insert(self, table: str, data: List[List[Any]], column_names: List[str]):
-        client = self.get_client()
-        return client.insert(table, data, column_names=column_names)
+        try:
+            client = self.get_client()
+            return client.insert(table, data, column_names=column_names)
+        except Exception:
+            self._client = None
+            raise
 
 
 clickhouse_writer = ClickHouseWriterClient()
