@@ -26,7 +26,7 @@ async def _trigger_sentinel_run_now() -> bool:
     """Trigger Sentinel on-demand detection cycle."""
     sentinel_url = getattr(settings, "SENTINEL_URL", "http://localhost:8002").rstrip("/")
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
+        async with httpx.AsyncClient(timeout=25.0) as client:
             resp = await client.post(f"{sentinel_url}/detect/run-now")
             if resp.status_code in (200, 201, 202):
                 logger.info("Triggered Sentinel /detect/run-now successfully.")
