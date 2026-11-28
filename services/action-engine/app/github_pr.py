@@ -47,7 +47,11 @@ class GitHubPREngine:
         if force_refresh or not self.g or fresh_token != self.token:
             self.token = fresh_token
             if self.token:
-                self.g = Github(self.token)
+                try:
+                    from github import Auth
+                    self.g = Github(auth=Auth.Token(self.token))
+                except Exception:
+                    self.g = Github(self.token)
             else:
                 self.g = None
 
