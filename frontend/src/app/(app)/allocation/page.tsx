@@ -23,14 +23,23 @@ import {
   MoreHorizontal,
   FileText,
   Lightbulb,
+  Layers,
+  Scale,
+  Cpu,
 } from "lucide-react";
+import {
+  ChalkWalletIcon,
+  ChalkAnomalyIcon,
+  ChalkLayersIcon,
+  ChalkSparklesIcon,
+  ChalkStarIcon,
+} from "@/components/ui/chalk-icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Topbar } from "@/components/layout/Topbar";
-import { Badge } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ProviderLogo } from "@/components/ui/provider-logos";
 import { apiFetch } from "@/lib/api";
-import { formatNumber } from "@/lib/utils";
+import { formatNumber, cn } from "@/lib/utils";
 import type { AllocationRule, AllocationCoverage, SuggestedRule } from "@/types";
 import {
   useRecommendations,
@@ -137,6 +146,9 @@ export default function AllocationPage() {
   const [newAssignFeature, setNewAssignFeature] = useState("");
   const [menuOpenRuleId, setMenuOpenRuleId] = useState<string | null>(null);
 
+  // Active view tab for lower section: "rules" | "models" | "scaling" | "guardrails"
+  const [activeTab, setActiveTab] = useState<"rules" | "models" | "scaling" | "guardrails">("rules");
+
   // ── Smart Rules Modal State ────────────────────────────────────
   const [selectedTemplate, setSelectedTemplate] = useState<RuleTemplate | null>(null);
   const [modalRuleName, setModalRuleName] = useState("");
@@ -227,7 +239,7 @@ export default function AllocationPage() {
         assign_team: sug.suggestedTeam,
       });
       setSuggestions((prev) => prev.filter((s) => s.id !== sug.id));
-      showToast("Suggested rule approved");
+      showToast("Suggested rule approved & mapped to " + sug.suggestedTeam);
     } catch (err) {
       console.error("Failed to add suggestion:", err);
     }
@@ -332,7 +344,7 @@ export default function AllocationPage() {
   const smartRules = smartRulesQuery.data ?? [];
   const ruleTemplates = ruleTemplatesQuery.data ?? [];
 
-  // Real brand logo resolver for Allocation Rules (AWS, GCP, OpenAI, Supabase, Kubernetes, Azure)
+  // Real brand logo resolver for Allocation Rules (AWS, GCP, OpenAI, Supabase, Groq, Kubernetes, Azure)
   const getRuleLogo = (rule: AllocationRule) => {
     const match = (rule.match_value || "").toLowerCase();
     const team = (rule.assign_team || "").toLowerCase();
@@ -367,300 +379,484 @@ export default function AllocationPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-white selection:text-black">
       <Topbar />
 
-      <main className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto select-none">
+      <main className="p-4 sm:p-6 lg:p-8 space-y-7 max-w-7xl mx-auto select-none">
         {/* Toast Alert */}
         {toastMessage && (
-          <div className="fixed bottom-6 right-6 z-50 bg-[#09090b] text-white px-4 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-zinc-800 animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono">
-            <CheckCircle2 className="w-5 h-5 text-white" />
-            <span className="text-xs font-medium">{toastMessage}</span>
+          <div className="fixed bottom-6 right-6 z-50 bg-[#09090b]/95 text-white px-5 py-3 rounded-full shadow-2xl flex items-center gap-3 border border-zinc-700 backdrop-blur-xl animate-in fade-in slide-in-from-bottom-3 duration-300 font-mono text-xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <span>{toastMessage}</span>
           </div>
         )}
 
-        {/* ── 2-COLUMN SIDE-BY-SIDE LAYOUT ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-          {/* ════ LEFT COLUMN (lg:col-span-7): Coverage, Rules Hierarchy & Smart Lock ════ */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8">
-            {/* ── SECTION 0: Attribution Coverage Timeline — connected to page content ── */}
-            <div className="bg-[#0b0c10]/95 backdrop-blur-xl border border-zinc-800/80 hover:border-zinc-700/90 transition-all duration-300 rounded-2xl p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.1)] space-y-5">
+        {/* ── UNIFIED EXECUTIVE HEADER (FULL WIDTH) ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-zinc-800/80">
+          <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-sans">
+              Spend Attribution &amp; Cost Mapping
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 font-sans max-w-2xl leading-relaxed">
+              Map unallocated cloud &amp; AI infrastructure spend directly to engineering teams and workloads using automated pattern rules and ML discovery.
+            </p>
+          </div>
 
-              {/* Header: meaningful name + live metrics */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-zinc-800/80">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2.5">
-                    <span className="font-bold text-white font-mono text-base tracking-tight">
-                      Attribution Coverage
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-950/70 border border-emerald-800/60 text-emerald-400 text-[11px] font-mono font-bold">
-                      <span>↗</span>
-                      <span>+5.2%</span>
-                    </span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-zinc-900 border border-zinc-700 text-zinc-400">
-                      SLA 99.4%
-                    </span>
-                  </div>
-                  <p className="text-xs text-zinc-400 font-sans">
-                    Monthly attributed vs unallocated spend — Jan through Jun 2025
-                  </p>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsAdding(true)}
+              className="group relative px-4 py-2 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
+            >
+              <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+              <Plus className="w-3.5 h-3.5 text-white relative z-10" />
+              <span className="relative z-10">Add Rule</span>
+            </button>
+          </div>
+        </div>
+
+        {/* ── 2-COLUMN MAIN LAYOUT: LEFT (2x2 CARDS + GRAPH) · RIGHT (SUGGESTIONS) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* ════ LEFT COLUMN (lg:col-span-7): 2x2 Metric Cards + Minimized Graph Below ════ */}
+          <div className="lg:col-span-7 space-y-4">
+            {/* 4 Cards in 2x2 Grid with Chalk Icons, Monochromatic Theme */}
+            <div className="grid grid-cols-2 gap-3.5 font-mono">
+              {/* Card 1: Attributed Spend */}
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">
+                    Attributed Spend
+                  </span>
+                  <ChalkWalletIcon size={14} className="text-zinc-400" />
                 </div>
-                <div className="font-mono text-right shrink-0">
-                  <div className="text-2xl font-black text-white tracking-tight">{coveragePct.toFixed(1)}%</div>
-                  <div className="text-[11px] text-zinc-500 font-normal">{unallocatedPct}% unallocated</div>
+                <div className="text-2xl font-black text-white tracking-tight">
+                  ${formatNumber(attributedSpend)}
+                </div>
+                <div className="text-[11px] text-zinc-400 font-sans">
+                  84.2% mapped to active teams
                 </div>
               </div>
 
-              {/* Stacked area coverage chart — attributed (blue) vs unallocated (zinc) */}
-              <div className="w-full">
-                <svg className="w-full h-40" viewBox="0 0 460 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+              {/* Card 2: Unallocated Gap */}
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">
+                    Unallocated Gap
+                  </span>
+                  <ChalkAnomalyIcon size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-2xl font-black text-white tracking-tight">
+                  ${formatNumber(unallocatedSpend)}
+                </div>
+                <div className="text-[11px] text-zinc-400 font-sans">
+                  {unallocatedPct}% requires tag or prefix rule
+                </div>
+              </div>
+
+              {/* Card 3: Active Rules */}
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">
+                    Active Rules
+                  </span>
+                  <ChalkLayersIcon size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-2xl font-black text-white tracking-tight">
+                  {rules.length}
+                </div>
+                <div className="text-[11px] text-zinc-400 font-sans">
+                  Sequential rule evaluation
+                </div>
+              </div>
+
+              {/* Card 4: ML Discovery */}
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 hover:border-zinc-700 transition-colors">
+                <div className="flex items-center justify-between text-zinc-400">
+                  <span className="text-[10px] uppercase font-bold tracking-wider">
+                    ML Discovery
+                  </span>
+                  <ChalkSparklesIcon size={14} className="text-zinc-400" />
+                </div>
+                <div className="text-2xl font-black text-white tracking-tight">
+                  {suggestions.length} Ready
+                </div>
+                <div className="text-[11px] text-zinc-400 font-sans">
+                  ${formatNumber(suggestions.reduce((acc, s) => acc + s.estimatedSpend, 0))}/mo mappable
+                </div>
+              </div>
+            </div>
+
+            {/* Minimized Redefined Graph Below the 2x2 Cards */}
+            <div className="bg-[#09090b]/95 border border-zinc-800/90 rounded-2xl p-5 shadow-2xl space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+                <div>
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                    Attribution Coverage
+                  </h3>
+                  <p className="text-[11px] text-zinc-400 font-sans">
+                    Monthly attributed vs unallocated spend
+                  </p>
+                </div>
+                <div className="font-mono text-xl font-black text-white tracking-tight">
+                  {coveragePct.toFixed(1)}%
+                </div>
+              </div>
+
+              {/* Minimal Clean SVG Stacked Bars */}
+              <div className="w-full pt-1">
+                <svg className="w-full h-32" viewBox="0 0 460 110" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <defs>
-                    <linearGradient id="attrGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563eb" stopOpacity="0.55" />
-                      <stop offset="100%" stopColor="#1e3a8a" stopOpacity="0.08" />
+                    <linearGradient id="minAttrGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
+                      <stop offset="100%" stopColor="#a1a1aa" stopOpacity="0.4" />
                     </linearGradient>
-                    <linearGradient id="unallocGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#52525b" stopOpacity="0.5" />
-                      <stop offset="100%" stopColor="#27272a" stopOpacity="0.05" />
-                    </linearGradient>
-                    <pattern id="hatch" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                      <line x1="0" y1="0" x2="0" y2="5" stroke="#3b82f6" strokeWidth="1.2" strokeOpacity="0.4" />
-                    </pattern>
                   </defs>
 
-                  {/* Y-axis grid lines */}
-                  {[25, 50, 75, 100].map((pct) => {
-                    const y = 118 - (pct / 100) * 110;
-                    return (
-                      <g key={pct}>
-                        <line x1="8" y1={y} x2="452" y2={y} stroke="#27272a" strokeWidth="0.75" strokeDasharray="3 4" />
-                        <text x="6" y={y + 3.5} fill="#52525b" fontSize="8" fontFamily="monospace" textAnchor="end">{pct}</text>
-                      </g>
-                    );
-                  })}
-
-                  {/* Attributed spend area — full height bars with fill + hatch overlay */}
+                  {/* Clean bars */}
                   {[
-                    { x: 14, attr: 78, total: 100 },
-                    { x: 45, attr: 83, total: 100 },
-                    { x: 76, attr: 80, total: 100 },
-                    { x: 107, attr: 82, total: 100 },
-                    { x: 138, attr: 79, total: 100 },
-                    { x: 169, attr: 84, total: 100 },
-                    { x: 200, attr: 86, total: 100 },
-                    { x: 231, attr: 85, total: 100 },
-                    { x: 262, attr: 83, total: 100 },
-                    { x: 293, attr: 84, total: 100 },
-                    { x: 324, attr: 87, total: 100 },
-                    { x: 355, attr: 85, total: 100 },
-                    { x: 386, attr: 84, total: 100 },
-                    { x: 417, attr: 84, total: 100 },
+                    { x: 16, attr: 78, total: 100 },
+                    { x: 50, attr: 83, total: 100 },
+                    { x: 84, attr: 80, total: 100 },
+                    { x: 118, attr: 82, total: 100 },
+                    { x: 152, attr: 79, total: 100 },
+                    { x: 186, attr: 84, total: 100 },
+                    { x: 220, attr: 86, total: 100 },
+                    { x: 254, attr: 85, total: 100 },
+                    { x: 288, attr: 83, total: 100 },
+                    { x: 322, attr: 84, total: 100 },
+                    { x: 356, attr: 87, total: 100 },
+                    { x: 390, attr: 85, total: 100 },
+                    { x: 424, attr: 84, total: 100 },
                   ].map((bar, i) => {
-                    const totalH = Math.round((bar.total / 100) * 110);
-                    const attrH = Math.round((bar.attr / 100) * 110);
+                    const totalH = Math.round((bar.total / 100) * 75);
+                    const attrH = Math.round((bar.attr / 100) * 75);
                     const unallocH = totalH - attrH;
                     return (
                       <g key={i} className="group cursor-pointer">
-                        {/* Unallocated segment — top (zinc) */}
-                        <rect x={bar.x} y={118 - totalH} width={18} height={unallocH} rx={2} fill="#3f3f46" fillOpacity={0.6} />
-                        {/* Attributed segment — bottom (blue gradient + hatch) */}
-                        <rect x={bar.x} y={118 - attrH} width={18} height={attrH} rx={2} fill="url(#attrGrad)" />
-                        <rect x={bar.x} y={118 - attrH} width={18} height={attrH} rx={2} fill="url(#hatch)" />
-                        {/* Hover glow border */}
-                        <rect
-                          x={bar.x} y={118 - totalH} width={18} height={totalH} rx={2}
-                          fill="transparent" stroke="#3b82f6" strokeWidth={0}
-                          className="group-hover:stroke-blue-400/60 group-hover:[stroke-width:1.5] transition-all"
-                        />
+                        {/* Unallocated - top */}
+                        <rect x={bar.x} y={80 - totalH} width={18} height={unallocH} rx={2} fill="#27272a" />
+                        {/* Attributed - bottom */}
+                        <rect x={bar.x} y={80 - attrH} width={18} height={attrH} rx={2} fill="url(#minAttrGrad)" />
                       </g>
                     );
                   })}
 
                   {/* Baseline */}
-                  <line x1="8" y1="118" x2="452" y2="118" stroke="#27272a" strokeWidth="1" />
+                  <line x1="8" y1="82" x2="452" y2="82" stroke="#27272a" strokeWidth="1" />
 
                   {/* Month labels */}
-                  <text x="23" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jan</text>
-                  <text x="85" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Feb</text>
-                  <text x="147" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Mar</text>
-                  <text x="209" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Apr</text>
-                  <text x="271" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">May</text>
-                  <text x="333" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jun</text>
-                  <text x="395" y="134" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jul</text>
+                  <text x="25" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jan</text>
+                  <text x="93" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Feb</text>
+                  <text x="161" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Mar</text>
+                  <text x="229" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Apr</text>
+                  <text x="297" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">May</text>
+                  <text x="365" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jun</text>
+                  <text x="433" y="98" fill="#71717a" fontSize="9" fontFamily="monospace" textAnchor="middle">Jul</text>
                 </svg>
               </div>
 
-              {/* Bottom legend + SLA */}
-              <div className="flex items-center justify-between text-xs font-mono text-zinc-500 pt-1 border-t border-zinc-900">
-                <div className="flex items-center gap-5">
-                  <span className="flex items-center gap-1.5 text-zinc-200 font-medium">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-blue-600 inline-block shadow-[0_0_6px_rgba(59,130,246,0.7)]" />
-                    ${formatNumber(attributedSpend)} attributed
-                  </span>
-                  <span className="flex items-center gap-1.5 text-zinc-400">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-zinc-600 inline-block" />
-                    ${formatNumber(unallocatedSpend)} unallocated
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-emerald-400 font-semibold">↑ Trending +5.2% coverage this quarter</span>
+              {/* Minimal Clean Legend */}
+              <div className="flex items-center gap-6 text-[11px] font-mono text-zinc-400 pt-2 border-t border-zinc-900">
+                <span className="flex items-center gap-2 text-zinc-200">
+                  <span className="w-2 h-2 rounded-xs bg-zinc-200 inline-block" />
+                  ${formatNumber(attributedSpend)} Attributed
+                </span>
+                <span className="flex items-center gap-2 text-zinc-500">
+                  <span className="w-2 h-2 rounded-xs bg-zinc-800 inline-block" />
+                  ${formatNumber(unallocatedSpend)} Unallocated
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ════ RIGHT COLUMN (lg:col-span-5): ML SUGGESTIONS IN BRIGHT THEME (NO TEXT BOX, BETTER ICONS) ════ */}
+          <div className="lg:col-span-5 bg-[#faf8f5] text-zinc-900 border border-[#e8e4dc] rounded-2xl p-5 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#e5e0d5]">
+              <div className="flex items-center gap-2.5">
+                <ChalkStarIcon size={18} className="text-zinc-800" />
+                <div>
+                  <h2 className="text-sm font-bold text-zinc-900 font-sans tracking-tight flex items-center gap-2">
+                    <span>Discovered Suggestions</span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-200/90 text-zinc-800 font-bold">
+                      {suggestions.length}
+                    </span>
+                  </h2>
+                  <p className="text-[11px] text-zinc-500 font-sans">
+                    ML heuristics discovered unmapped pattern rules
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* ── Rules Table Card (Allocation Rules Hierarchy - Floating) ──────── */}
-            <div className="bg-[#0b0c10]/95 backdrop-blur-xl border border-zinc-800/80 hover:border-zinc-700/90 transition-all duration-300 rounded-2xl p-6 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.1)]">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="font-semibold text-white text-base font-mono">Allocation Rules Hierarchy</h3>
-                  <p className="text-xs text-zinc-400 mt-0.5">
-                    Rules are evaluated sequentially from top to bottom
-                  </p>
-                </div>
+            {suggestions.length === 0 ? (
+              <div className="py-8 text-center space-y-2 font-mono">
+                <div className="text-xs font-bold text-zinc-800">All Suggestions Evaluated</div>
+                <p className="text-[11px] text-zinc-500 max-w-xs mx-auto font-sans">
+                  Cirra is monitoring spend streams for new allocation patterns.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {suggestions.map((sug) => (
+                  <div
+                    key={sug.id}
+                    className="bg-white rounded-xl p-4 border border-[#e8e3d8] shadow-xs hover:shadow-sm transition-all space-y-2.5"
+                  >
+                    {/* NO TEXT BOX — clean direct typography */}
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs font-mono font-bold text-zinc-900 tracking-tight">
+                        {sug.pattern}
+                      </span>
+                      <span className="text-xs font-mono font-bold text-zinc-900 shrink-0">
+                        +${formatNumber(sug.estimatedSpend)}/mo
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] font-mono space-y-0.5 text-zinc-600">
+                      <div className="flex items-center justify-between">
+                        <span>Suggested Team:</span>
+                        <span className="font-semibold text-zinc-900">{sug.suggestedTeam}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span>Confidence:</span>
+                        <span className="font-semibold text-zinc-800">
+                          {(sug.confidence * 100).toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Glass Morphism Action Buttons */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-[#f0ece3]">
+                      <button
+                        type="button"
+                        onClick={() => handleConfirmSuggestion(sug)}
+                        disabled={createRuleMutation.isPending}
+                        className="group relative flex-1 py-1.5 px-3 rounded-full overflow-hidden text-xs font-mono font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 text-white border border-white/30 bg-zinc-900/90 hover:bg-black backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_6px_rgba(0,0,0,0.15)] active:scale-[0.98] cursor-pointer"
+                      >
+                        <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
+                        <Check className="w-3.5 h-3.5 stroke-[2.5] relative z-10 text-white" />
+                        <span className="relative z-10">Confirm</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDismissSuggestion(sug.id)}
+                        className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-zinc-700 hover:text-black border border-zinc-300/80 bg-zinc-100/80 hover:bg-zinc-200/90 backdrop-blur-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)] active:scale-[0.98] cursor-pointer"
+                      >
+                        <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/60 to-transparent pointer-events-none" />
+                        <X className="w-3.5 h-3.5 relative z-10" />
+                        <span className="relative z-10">Dismiss</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── LOWER SECTION: UNIFIED DATA TABLE & INTELLIGENCE WITH CLEAN SEGMENTED PILL SWITCHER ── */}
+        <div className="space-y-4 pt-2">
+          {/* Segmented Switcher Pill (No Clutter, Full View) */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-zinc-800/80">
+            <div className="inline-flex items-center gap-1 bg-zinc-900/80 backdrop-blur-xl p-1 rounded-full border border-zinc-800 text-xs font-mono shadow-inner">
+              <button
+                type="button"
+                onClick={() => setActiveTab("rules")}
+                className={cn(
+                  "px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer font-medium",
+                  activeTab === "rules"
+                    ? "bg-white text-black font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Rules Hierarchy ({rules.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("models")}
+                className={cn(
+                  "px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer font-medium",
+                  activeTab === "models"
+                    ? "bg-white text-black font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Model Optimization ({modelSwaps.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("scaling")}
+                className={cn(
+                  "px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer font-medium",
+                  activeTab === "scaling"
+                    ? "bg-white text-black font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Scaling Alerts ({scalingRecs.length})
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("guardrails")}
+                className={cn(
+                  "px-4 py-1.5 rounded-full transition-all duration-200 cursor-pointer font-medium",
+                  activeTab === "guardrails"
+                    ? "bg-white text-black font-bold shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Guardrails ({smartRules.length})
+              </button>
+            </div>
+
+            <div className="text-xs font-mono text-zinc-400">
+              {activeTab === "rules" && "Evaluated sequentially top to bottom"}
+              {activeTab === "models" && "Potential monthly savings: $" + formatNumber(totalSavings) + "/mo"}
+              {activeTab === "scaling" && "Week-over-week acceleration monitoring"}
+              {activeTab === "guardrails" && "Automated budget limits & enforcement"}
+            </div>
+          </div>
+
+          {/* Inline Add Rule Form when open */}
+          {isAdding && (
+            <form
+              onSubmit={handleCreateRule}
+              className="p-5 rounded-2xl border border-zinc-800 bg-[#09090b] shadow-2xl space-y-4 font-mono animate-in fade-in zoom-in-98 duration-200"
+            >
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Create New Allocation Rule
+                </span>
                 <button
                   type="button"
-                  onClick={() => setIsAdding(!isAdding)}
-                  className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
+                  onClick={() => setIsAdding(false)}
+                  className="text-zinc-400 hover:text-white cursor-pointer"
                 >
-                  <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
-                  <Plus className="w-3.5 h-3.5 text-emerald-400 relative z-10" />
-                  <span className="relative z-10">Add Rule</span>
+                  <X className="w-4 h-4" />
                 </button>
               </div>
 
-              {/* Inline Add Rule Form */}
-              {isAdding && (
-                <form
-                  onSubmit={handleCreateRule}
-                  className="mb-4 p-4 rounded-xl border border-zinc-800 bg-zinc-950 space-y-3 font-mono"
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
+                    Match Type
+                  </label>
+                  <select
+                    value={newMatchType}
+                    onChange={(e) =>
+                      setNewMatchType(
+                        e.target.value as "tag" | "prefix" | "regex" | "service"
+                      )
+                    }
+                    className="w-full h-9 px-2 text-xs rounded-lg border border-zinc-800 bg-[#121318] text-white"
+                  >
+                    <option value="tag">tag</option>
+                    <option value="prefix">prefix</option>
+                    <option value="regex">regex</option>
+                    <option value="service">service</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
+                    Match Value
+                  </label>
+                  <input
+                    value={newMatchValue}
+                    onChange={(e) => setNewMatchValue(e.target.value)}
+                    placeholder="e.g. env=prod"
+                    required
+                    className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-800 bg-[#121318] text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
+                    Assign Team
+                  </label>
+                  <input
+                    value={newAssignTeam}
+                    onChange={(e) => setNewAssignTeam(e.target.value)}
+                    placeholder="e.g. Core Platform"
+                    required
+                    className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-800 bg-[#121318] text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
+                    Feature (Optional)
+                  </label>
+                  <input
+                    value={newAssignFeature}
+                    onChange={(e) => setNewAssignFeature(e.target.value)}
+                    placeholder="e.g. Storage &amp; Edge"
+                    className="w-full h-9 px-3 text-xs rounded-lg border border-zinc-800 bg-[#121318] text-white placeholder:text-zinc-600 focus:outline-none focus:border-zinc-600"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAdding(false)}
+                  className="px-4 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-800"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
-                        Match Type
-                      </label>
-                      <select
-                        value={newMatchType}
-                        onChange={(e) =>
-                          setNewMatchType(
-                            e.target.value as "tag" | "prefix" | "regex" | "service"
-                          )
-                        }
-                        className="w-full h-8 px-2 text-xs rounded-lg border border-zinc-800 bg-[#09090b] text-white"
-                      >
-                        <option value="tag">tag</option>
-                        <option value="prefix">prefix</option>
-                        <option value="regex">regex</option>
-                        <option value="service">service</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
-                        Match Value
-                      </label>
-                      <input
-                        value={newMatchValue}
-                        onChange={(e) => setNewMatchValue(e.target.value)}
-                        placeholder="e.g. env=prod"
-                        required
-                        className="w-full h-8 px-2.5 text-xs rounded-lg border border-zinc-800 bg-[#09090b] text-white placeholder:text-zinc-600"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
-                        Assign Team
-                      </label>
-                      <input
-                        value={newAssignTeam}
-                        onChange={(e) => setNewAssignTeam(e.target.value)}
-                        placeholder="e.g. Core Platform"
-                        required
-                        className="w-full h-8 px-2.5 text-xs rounded-lg border border-zinc-800 bg-[#09090b] text-white placeholder:text-zinc-600"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-semibold text-zinc-400 block mb-1">
-                        Feature (Optional)
-                      </label>
-                      <input
-                        value={newAssignFeature}
-                        onChange={(e) => setNewAssignFeature(e.target.value)}
-                        placeholder="e.g. Storage"
-                        className="w-full h-8 px-2.5 text-xs rounded-lg border border-zinc-800 bg-[#09090b] text-white placeholder:text-zinc-600"
-                      />
-                    </div>
-                  </div>
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createRuleMutation.isPending}
+                  className="group relative px-5 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
+                >
+                  <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                  <span className="relative z-10">{createRuleMutation.isPending ? "Saving..." : "Save Rule"}</span>
+                </button>
+              </div>
+            </form>
+          )}
 
-                  <div className="flex justify-end gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setIsAdding(false)}
-                      className="px-3 py-1.5 rounded-full text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-900"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={createRuleMutation.isPending}
-                      className="px-4 py-1.5 rounded-full bg-white text-black text-xs font-semibold hover:bg-zinc-200 transition-colors cursor-pointer"
-                    >
-                      {createRuleMutation.isPending ? "Saving..." : "Save Rule"}
-                    </button>
-                  </div>
-                </form>
-              )}
-
+          {/* ════ TAB 1: ALLOCATION RULES HIERARCHY ════ */}
+          {activeTab === "rules" && (
+            <div className="rounded-2xl border border-zinc-800/80 bg-[#09090b]/95 shadow-2xl overflow-hidden">
               {rulesQuery.isLoading ? (
-                <div className="space-y-3 py-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-center justify-between py-3 px-2">
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="w-4 h-4 bg-zinc-800" />
-                        <Skeleton className="w-6 h-4 bg-zinc-800" />
-                        <Skeleton className="w-12 h-5 rounded bg-zinc-800" />
-                        <Skeleton className="w-32 h-5 rounded bg-zinc-800" />
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="w-24 h-5 rounded-full bg-zinc-800" />
-                        <Skeleton className="w-16 h-4 bg-zinc-800" />
-                      </div>
-                    </div>
-                  ))}
+                <div className="p-6 space-y-3">
+                  <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
+                  <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
+                  <Skeleton className="h-12 w-full rounded-xl bg-zinc-900" />
                 </div>
               ) : rules.length === 0 ? (
-                <div className="py-8 text-center text-xs text-zinc-400 font-mono">
+                <div className="p-12 text-center text-xs text-zinc-400 font-mono">
                   No allocation rules defined yet. Click &quot;Add Rule&quot; to configure your first rule.
                 </div>
               ) : (
-                <div className="space-y-2.5 sm:space-y-3">
+                <div className="divide-y divide-zinc-800/60 font-mono text-xs">
                   {rules.map((rule) => (
                     <div
                       key={rule.id}
-                      className="bg-[#0c0d10] hover:bg-[#111317] border border-zinc-800/90 hover:border-zinc-700/80 rounded-xl p-3.5 sm:p-4 flex items-center justify-between gap-4 transition-all duration-200 group"
+                      className="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-zinc-900/60 transition-colors"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        {/* Real provider / platform logo matching reference */}
                         <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center p-1.5 shrink-0 shadow-xs">
                           {getRuleLogo(rule)}
                         </div>
 
                         <div className="min-w-0 space-y-0.5">
-                          {/* Top Line: Bold Title */}
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-sm font-semibold text-white font-mono truncate">
+                            <span className="text-sm font-bold text-white truncate">
                               {rule.match_value}
                             </span>
-                            <span className="text-[10px] uppercase font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                            <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
                               {rule.match_type}
                             </span>
-                            <span className="text-xs font-mono font-medium text-zinc-500">
+                            <span className="text-xs text-zinc-500 font-medium">
                               #{rule.priority}
                             </span>
                           </div>
 
-                          {/* Bottom Line: Subtitle metadata with dot separators matching reference */}
-                          <div className="text-xs text-zinc-400 font-mono flex items-center gap-2 flex-wrap">
-                            <span className="text-zinc-300">{rule.assign_team}</span>
+                          <div className="text-xs text-zinc-400 flex items-center gap-2 flex-wrap">
+                            <span className="text-zinc-300 font-semibold">{rule.assign_team}</span>
                             {rule.assign_feature && (
                               <>
                                 <span className="text-zinc-600">·</span>
@@ -671,13 +867,16 @@ export default function AllocationPage() {
                         </div>
                       </div>
 
-                      {/* Right side: Spend & More Options (...) */}
-                      <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-4 shrink-0">
                         {Boolean(rule.spendAttributed) && (
-                          <span className="text-xs font-mono font-semibold text-zinc-300 hidden sm:inline-block">
-                            ${formatNumber(rule.spendAttributed ?? 0)}
-                          </span>
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-white">
+                              ${formatNumber(rule.spendAttributed ?? 0)}
+                            </div>
+                            <div className="text-[10px] text-zinc-500">monthly mapped</div>
+                          </div>
                         )}
+
                         <div className="relative">
                           <button
                             type="button"
@@ -685,9 +884,9 @@ export default function AllocationPage() {
                               setMenuOpenRuleId(menuOpenRuleId === rule.id ? null : rule.id)
                             }
                             title="More options"
-                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
                           >
-                            <MoreHorizontal className="w-5 h-5" />
+                            <MoreHorizontal className="w-4 h-4" />
                           </button>
 
                           {menuOpenRuleId === rule.id && (
@@ -712,492 +911,78 @@ export default function AllocationPage() {
                 </div>
               )}
             </div>
+          )}
 
-            {/* ── SMART ALLOCATION GATE (Floating Lock) ─────────────────────────── */}
-            {!isSmartEnabled ? (
-              <div className="bg-[#0b0c10]/95 backdrop-blur-xl p-8 border border-dashed border-zinc-800/90 hover:border-zinc-700 transition-all duration-300 rounded-2xl text-center space-y-3 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.1)]">
-                <div className="w-12 h-12 rounded-2xl bg-zinc-900 text-zinc-400 mx-auto flex items-center justify-center">
-                  <Lock className="w-6 h-6" />
-                </div>
-                <div className="max-w-md mx-auto">
-                  <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-zinc-900 text-zinc-300 uppercase tracking-wider inline-block mb-2 font-mono border border-zinc-800">
-                    Smart Allocation — Enable in settings
-                  </span>
-                  <h3 className="text-base font-semibold text-white font-mono">
-                    Automated Allocation & Optimization Intelligence
-                  </h3>
-                  <p className="text-xs text-zinc-400 mt-1 font-sans">
-                    Unlock model swap recommendations, growth scaling alerts, and automated budget guardrails by setting{" "}
-                    <code className="text-white bg-zinc-900 px-1 py-0.5 rounded font-mono border border-zinc-800">ENABLE_SMART_ALLOCATION=true</code>.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <>
-                {/* ── SECTION 1: Model Swap Recommendations ───────────────── */}
-                <div className="bg-[#09090b] border border-zinc-800/80 rounded-2xl p-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-zinc-800/80">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Zap className="w-5 h-5 text-white" />
-                        <h3 className="font-semibold text-white text-base font-mono">
-                          Model Optimization Opportunities
-                        </h3>
-                      </div>
-                      <p className="text-xs text-zinc-400 mt-0.5">
-                        Switch to cheaper models without sacrificing quality
-                      </p>
-                    </div>
-
-                    {totalSavings > 0 && (
-                      <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 text-white px-3 py-1.5 rounded-full text-xs font-semibold font-mono">
-                        <TrendingUp className="w-4 h-4 text-white" />
-                        <span>Potential Savings: ${formatNumber(totalSavings)}/mo</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {recsQuery.isLoading ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="p-4 rounded-xl border border-slate-200 space-y-3">
-                          <Skeleton className="h-5 w-48" />
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-8 w-full" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : modelSwaps.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-[#64748B]">
-                      No model swap opportunities found. Your current model deployments are cost-optimal.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {modelSwaps.map((rec, idx) => {
-                        const qualityColor =
-                          rec.quality_tier_change === "same"
-                            ? "bg-slate-100 text-slate-700 border-slate-200"
-                            : rec.quality_tier_change === "downgrade"
-                              ? "bg-amber-50 text-amber-800 border-amber-200"
-                              : "bg-emerald-50 text-emerald-800 border-emerald-200";
-
-                        const qualityLabel =
-                          rec.quality_tier_change === "same"
-                            ? "Same tier"
-                            : rec.quality_tier_change === "downgrade"
-                              ? "Slight downgrade"
-                              : "Upgrade";
-
-                        return (
-                          <div
-                            key={idx}
-                            className="p-4 rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] hover:bg-[#F2F7FC] transition-colors flex flex-col justify-between space-y-3"
-                          >
-                            {/* Top: Current Model -> Recommended Model */}
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5 mb-1">
-                                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">
-                                    {rec.current_provider}
-                                  </span>
-                                  <span className="text-xs font-bold text-[#0A192F] truncate">
-                                    {rec.current_model}
-                                  </span>
-                                </div>
-                                <div className="text-[11px] font-medium text-slate-500">
-                                  Costing ${formatNumber(rec.current_monthly_cost)}/month
-                                </div>
-                              </div>
-
-                              <div className="flex items-center justify-center p-1.5 rounded-full bg-white shadow-sm border border-slate-200 flex-shrink-0">
-                                <ArrowRight className="w-4 h-4 text-[#0062E0]" />
-                              </div>
-
-                              <div className="min-w-0 text-right">
-                                <div className="flex items-center justify-end gap-1.5 mb-1">
-                                  <span className="text-xs font-bold text-[#0A192F] truncate">
-                                    {rec.recommended_model}
-                                  </span>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                                    {rec.recommended_provider}
-                                  </span>
-                                </div>
-                                <div className="text-[11px] font-semibold text-emerald-700">
-                                  Projected ${formatNumber(rec.projected_monthly_cost)}/month
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Trade-off description */}
-                            <div className="text-[11px] text-slate-500 italic border-l-2 border-slate-300 pl-2">
-                              {rec.trade_off}
-                            </div>
-
-                            {/* Bottom Row: Savings Badge + Quality pill + Apply Rule Button */}
-                            <div className="flex items-center justify-between pt-1 gap-2 flex-wrap">
-                              <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                  Save ${formatNumber(rec.monthly_savings)}/mo ({rec.savings_pct.toFixed(0)}%)
-                                </span>
-                                <span
-                                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${qualityColor}`}
-                                >
-                                  {qualityLabel}
-                                </span>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={() => handleApplyModelSwapRule(rec)}
-                                disabled={createRuleMutation.isPending}
-                                className="px-3 py-1 rounded-lg bg-[#0062E0] text-white text-xs font-medium hover:bg-[#0052C2] transition-colors shadow-sm"
-                              >
-                                Apply Rule
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── SECTION 2: Scaling Recommendations ──────────────────── */}
-                <div className="cirra-card p-6 space-y-4">
-                  <div className="pb-2 border-b border-[#EBF2FA]">
-                    <div className="flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-indigo-600" />
-                      <h3 className="font-semibold text-[#0A192F] text-base">
-                        Scaling & Growth Alerts
-                      </h3>
-                    </div>
-                    <p className="text-xs text-[#475569] mt-0.5">
-                      Workload services demonstrating high week-over-week spend acceleration
-                    </p>
-                  </div>
-
-                  {recsQuery.isLoading ? (
-                    <div className="space-y-3">
-                      {[1, 2].map((i) => (
-                        <Skeleton key={i} className="h-16 w-full rounded-xl" />
-                      ))}
-                    </div>
-                  ) : scalingRecs.length === 0 ? (
-                    <div className="py-6 text-center text-xs text-[#64748B]">
-                      No scaling anomalies detected. Growth rates across all infrastructure and AI services are steady.
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {scalingRecs.map((s, idx) => {
-                        const isSpike = s.avg_weekly_growth_pct > 20;
-                        const growthBadge = isSpike
-                          ? "bg-rose-100 text-rose-800 border-rose-200"
-                          : "bg-amber-100 text-amber-800 border-amber-200";
-
-                        const priorityBadge =
-                          s.priority === "high"
-                            ? "bg-rose-50 text-rose-700 border-rose-200"
-                            : s.priority === "medium"
-                              ? "bg-amber-50 text-amber-700 border-amber-200"
-                              : "bg-slate-50 text-slate-700 border-slate-200";
-
-                        return (
-                          <div
-                            key={idx}
-                            className="p-4 rounded-xl border border-[#D6E4F5] bg-white hover:bg-[#F8FAFD] transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
-                          >
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-bold text-[#0A192F]">
-                                  {s.provider.toUpperCase()} · {s.service}
-                                </span>
-                                <span
-                                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${growthBadge}`}
-                                >
-                                  Growing {s.avg_weekly_growth_pct.toFixed(1)}%/week
-                                </span>
-                                <span
-                                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${priorityBadge}`}
-                                >
-                                  {s.priority} Priority
-                                </span>
-                              </div>
-                              <p className="text-xs text-[#475569]">{s.recommendation}</p>
-                            </div>
-
-                            <div className="text-right flex-shrink-0">
-                              <div className="text-xs font-bold text-[#0A192F]">
-                                ${formatNumber(s.current_weekly_cost)}/week current
-                              </div>
-                              <div className="text-[11px] font-semibold text-emerald-600">
-                                ${formatNumber(s.estimated_monthly_impact)}/month potential reduction
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-
-                {/* ── SECTION 3: Smart Spend Rules ────────────────────────── */}
-                <div className="cirra-card p-6 space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#EBF2FA]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <ShieldCheck className="w-5 h-5 text-[#0062E0]" />
-                        <h3 className="font-semibold text-[#0A192F] text-base">Smart Spend Rules</h3>
-                      </div>
-                      <p className="text-xs text-[#475569] mt-0.5">
-                        Automated guardrails — set it and forget it
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleRunEvaluation}
-                      disabled={evaluateRulesMutation.isPending}
-                      className="px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold flex items-center gap-1.5 hover:bg-emerald-700 shadow-sm transition-colors"
-                    >
-                      <Play className="w-3.5 h-3.5 fill-current" />
-                      {evaluateRulesMutation.isPending ? "Evaluating..." : "Evaluate Now"}
-                    </button>
-                  </div>
-
-                  {/* Two Column Grid: Templates (Left) & Active Rules (Right) */}
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-                    {/* Column 1: Rule Templates */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
-                          Rule Templates
-                        </h4>
-                        <span className="text-[11px] text-slate-400">Ready to deploy</span>
-                      </div>
-
-                      <div className="space-y-3">
-                        {ruleTemplates.map((tpl) => (
-                          <div
-                            key={tpl.condition_type}
-                            className="p-3.5 rounded-xl border border-[#D6E4F5] bg-[#F8FAFD] flex items-center justify-between gap-3"
-                          >
-                            <div className="space-y-0.5">
-                              <div className="text-xs font-semibold text-[#0A192F]">{tpl.name}</div>
-                              <div className="text-[11px] text-slate-500">{tpl.description}</div>
-                              <div className="text-[10px] text-slate-400 font-mono">
-                                Default: {tpl.default_value !== null ? `${tpl.default_value} ${tpl.unit}` : "Manual Approval"} · Scope: {tpl.scope}
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => handleOpenAddSmartRuleModal(tpl)}
-                              className="px-2.5 py-1.5 rounded-lg bg-white border border-[#BCD9FC] text-[#0062E0] text-xs font-medium hover:bg-[#EBF3FE] transition-colors flex-shrink-0"
-                            >
-                              Add Rule
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Column 2: Active Rules */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h4 className="text-xs font-bold uppercase tracking-wider text-[#475569]">
-                          Active Rules ({smartRules.length})
-                        </h4>
-                        <span className="text-[11px] text-slate-400">Continuous enforcement</span>
-                      </div>
-
-                      {smartRulesQuery.isLoading ? (
-                        <div className="space-y-3">
-                          {[1, 2].map((i) => (
-                            <Skeleton key={i} className="h-20 w-full rounded-xl" />
-                          ))}
-                        </div>
-                      ) : smartRules.length === 0 ? (
-                        <div className="p-8 border border-dashed border-slate-200 rounded-xl text-center text-xs text-slate-400">
-                          No active smart guardrails. Click &quot;Add Rule&quot; on any template on the left to configure automated limits.
-                        </div>
-                      ) : (
-                        <div className="space-y-3">
-                          {smartRules.map((rule) => {
-                            const isTriggered = rule.last_evaluation_status === "triggered";
-
-                            return (
-                              <div
-                                key={rule.id}
-                                className={`p-3.5 rounded-xl border transition-colors space-y-2 ${isTriggered
-                                  ? "border-rose-300 bg-rose-50/50"
-                                  : rule.is_active
-                                    ? "border-[#D6E4F5] bg-white"
-                                    : "border-slate-200 bg-slate-50 opacity-60"
-                                  }`}
-                              >
-                                <div className="flex items-center justify-between gap-2">
-                                  <div>
-                                    <span className="text-xs font-semibold text-[#0A192F]">
-                                      {rule.name}
-                                    </span>
-                                    <span className="text-[11px] text-slate-500 block">
-                                      Threshold:{" "}
-                                      <span className="font-mono font-medium text-slate-700">
-                                        {rule.threshold_value !== null ? `${rule.threshold_value} ${rule.unit || ""}` : "Approval required"}
-                                      </span>{" "}
-                                      · Scope: {rule.scope}
-                                    </span>
-                                  </div>
-
-                                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                                    <button
-                                      type="button"
-                                      title={rule.is_active ? "Pause Rule" : "Activate Rule"}
-                                      onClick={() =>
-                                        toggleSmartRuleMutation.mutate({
-                                          id: rule.id,
-                                          is_active: !rule.is_active,
-                                        })
-                                      }
-                                      className="p-1 text-slate-500 hover:text-slate-800 transition-colors"
-                                    >
-                                      {rule.is_active ? (
-                                        <ToggleRight className="w-5 h-5 text-emerald-600" />
-                                      ) : (
-                                        <ToggleLeft className="w-5 h-5 text-slate-400" />
-                                      )}
-                                    </button>
-
-                                    <button
-                                      type="button"
-                                      title="Delete Guardrail"
-                                      onClick={() => deleteSmartRuleMutation.mutate(rule.id)}
-                                      className="p-1 text-slate-400 hover:text-rose-600 rounded transition-colors"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                </div>
-
-                                {/* Evaluation Status Badge */}
-                                <div className="flex items-start gap-1.5 pt-1 text-[11px]">
-                                  {isTriggered ? (
-                                    <div className="text-rose-700 flex items-start gap-1">
-                                      <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-rose-600" />
-                                      <span>
-                                        <strong className="font-semibold">Triggered:</strong>{" "}
-                                        {rule.last_evaluation_message || "Threshold exceeded."}
-                                      </span>
-                                    </div>
-                                  ) : (
-                                    <div className="text-emerald-700 flex items-start gap-1">
-                                      <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-emerald-600" />
-                                      <span>
-                                        <strong className="font-semibold">Not triggered:</strong>{" "}
-                                        {rule.last_evaluation_message || "Spend within normal bounds."}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* ════ RIGHT COLUMN (lg:col-span-5): ML Discovered Suggestions ════ */}
-          <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-20">
-            {/* Page Header (Right Side Only) */}
-            <div className="space-y-1.5 pb-3 border-b border-zinc-800/80">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-400">
-                Cost Allocation Engine
-              </span>
-              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-sans">
-                Unit Economics & Attribution.
-              </h2>
-              <p className="text-xs text-zinc-400 font-sans leading-relaxed">
-                Map unallocated cloud & AI infrastructure spend directly to engineering teams, features, and business units with continuous ML heuristics.
-              </p>
-            </div>
-
-            {/* Suggestions Section */}
+          {/* ════ TAB 2: MODEL OPTIMIZATION OPPORTUNITIES (SLEEK DARK THEME, NOT CLUSTERED) ════ */}
+          {activeTab === "models" && (
             <div className="space-y-4">
-              {/* Clean Heading of Suggestions */}
-              <div className="flex items-center justify-between pb-1">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-b from-[#f6f3eb] via-[#efebe3] to-[#e4e0d8] border border-[#ded8cb] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.15),inset_0_1px_0_0_rgba(255,255,255,0.9)]">
-                    <Lightbulb className="w-4 h-4 text-amber-500 fill-amber-400 drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]" />
-                  </div>
-                  <h3 className="text-base font-semibold text-white font-mono tracking-tight">
-                    Suggestions
-                  </h3>
+              {recsQuery.isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Skeleton key={i} className="h-32 w-full rounded-2xl bg-zinc-900" />
+                  ))}
                 </div>
-              </div>
-
-              {suggestions.length === 0 ? (
-                <div className="py-8 text-center space-y-2 font-mono">
-                  <div className="w-9 h-9 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
-                    <Check className="w-4 h-4 stroke-[3]" />
-                  </div>
-                  <div className="text-xs font-bold text-white">All Suggestions Evaluated</div>
-                  <p className="text-[11px] text-zinc-400 max-w-xs mx-auto font-sans">
-                    Cirra&apos;s continuous discovery engine is monitoring spend streams for new allocation patterns.
-                  </p>
+              ) : modelSwaps.length === 0 ? (
+                <div className="p-12 text-center text-xs text-zinc-400 font-mono bg-[#09090b] rounded-2xl border border-zinc-800">
+                  No model swap opportunities found. Your current model deployments are cost-optimal.
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {suggestions.map((sug) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono">
+                  {modelSwaps.map((rec, idx) => (
                     <div
-                      key={sug.id}
-                      className="bg-[#0f1014] rounded-2xl p-4 sm:p-5 border border-zinc-800/80 hover:border-zinc-700 shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.05)] space-y-3.5 transition-all"
+                      key={idx}
+                      className="p-5 rounded-2xl bg-[#09090b]/95 border border-zinc-800 hover:border-zinc-700 transition-colors space-y-3.5 shadow-xl"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <code className="text-xs font-mono font-bold text-zinc-100 bg-zinc-900 border border-zinc-700/80 px-2.5 py-1 rounded-lg truncate max-w-[220px] shadow-inner">
-                          {sug.pattern}
-                        </code>
-                        <span className="text-xs font-bold font-mono text-emerald-400 shrink-0">
-                          ${formatNumber(sug.estimatedSpend)}/mo
-                        </span>
+                      {/* Top Model Comparison */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-[10px] text-zinc-500 uppercase tracking-wider">
+                            Current Model
+                          </div>
+                          <div className="text-sm font-bold text-white truncate">
+                            {rec.current_model}
+                          </div>
+                          <div className="text-xs text-zinc-400">
+                            ${formatNumber(rec.current_monthly_cost)}/mo
+                          </div>
+                        </div>
+
+                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0 text-zinc-400">
+                          <ArrowRight className="w-4 h-4" />
+                        </div>
+
+                        <div className="min-w-0 text-right">
+                          <div className="text-[10px] text-emerald-400 uppercase tracking-wider">
+                            Recommended
+                          </div>
+                          <div className="text-sm font-bold text-emerald-400 truncate">
+                            {rec.recommended_model}
+                          </div>
+                          <div className="text-xs text-zinc-400">
+                            ${formatNumber(rec.projected_monthly_cost)}/mo
+                          </div>
+                        </div>
                       </div>
 
-                      <div className="text-[11px] font-mono space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-zinc-500">Suggested Team:</span>
-                          <span className="font-semibold text-zinc-200">{sug.suggestedTeam}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-zinc-500">Confidence:</span>
-                          <span className="font-semibold text-emerald-400">
-                            {(sug.confidence * 100).toFixed(0)}%
-                          </span>
-                        </div>
-                      </div>
+                      {/* Trade-off description */}
+                      <p className="text-xs text-zinc-400 font-sans border-l-2 border-zinc-700 pl-2.5 leading-relaxed">
+                        {rec.trade_off}
+                      </p>
 
-                      <div className="flex items-center gap-2 pt-2 border-t border-zinc-800/80">
+                      {/* Savings Pill + Glass Action Button */}
+                      <div className="flex items-center justify-between pt-2 border-t border-zinc-800/80 gap-3">
+                        <div className="text-xs font-bold text-emerald-400">
+                          Save ${formatNumber(rec.monthly_savings)}/mo ({rec.savings_pct.toFixed(0)}%)
+                        </div>
+
                         <button
                           type="button"
-                          onClick={() => handleConfirmSuggestion(sug)}
+                          onClick={() => handleApplyModelSwapRule(rec)}
                           disabled={createRuleMutation.isPending}
-                          className="group relative flex-1 py-1.5 rounded-full overflow-hidden text-xs font-mono font-bold transition-all duration-300 flex items-center justify-center gap-1.5 text-white border border-white/25 bg-white/[0.14] hover:bg-white/[0.22] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.5)] active:scale-[0.98] cursor-pointer whitespace-nowrap"
+                          className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
                         >
-                          <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/40 to-transparent pointer-events-none" />
-                          <Check className="w-3.5 h-3.5 stroke-[3] shrink-0 relative z-10 text-white" />
-                          <span className="relative z-10">Confirm</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDismissSuggestion(sug.id)}
-                          className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center justify-center gap-1.5 text-zinc-300 hover:text-white border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-[0.98] cursor-pointer whitespace-nowrap shrink-0"
-                        >
-                          <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/25 to-transparent pointer-events-none" />
-                          <X className="w-3.5 h-3.5 shrink-0 relative z-10" />
-                          <span className="relative z-10">Dismiss</span>
+                          <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                          <span className="relative z-10">Apply Rule</span>
                         </button>
                       </div>
                     </div>
@@ -1205,43 +990,216 @@ export default function AllocationPage() {
                 </div>
               )}
             </div>
-          </div>
+          )}
 
-        </div>{/* ── end 2-COLUMN GRID ── */}
+          {/* ════ TAB 3: SCALING & ACCELERATION ALERTS ════ */}
+          {activeTab === "scaling" && (
+            <div className="space-y-3 font-mono">
+              {scalingRecs.length === 0 ? (
+                <div className="p-12 text-center text-xs text-zinc-400 bg-[#09090b] rounded-2xl border border-zinc-800">
+                  No scaling anomalies detected. Growth rates across all services are steady.
+                </div>
+              ) : (
+                scalingRecs.map((s, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 sm:p-5 rounded-2xl bg-[#09090b]/95 border border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold text-white uppercase">
+                          {s.provider} · {s.service}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-rose-500/30 bg-rose-950/40 text-rose-300">
+                          Growing {s.avg_weekly_growth_pct.toFixed(1)}%/week
+                        </span>
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-400">
+                          {s.priority} Priority
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-400 font-sans">{s.recommendation}</p>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <div className="text-xs font-bold text-white">
+                        ${formatNumber(s.current_weekly_cost)}/wk current
+                      </div>
+                      <div className="text-[11px] text-emerald-400 font-semibold">
+                        -${formatNumber(s.estimated_monthly_impact)}/mo potential reduction
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* ════ TAB 4: AUTOMATED SMART GUARDRAILS ════ */}
+          {activeTab === "guardrails" && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <p className="text-xs text-zinc-400 font-sans">
+                  Automated guardrails enforce real-time hard caps and notify on token runaway conditions.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleRunEvaluation}
+                  disabled={evaluateRulesMutation.isPending}
+                  className="group relative px-4 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer shrink-0"
+                >
+                  <div className="absolute top-0 inset-x-1.5 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                  <Play className="w-3.5 h-3.5 relative z-10 text-emerald-400 fill-current" />
+                  <span className="relative z-10">{evaluateRulesMutation.isPending ? "Evaluating..." : "Evaluate Guardrails"}</span>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 font-mono">
+                {/* Templates */}
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    Rule Templates
+                  </div>
+                  {ruleTemplates.map((tpl) => (
+                    <div
+                      key={tpl.condition_type}
+                      className="p-4 rounded-xl bg-[#09090b] border border-zinc-800 flex items-center justify-between gap-3"
+                    >
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="text-xs font-bold text-white">{tpl.name}</div>
+                        <div className="text-[11px] text-zinc-400 font-sans">{tpl.description}</div>
+                        <div className="text-[10px] text-zinc-500">
+                          Scope: {tpl.scope} · Default: {tpl.default_value !== null ? `${tpl.default_value} ${tpl.unit}` : "Manual"}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAddSmartRuleModal(tpl)}
+                        className="group relative px-3 py-1 rounded-full overflow-hidden text-[11px] font-mono font-medium text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shrink-0 cursor-pointer"
+                      >
+                        <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                        <span className="relative z-10">Add</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Active Guardrails */}
+                <div className="space-y-3">
+                  <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
+                    Active Guardrails ({smartRules.length})
+                  </div>
+                  {smartRules.length === 0 ? (
+                    <div className="p-8 border border-dashed border-zinc-800 rounded-xl text-center text-xs text-zinc-500">
+                      No active guardrails. Click &quot;Add&quot; on any template to configure automated limits.
+                    </div>
+                  ) : (
+                    smartRules.map((rule) => {
+                      const isTriggered = rule.last_evaluation_status === "triggered";
+                      return (
+                        <div
+                          key={rule.id}
+                          className={cn(
+                            "p-4 rounded-xl border space-y-2",
+                            isTriggered
+                              ? "bg-rose-950/20 border-rose-800/60"
+                              : "bg-[#09090b] border-zinc-800"
+                          )}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <div className="text-xs font-bold text-white">{rule.name}</div>
+                              <div className="text-[11px] text-zinc-400">
+                                Threshold: {rule.threshold_value !== null ? `${rule.threshold_value} ${rule.unit || ""}` : "Approval"} · Scope: {rule.scope}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                title={rule.is_active ? "Pause Rule" : "Activate Rule"}
+                                onClick={() =>
+                                  toggleSmartRuleMutation.mutate({
+                                    id: rule.id,
+                                    is_active: !rule.is_active,
+                                  })
+                                }
+                                className="text-zinc-400 hover:text-white cursor-pointer"
+                              >
+                                {rule.is_active ? (
+                                  <ToggleRight className="w-5 h-5 text-emerald-400" />
+                                ) : (
+                                  <ToggleLeft className="w-5 h-5 text-zinc-600" />
+                                )}
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => deleteSmartRuleMutation.mutate(rule.id)}
+                                className="text-zinc-500 hover:text-rose-400 cursor-pointer"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="text-[11px]">
+                            {isTriggered ? (
+                              <div className="text-rose-400 flex items-center gap-1.5">
+                                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                                <span>Triggered: {rule.last_evaluation_message || "Threshold exceeded."}</span>
+                              </div>
+                            ) : (
+                              <div className="text-emerald-400 flex items-center gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span>Active &amp; enforcing</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* ── MODAL: Customize & Create Smart Rule ────────────────────── */}
         {selectedTemplate && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200">
+            <div className="bg-[#09090b] text-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-zinc-800 space-y-4 font-mono">
+              <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
                 <div className="flex items-center gap-2">
-                  <Sliders className="w-4 h-4 text-[#0062E0]" />
-                  <h3 className="font-semibold text-sm text-[#0A192F]">Configure Guardrail</h3>
+                  <Sliders className="w-4 h-4 text-emerald-400" />
+                  <h3 className="font-bold text-sm text-white">Configure Guardrail</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedTemplate(null)}
-                  className="p-1 text-slate-400 hover:text-slate-600 rounded"
+                  className="p-1 text-zinc-400 hover:text-white rounded cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <form onSubmit={handleSaveSmartRuleModal} className="space-y-4">
+              <form onSubmit={handleSaveSmartRuleModal} className="space-y-4 text-xs">
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  <label className="text-zinc-400 block mb-1">
                     Guardrail Name
                   </label>
                   <input
                     value={modalRuleName}
                     onChange={(e) => setModalRuleName(e.target.value)}
                     required
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 bg-white text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#0062E0]"
+                    className="w-full h-9 px-3 text-xs rounded-xl border border-zinc-800 bg-[#121318] text-white focus:outline-none focus:border-zinc-600"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">
+                  <label className="text-zinc-400 block mb-1">
                     Threshold Value ({selectedTemplate.unit || "unit"})
                   </label>
                   <input
@@ -1250,25 +1208,26 @@ export default function AllocationPage() {
                     value={modalThreshold}
                     onChange={(e) => setModalThreshold(e.target.value)}
                     placeholder={selectedTemplate.default_value?.toString() ?? "Optional"}
-                    className="w-full h-9 px-3 text-xs rounded-xl border border-slate-200 bg-white text-[#0A192F] focus:outline-none focus:ring-2 focus:ring-[#0062E0]"
+                    className="w-full h-9 px-3 text-xs rounded-xl border border-zinc-800 bg-[#121318] text-white focus:outline-none focus:border-zinc-600"
                   />
-                  <p className="text-[11px] text-slate-500 mt-1">{selectedTemplate.description}</p>
+                  <p className="text-[11px] text-zinc-500 mt-1 font-sans">{selectedTemplate.description}</p>
                 </div>
 
                 <div className="flex justify-end gap-2 pt-2">
                   <button
                     type="button"
                     onClick={() => setSelectedTemplate(null)}
-                    className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100"
+                    className="px-4 py-1.5 rounded-full text-xs text-zinc-400 hover:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={createSmartRuleMutation.isPending}
-                    className="px-4 py-1.5 rounded-lg bg-[#0062E0] text-white text-xs font-semibold hover:bg-[#0052C2] shadow-sm transition-colors"
+                    className="group relative px-5 py-1.5 rounded-full overflow-hidden text-xs font-mono font-medium transition-all duration-300 flex items-center gap-1.5 text-white border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] backdrop-blur-xl shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] active:scale-[0.98] cursor-pointer"
                   >
-                    {createSmartRuleMutation.isPending ? "Activating..." : "Activate Guardrail"}
+                    <div className="absolute top-0 inset-x-2 h-[50%] rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none" />
+                    <span className="relative z-10">{createSmartRuleMutation.isPending ? "Activating..." : "Activate Guardrail"}</span>
                   </button>
                 </div>
               </form>
