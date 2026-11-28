@@ -246,26 +246,26 @@ export default function CloudSpendPage() {
           subtitle="1,648 telemetry events ingested · ±4.2% daily velocity stability · 34 day streak"
         />
 
-        {/* 2. THEN: Multi-Cloud Spend Trajectory Chart (Soft Stone / Obsidian Style) */}
-        <div className="bg-[#09090b] border border-zinc-800/80 hover:border-zinc-700 transition-colors rounded-2xl p-6 flex flex-col justify-between">
+        {/* 2. THEN: Multi-Cloud Spend Trajectory Chart */}
+        <div className="bg-[#09090b] border border-zinc-800/80 rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3 pb-3 border-b border-zinc-800/80">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2 pb-2.5 border-b border-zinc-800/80">
               <div>
-                <h3 className="font-semibold text-white text-base tracking-tight font-mono">
-                  Total Multi-Cloud Spend
+                <h3 className="font-semibold text-white text-base tracking-tight font-display">
+                  Multi-Cloud Spend
                 </h3>
-                <p className="text-[13px] text-zinc-400 mt-0.5 font-sans">
-                  Aggregated hourly billing telemetry smoothed daily
+                <p className="text-xs text-zinc-400 font-sans">
+                  Daily aggregated billing telemetry across clouds
                 </p>
               </div>
 
-              {/* MTD Spend pill in Soft White / Stone */}
-              <div className="bg-zinc-900/90 border border-zinc-800 px-3.5 py-1.5 rounded-xl text-left sm:text-right w-fit">
-                <div className="text-base sm:text-lg font-bold text-white leading-tight font-mono">
+              {/* MTD Spend */}
+              <div className="text-left sm:text-right">
+                <div className="text-lg font-bold text-white font-mono leading-none">
                   ${data ? formatNumber(data.totalCost) : 0}
                 </div>
-                <div className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider font-mono">
-                  Total Spend (MTD)
+                <div className="text-[10px] text-zinc-500 uppercase tracking-wider font-mono mt-0.5">
+                  MTD Total
                 </div>
               </div>
             </div>

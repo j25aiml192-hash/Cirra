@@ -189,14 +189,26 @@ export function MultiCloudSpendChart({
               dataKey="date"
               axisLine={{ stroke: "#27272a" }}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#a1a1aa", fontWeight: 500 }}
+              interval="preserveStartEnd"
+              minTickGap={28}
+              tickFormatter={(val: string) => {
+                if (!val) return "";
+                const parts = val.split("-");
+                if (parts.length === 3 && parts[1]) {
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                  const m = parseInt(parts[1], 10) - 1;
+                  return `${months[m] || parts[1]} ${parts[2] || ""}`;
+                }
+                return val;
+              }}
               dy={6}
             />
 
             <YAxisAny
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#71717a", fontWeight: 500 }}
               tickFormatter={(val: number) =>
                 `$${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}`
               }
@@ -248,24 +260,23 @@ export function MultiCloudSpendChart({
         </ResponsiveContainerAny>
       </div>
 
-      {/* Floating provider indicators & Legend matching reference aesthetic */}
+      {/* Provider share indicators */}
       <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-zinc-800/80 text-xs">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.6)]" />
-            <span className="text-xs font-medium text-zinc-300">AWS Infrastructure</span>
-            <span className="text-xs text-amber-400 font-medium font-mono">63.8%</span>
+            <span className="w-2 h-2 rounded-full bg-amber-500" />
+            <span className="text-xs text-zinc-300 font-sans">AWS</span>
+            <span className="text-xs text-zinc-400 font-mono">63.8%</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_6px_rgba(5,150,105,0.6)]" />
-            <span className="text-xs font-medium text-zinc-300">GCP Infrastructure</span>
-            <span className="text-xs text-emerald-400 font-medium font-mono">36.2%</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-600" />
+            <span className="text-xs text-zinc-300 font-sans">GCP</span>
+            <span className="text-xs text-zinc-400 font-mono">36.2%</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 font-mono">
-          <span>Interpolation:</span>
-          <span className="text-white font-medium">Monotone Spline</span>
+        <div className="text-[11px] text-zinc-500 font-mono">
+          Daily smoothed
         </div>
       </div>
     </div>
@@ -314,14 +325,26 @@ export function SpendVelocityChart({
               dataKey="date"
               axisLine={{ stroke: "#27272a" }}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#a1a1aa", fontWeight: 500 }}
+              interval="preserveStartEnd"
+              minTickGap={28}
+              tickFormatter={(val: string) => {
+                if (!val) return "";
+                const parts = val.split("-");
+                if (parts.length === 3 && parts[1]) {
+                  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                  const m = parseInt(parts[1], 10) - 1;
+                  return `${months[m] || parts[1]} ${parts[2] || ""}`;
+                }
+                return val;
+              }}
               dy={6}
             />
 
             <YAxisAny
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "#FFFFFF", fontWeight: 500 }}
+              tick={{ fontSize: 11, fill: "#71717a", fontWeight: 500 }}
               tickFormatter={(val: number) =>
                 `$${val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}`
               }

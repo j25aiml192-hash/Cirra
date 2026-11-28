@@ -33,8 +33,18 @@ export function SettingsView({ initialTab = "profile" }: SettingsViewProps) {
   /* 1. Profile State                                                           */
   /* -------------------------------------------------------------------------- */
   const [fullName, setFullName] = useState("Hiten Kumar");
-  const [timezone, setTimezone] = useState("America/New_York (EST)");
+  const [timezone, setTimezone] = useState("Asia/Kolkata (IST)");
+  const [avatarUrl, setAvatarUrl] = useState("/profile-avatar.jpg");
   const [profileSaved, setProfileSaved] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarUrl(url);
+    }
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -246,22 +256,36 @@ export function SettingsView({ initialTab = "profile" }: SettingsViewProps) {
               </div>
 
               <form onSubmit={handleSaveProfile} className="space-y-5">
+                {/* Hidden File Input for Avatar */}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleAvatarChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+
                 {/* Avatar Row */}
                 <div className="flex items-center gap-4 p-3.5 rounded-xl bg-[#F8FAFD] border border-[#D6E4F5]">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#4F46E5] to-[#6366F1] text-white font-bold text-lg flex items-center justify-center shadow-sm shadow-[#4F46E5]/20 flex-shrink-0">
-                    HK
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md flex-shrink-0 bg-zinc-900">
+                    <img
+                      src={avatarUrl}
+                      alt={fullName}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        className="px-3 py-1.5 rounded-xl border border-[#D6E4F5] bg-white text-xs font-bold text-[#0A192F] hover:bg-[#F0F5FD] hover:border-[#BCD4F0] shadow-xs transition-all active:scale-[0.98]"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3.5 py-1.5 rounded-xl border border-[#D6E4F5] bg-white text-xs font-bold text-[#0A192F] hover:bg-[#F0F5FD] hover:border-[#BCD4F0] shadow-xs transition-all active:scale-[0.98] cursor-pointer"
                       >
-                        Change Avatar
+                        Change Photo
                       </button>
                     </div>
                     <p className="text-[11px] text-[#7E93AB] font-medium mt-1">
-                      PNG, JPG or SVG up to 2MB
+                      PNG, JPG or SVG up to 5MB
                     </p>
                   </div>
                 </div>

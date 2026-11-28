@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import {
+  User,
   Plug,
   Bell,
   Building,
@@ -18,6 +19,9 @@ import {
   X,
   ShieldAlert,
   Save,
+  Clock,
+  ShieldCheck,
+  Lock,
 } from "lucide-react";
 import { useConnections } from "@/hooks/useConnections";
 import { useSettings } from "@/hooks/useSettings";
@@ -25,7 +29,32 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { Topbar } from "@/components/layout/Topbar";
 
 export default function UnifiedSettingsPage() {
-  const [activeTab, setActiveTab] = React.useState<"connections" | "alerts" | "account">("connections");
+  const [activeTab, setActiveTab] = React.useState<"personal" | "connections" | "alerts" | "account">("personal");
+
+  // Personal Profile State
+  const [fullName, setFullName] = React.useState("Hiten Kumar");
+  const [timezone, setTimezone] = React.useState("Asia/Kolkata (IST)");
+  const [avatarUrl, setAvatarUrl] = React.useState("/profile-avatar.jpg");
+  const [profileSaving, setProfileSaving] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setAvatarUrl(url);
+      showToast("Profile photo updated");
+    }
+  };
+
+  const handleSavePersonal = (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setTimeout(() => {
+      setProfileSaving(false);
+      showToast("Personal settings saved successfully");
+    }, 500);
+  };
 
   // Connections Hook
   const {
@@ -304,9 +333,10 @@ export default function UnifiedSettingsPage() {
           </p>
         </div>
 
-        {/* 3 Main Tabs */}
-        <div className="flex items-center gap-2 border-b border-zinc-800">
+        {/* Main Tabs */}
+        <div className="flex items-center gap-2 border-b border-zinc-800 overflow-x-auto">
           {[
+            { id: "personal", label: "Personal Settings", icon: User },
             { id: "connections", label: "Connections", icon: Plug },
             { id: "alerts", label: "Alert Preferences", icon: Bell },
             { id: "account", label: "Account & Setup", icon: Building },
@@ -329,6 +359,131 @@ export default function UnifiedSettingsPage() {
             );
           })}
         </div>
+
+        {/* TAB 0: PERSONAL SETTINGS */}
+        {activeTab === "personal" && (
+          <div className="space-y-6 animate-in fade-in duration-200">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-[0.2em] text-zinc-500 mb-1">
+                Identity & Preferences
+              </p>
+              <h2 className="text-sm font-mono uppercase tracking-wider text-zinc-200 font-bold">
+                Personal Profile & Settings
+              </h2>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Manage your personal avatar, name, and regional timezone for billing telemetry.
+              </p>
+            </div>
+
+            <form onSubmit={handleSavePersonal} className="space-y-6 max-w-2xl">
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarChange}
+                accept="image/*"
+                className="hidden"
+              />
+
+              {/* Photo Avatar Card */}
+              <div className="p-5 rounded-2xl bg-zinc-950/70 border border-zinc-800 flex items-center gap-5 shadow-sm">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border border-zinc-700 bg-zinc-900 shrink-0 shadow-md">
+                  <img
+                    src={avatarUrl}
+                    alt={fullName}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <div className="text-xs font-mono font-bold text-white uppercase">Profile Avatar</div>
+                  <p className="text-xs text-zinc-400">
+                    Your photo is shown across the navigation bar and audit activity logs.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3.5 py-1.5 rounded-xl border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-xs font-mono font-semibold text-white transition-all cursor-pointer shadow-sm active:scale-95"
+                  >
+                    Change Photo
+                  </button>
+                </div>
+              </div>
+
+              {/* Edit Name */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono font-semibold text-zinc-300 block">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  required
+                  placeholder="Your Name"
+                  className="w-full h-10 px-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-600 font-mono transition-colors"
+                />
+              </div>
+
+              {/* Email (Readonly) */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono font-semibold text-zinc-300 block">
+                  Account Email
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value="hiten@cirra.dev"
+                    disabled
+                    className="w-full h-10 pl-3.5 pr-10 rounded-xl bg-zinc-900/50 border border-zinc-800/80 text-xs text-zinc-500 font-mono cursor-not-allowed select-all"
+                  />
+                  <Lock className="w-3.5 h-3.5 text-zinc-600 absolute right-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+                <p className="text-[11px] text-zinc-500 font-mono flex items-center gap-1 mt-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>Managed via Google Workspace / SSO Session</span>
+                </p>
+              </div>
+
+              {/* Regional Timezone */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-mono font-semibold text-zinc-300 block">
+                  Regional Timezone
+                </label>
+                <div className="relative">
+                  <select
+                    value={timezone}
+                    onChange={(e) => setTimezone(e.target.value)}
+                    className="w-full h-10 px-3.5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs text-white font-mono focus:outline-none focus:border-zinc-600 cursor-pointer appearance-none"
+                  >
+                    <option value="Asia/Kolkata (IST)">Asia/Kolkata (UTC+5:30 IST) — India Standard Time</option>
+                    <option value="America/New_York (EST)">America/New_York (UTC-5 EST) — Eastern Time</option>
+                    <option value="America/Chicago (CST)">America/Chicago (UTC-6 CST) — Central Time</option>
+                    <option value="America/Los_Angeles (PST)">America/Los_Angeles (UTC-8 PST) — Pacific Time</option>
+                    <option value="Europe/London (GMT)">Europe/London (UTC+0 GMT) — British Summer Time</option>
+                    <option value="Europe/Berlin (CET)">Europe/Berlin (UTC+1 CET) — Central Europe</option>
+                    <option value="Asia/Tokyo (JST)">Asia/Tokyo (UTC+9 JST) — Japan Standard Time</option>
+                  </select>
+                  <Clock className="w-3.5 h-3.5 text-zinc-500 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+                <p className="text-[11px] text-zinc-500 font-mono mt-1">
+                  Synchronizes billing telemetry cut-offs and daily invoice rollups to your local business hours.
+                </p>
+              </div>
+
+              {/* Save Button */}
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={profileSaving}
+                  className="px-5 py-2.5 rounded-full border border-white/20 bg-white/[0.08] hover:bg-white/[0.16] text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-sm active:scale-95 flex items-center gap-2"
+                >
+                  <Save className="w-3.5 h-3.5 text-zinc-300" />
+                  <span>{profileSaving ? "Saving..." : "Save Personal Settings"}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {/* TAB 1: CONNECTIONS */}
         {activeTab === "connections" && (
