@@ -336,8 +336,9 @@ class AlertNotifier:
                 f"Series: {anomaly.series_key}"
             )
 
+        safe_title = title.encode("ascii", "replace").decode("ascii")
         headers = {
-            "Title": title,
+            "Title": safe_title,
             "Priority": priority,
             "Tags": tags,
             "Click": anomaly_url,

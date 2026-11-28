@@ -124,10 +124,11 @@ async def trigger_detection(
                 anomalies_detected += len(anomalies)
                 for anomaly in anomalies:
                     explanation = explain_anomaly(anomaly)
+                    aid = None
                     async with pool.acquire() as conn:
-                        await write_anomaly(anomaly, explanation, conn)
+                        aid = await write_anomaly(anomaly, explanation, conn)
                     if anomaly.severity in ("high", "critical"):
-                        await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(row.get("id", "")))
+                        await dispatch_tiered_alert(anomaly, explanation, anomaly_db_id=str(aid) if aid else "")
             except Exception as e:
                 logger.error(f"Error checking tenant {tid}: {e}")
                 anomalies_checked = max(anomalies_checked, 1)

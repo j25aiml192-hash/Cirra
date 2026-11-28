@@ -329,7 +329,7 @@ async def _create_and_approve_github_pr(
     """Propose GitHub PR action and auto-approve it via action-engine for demo."""
     action_engine_url = (getattr(settings, "action_engine_url", None) or "http://localhost:8003").rstrip("/")
     try:
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=25.0) as client:
             resp = await client.post(
                 f"{action_engine_url}/actions/propose",
                 json={
@@ -358,7 +358,12 @@ async def _create_and_approve_github_pr(
                     )
                     if appr_resp.status_code in (200, 201):
                         appr_data = appr_resp.json()
-                        pr_url = appr_data.get("github_pr_url") or appr_data.get("pr_url")
+                        action_obj = appr_data.get("action") if isinstance(appr_data.get("action"), dict) else {}
+                        pr_url = (
+                            appr_data.get("github_pr_url")
+                            or appr_data.get("pr_url")
+                            or action_obj.get("github_pr_url")
+                        )
                         if pr_url:
                             return pr_url
                     # Fallback check directly from database in case response serialized differently
@@ -523,11 +528,17 @@ async def dispatch_tiered_alert(
 
     elif tier == 4:
         # TIER 4 — CRITICAL (deviation >300%, severity='critical', NOT a leaked key):
-        # Slack with @channel mention + GitHub PR + Vapi call. NO ntfy.
+        # Slack with @channel mention + ntfy urgent + GitHub PR + Vapi call.
         # Slack: urgent block kit with kill switch button. Call placed to VAPI_ALERT_PHONE_NUMBER.
         # PR raised on cirra-demo-infra.
-        channels_fired = ["slack", "github_pr", "vapi"]
-        slack_ok = await notifier.send_slack(anomaly, explanation, anomaly_db_id, tier=4)
+        channels_fired = ["slack", "ntfy", "github_pr", "vapi"]
+        n_res, s_res = await asyncio.gather(
+            notifier.send_ntfy(anomaly, explanation, anomaly_db_id, priority="urgent", tier=4),
+            notifier.send_slack(anomaly, explanation, anomaly_db_id, tier=4),
+            return_exceptions=True,
+        )
+        ntfy_ok = bool(n_res is True)
+        slack_ok = bool(s_res is True)
         github_pr_url = await _create_and_approve_github_pr(anomaly, anomaly_db_id, explanation)
         vapi_ok = await _trigger_voice_alert(notifier, anomaly, explanation, anomaly_db_id)
 
