@@ -429,10 +429,29 @@ async def _trigger_voice_alert(
     except Exception as exc:
         logger.error(f"Vapi call failed: {exc}")
 
+    # Fallback to look up anomaly_db_id if empty
+    if not anomaly_db_id and getattr(anomaly, "tenant_id", None):
+        try:
+            pool = await get_db_pool()
+            async with pool.acquire() as conn:
+                row = await conn.fetchrow(
+                    """
+                    SELECT id::text FROM anomalies
+                    WHERE tenant_id = $1::uuid AND series_key = $2
+                    ORDER BY detected_at DESC LIMIT 1;
+                    """,
+                    uuid.UUID(str(anomaly.tenant_id)),
+                    anomaly.series_key,
+                )
+                if row:
+                    anomaly_db_id = row["id"]
+        except Exception as e:
+            logger.debug(f"Notice: anomaly_db_id lookup note: {e}")
+
     if anomaly_db_id:
         try:
             api_base = getattr(settings, "API_BASE_URL", "http://localhost:8000").rstrip("/")
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            async with httpx.AsyncClient(timeout=25.0) as client:
                 resp = await client.post(
                     f"{api_base}/api/v1/voice/call",
                     json={
@@ -442,9 +461,12 @@ async def _trigger_voice_alert(
                     headers={"X-Internal-Service": settings.INTERNAL_SERVICE_KEY},
                 )
                 if resp.status_code in (200, 201):
+                    logger.info(f"API telephony voice call triggered successfully: {resp.text}")
                     vapi_ok = True
+                else:
+                    logger.warning(f"API telephony voice service returned HTTP {resp.status_code}: {resp.text}")
         except Exception as exc:
-            logger.debug(f"API voice service dispatch note: {exc}")
+            logger.error(f"API voice service dispatch exception: {exc}")
 
     return vapi_ok
 

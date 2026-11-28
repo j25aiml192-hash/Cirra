@@ -127,22 +127,36 @@ async def trigger_call(
                 detail=f"Voice alerts can only be triggered for high/critical anomalies (found: {anomaly_dict.get('severity')})",
             )
 
-        # Rate limits check
-        # 1. Max 3 calls per anomaly
+        # Rate limits check (excluding mock calls)
+        # 1. Max 3 calls per anomaly in past hour
         anomaly_calls_count = await session.scalar(
-            text("SELECT count(*) FROM voice_calls WHERE anomaly_id = CAST(:anomaly_id AS UUID)"),
-            {"anomaly_id": str(anomaly_uuid)},
+            text(
+                """
+                SELECT count(*) FROM voice_calls 
+                WHERE anomaly_id = CAST(:anomaly_id AS UUID)
+                  AND (call_sid IS NULL OR call_sid NOT LIKE 'MOCK_%')
+                  AND created_at >= :hour_ago
+                """
+            ),
+            {"anomaly_id": str(anomaly_uuid), "hour_ago": datetime.now(timezone.utc) - timedelta(hours=1)},
         )
         if anomaly_calls_count and anomaly_calls_count >= 3:
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                detail="Rate limit reached: Maximum 3 voice alert calls per anomaly allowed.",
+                detail="Rate limit reached: Maximum 3 voice alert calls per anomaly allowed per hour.",
             )
 
         # 2. Max 10 calls per tenant per hour
         one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
         hourly_tenant_calls = await session.scalar(
-            text("SELECT count(*) FROM voice_calls WHERE tenant_id = CAST(:tenant_id AS UUID) AND initiated_at >= :hour_ago"),
+            text(
+                """
+                SELECT count(*) FROM voice_calls 
+                WHERE tenant_id = CAST(:tenant_id AS UUID) 
+                  AND initiated_at >= :hour_ago
+                  AND (call_sid IS NULL OR call_sid NOT LIKE 'MOCK_%')
+                """
+            ),
             {"tenant_id": caller_tenant_id, "hour_ago": one_hour_ago},
         )
         if hourly_tenant_calls and hourly_tenant_calls >= 10:

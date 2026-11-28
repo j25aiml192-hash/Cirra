@@ -237,19 +237,21 @@ class VoiceAlertService:
         anomaly_id = str(anomaly["id"]) if anomaly.get("id") else None
 
         # 1. Check idempotency: avoid placing duplicate active calls for the same anomaly
-        if anomaly_id and not anomaly.get("is_test"):
+        if anomaly_id and not anomaly.get("is_test") and not anomaly.get("force_call"):
             existing_call_id = await conn.fetchval(
                 """
                 SELECT id::text FROM voice_calls 
                 WHERE anomaly_id = $1::uuid 
-                  AND status NOT IN ('failed', 'no-answer', 'busy')
+                  AND status IN ('initiated', 'ringing', 'in-progress')
+                  AND (call_sid IS NULL OR call_sid NOT LIKE 'MOCK_%')
+                  AND created_at > now() - interval '5 minutes'
                 ORDER BY initiated_at DESC
                 LIMIT 1
                 """,
                 anomaly_id,
             )
             if existing_call_id:
-                logger.info(f"Call already placed for anomaly {anomaly_id}. Reusing call ID: {existing_call_id}")
+                logger.info(f"Active in-flight call already placed for anomaly {anomaly_id}. Reusing call ID: {existing_call_id}")
                 return existing_call_id
 
         to_num = anomaly.get("to_number") or settings.VAPI_ALERT_PHONE_NUMBER or "+918910095002"
