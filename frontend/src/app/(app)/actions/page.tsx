@@ -114,8 +114,8 @@ export default function ActionsPage() {
             <span>Dry-run verified before manual approval. Zero direct production mutations without consent.</span>
           </div>
 
-          {/* Status Filter Tabs */}
-          <div className="inline-flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-full text-xs font-mono shrink-0">
+          {/* Status Filter Tabs in Liquid Glass */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-xs font-mono shadow-inner shrink-0">
             {[
               { id: "all", label: "All" },
               { id: "proposed", label: `Proposed (${proposedCount})` },
@@ -126,15 +126,19 @@ export default function ActionsPage() {
               return (
                 <button
                   key={tab.id}
+                  type="button"
                   onClick={() => setStatusFilter(tab.id)}
                   className={cn(
-                    "px-3 py-1 rounded-full text-[11px] font-mono transition-colors cursor-pointer",
+                    "relative px-3.5 py-1 rounded-full text-xs font-mono transition-all duration-200 cursor-pointer overflow-hidden focus:outline-none",
                     isActive
-                      ? "bg-zinc-800 text-white font-bold"
-                      : "text-zinc-400 hover:text-zinc-200"
+                      ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
                   )}
                 >
-                  {tab.label}
+                  {isActive && (
+                    <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                  )}
+                  <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">{tab.label}</span>
                 </button>
               );
             })}

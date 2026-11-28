@@ -5,26 +5,49 @@ import React from "react";
 export function AwsLogo({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg viewBox="0 0 100 100" className={className} aria-label="AWS">
-      <text x="50" y="52" fontFamily="system-ui, -apple-system, sans-serif" fontWeight="900" fontSize="34" fill="#232F3E" textAnchor="middle" letterSpacing="-1">
+      <text
+        x="50"
+        y="50"
+        fontFamily="Arial, -apple-system, sans-serif"
+        fontWeight="900"
+        fontSize="36"
+        fill="#FFFFFF"
+        textAnchor="middle"
+        letterSpacing="-1"
+      >
         aws
       </text>
-      <path d="M22 65 C40 78, 60 78, 78 65" fill="none" stroke="#FF9900" strokeWidth="6" strokeLinecap="round" />
-      <polygon points="76,60 83,67 74,70" fill="#FF9900" />
+      <path
+        d="M20 64 C38 80, 62 80, 80 64"
+        fill="none"
+        stroke="#FF9900"
+        strokeWidth="7"
+        strokeLinecap="round"
+      />
+      <polygon points="78,56 88,65 76,72" fill="#FF9900" />
     </svg>
   );
 }
 
 export function GcpCloudLogo({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" className={className} aria-label="Google Cloud">
-      <g transform="translate(18, 22) scale(0.64)">
-        <path fill="#EA4335" d="M68.5 35.8c-2.4-7.5-8.6-13.4-16.2-16.2l-10 17.3 26.2-1.1z" />
-        <path fill="#4285F4" d="M52.3 19.6C44.7 16.8 36.2 18 29.8 22.8L39.8 40l12.5-20.4z" />
-        <path fill="#FBBC05" d="M29.8 22.8c-6.4 4.8-10.1 12.3-10.1 20.3 0 2.2.3 4.4.9 6.5L39.8 40 29.8 22.8z" />
-        <path fill="#34A853" d="M20.6 49.6c2.4 7.5 8.6 13.4 16.2 16.2l10-17.3-26.2 1.1z" />
-        <path fill="#4285F4" d="M36.8 65.8c7.6 2.8 16.1 1.6 22.5-3.2L49.3 45.4 36.8 65.8z" />
-        <path fill="#EA4335" d="M59.3 62.6c6.4-4.8 10.1-12.3 10.1-20.3 0-2.2-.3-4.4-.9-6.5L49.3 45.4l10 17.2z" />
-      </g>
+    <svg viewBox="0 0 24 24" className={className} aria-label="Google Cloud">
+      <path
+        d="M19.35 10.04C18.67 6.59 15.64 4 12 4c-1.48 0-2.85.44-4 1.2l2.67 4.62c.49-.52.89-.68 1.33-.68 2.21 0 4 1.79 4 4 0 .34-.04.67-.13.98l4.48 2.59c.63-.82 1-1.84 1-2.95 0-2.64-2.05-4.78-4.65-4.96z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 4c-3.64 0-6.67 2.59-7.35 6.04-.52.04-1.02.16-1.5.34l3.18 5.51c.54-.54 1.28-.89 2.1-.89.28 0 .55.04.8.11L12 4z"
+        fill="#EA4335"
+      />
+      <path
+        d="M5.35 8.04C2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h6.5l-3.32-5.75A3.996 3.996 0 0 1 6 14c0-1.63.97-3.03 2.37-3.67L5.35 8.04z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12.5 20H19c2.76 0 5-2.24 5-5 0-1.57-.72-2.97-1.85-3.89l-4.47 2.58c.2.41.32.87.32 1.36 0 1.86-1.27 3.43-3 3.87V20z"
+        fill="#34A853"
+      />
     </svg>
   );
 }
@@ -69,11 +92,15 @@ export function OpenAiRosetteLogo({ className = "w-6 h-6" }: { className?: strin
 
 export function AnthropicAiLogo({ className = "w-6 h-6" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 100 100" className={className} aria-label="Anthropic Claude">
-      <g transform="translate(10, 15) scale(0.8)">
-        <path fill="#CC785C" d="M60 18h16L42 78H26l18-34.5h.3L60 18z" />
-        <path fill="#1D1D1F" d="M76 78H60L41 43.5h16L76 78z" />
-      </g>
+    <svg viewBox="0 0 24 24" className={className} aria-label="Anthropic Claude">
+      <path
+        fill="#D97757"
+        d="M13.82 4.5h3.28L23.5 20h-3.28l-1.54-4.22h-6.36L10.78 20H7.5L13.82 4.5zm1.26 4.38l-2.09 5.72h4.18l-2.09-5.72z"
+      />
+      <path
+        fill="#FFFFFF"
+        d="M4.68 11.2h3.28L4.1 20H.5l4.18-8.8z"
+      />
     </svg>
   );
 }

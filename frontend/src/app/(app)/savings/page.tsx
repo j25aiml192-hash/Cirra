@@ -321,8 +321,8 @@ export default function SavingsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Category Filter */}
-              <div className="inline-flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-full text-xs font-mono">
+              {/* Category Filter in Liquid Glass */}
+              <div className="inline-flex items-center gap-1 p-1 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 text-xs font-mono shadow-inner shrink-0">
                 {[
                   { id: "all", label: "All" },
                   { id: "cloud", label: "Compute" },
@@ -336,13 +336,16 @@ export default function SavingsPage() {
                       type="button"
                       onClick={() => setSelectedCategory(cat.id as any)}
                       className={cn(
-                        "px-3 py-1 rounded-full text-[11px] font-mono transition-colors cursor-pointer",
+                        "relative px-3.5 py-1 rounded-full text-xs font-mono transition-all duration-200 cursor-pointer overflow-hidden focus:outline-none",
                         isActive
-                          ? "bg-zinc-800 text-white font-bold"
-                          : "text-zinc-400 hover:text-zinc-200"
+                          ? "text-white font-bold bg-white/[0.18] border border-white/30 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),inset_0_-1px_1px_rgba(0,0,0,0.3)] backdrop-blur-md"
+                          : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
                       )}
                     >
-                      {cat.label}
+                      {isActive && (
+                        <div className="absolute top-0 inset-x-1 h-[50%] rounded-t-full bg-gradient-to-b from-white/50 to-transparent pointer-events-none" />
+                      )}
+                      <span className="relative z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.6)]">{cat.label}</span>
                     </button>
                   );
                 })}
@@ -382,13 +385,13 @@ export default function SavingsPage() {
                   >
                     {/* Left: Icon & Service Info */}
                     <div className="flex items-start sm:items-center gap-3.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center p-2 shrink-0">
-                        {meta.logo === "aws" && <AwsLogo className="w-5 h-5" />}
+                      <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center p-2 shrink-0 shadow-sm">
+                        {meta.logo === "aws" && <AwsLogo className="w-6 h-6" />}
                         {meta.logo === "gcp" && <GcpCloudLogo className="w-5 h-5" />}
                         {meta.logo === "openai" && <OpenAiRosetteLogo className="w-5 h-5" />}
                         {meta.logo === "anthropic" && <AnthropicAiLogo className="w-5 h-5" />}
                         {meta.logo === "kubernetes" && <KubernetesWheelLogo className="w-5 h-5" />}
-                        {meta.logo === "cloud" && <Cloud className="w-5 h-5 text-zinc-400" />}
+                        {meta.logo === "cloud" && <Cloud className="w-5 h-5 text-zinc-300" />}
                       </div>
 
                       <div className="min-w-0">

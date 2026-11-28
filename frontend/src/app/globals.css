@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=cal-sans@600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -37,7 +38,7 @@ html {
 
 body {
   background: #000000;
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Text", system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   color: #ffffff;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
@@ -51,10 +52,14 @@ body {
   min-height: 100vh;
 }
 
-/* Universal Pure White Typography */
-h1, h2, h3, h4, h5, h6,
-.hero-display, .display-lg, .display-md, .tagline, .body-strong {
-  color: #ffffff;
+/* Universal Typography Scale: Cal Sans (Headlines, weight 600) + Inter (Body/Buttons/Nav) */
+h1, h2, h3, h4, .font-display, [class*="tracking-tight"] {
+  font-family: 'Cal Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+button, input, select, textarea, .font-sans {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* 02 — Typography Scale: SF Pro Display + SF Pro Text (Inter substituted) */

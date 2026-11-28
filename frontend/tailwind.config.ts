@@ -66,8 +66,6 @@ const config: Config = {
       },
       fontFamily: {
         sans: [
-          '"SF Pro Display"',
-          '"SF Pro Text"',
           '"Inter"',
           "-apple-system",
           "BlinkMacSystemFont",
@@ -76,13 +74,23 @@ const config: Config = {
           '"Helvetica Neue"',
           "Arial",
           "sans-serif",
-          '"Apple Color Emoji"',
-          '"Segoe UI Emoji"',
-          '"Segoe UI Symbol"',
+        ],
+        display: [
+          '"Cal Sans"',
+          '"Inter"',
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "sans-serif",
+        ],
+        mono: [
+          '"JetBrains Mono"',
+          '"SF Mono"',
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          "monospace",
         ],
         sf: [
-          '"SF Pro Display"',
-          '"SF Pro Text"',
           '"Inter"',
           "-apple-system",
           "BlinkMacSystemFont",

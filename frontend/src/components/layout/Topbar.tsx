@@ -119,9 +119,9 @@ export function Topbar({ title, subtitle }: TopbarProps) {
       {/* Left: Cirra Brand Header */}
       <div className="flex items-center min-w-0 relative z-10 pl-1">
         <Link
-          href="/dashboard"
-          className="h-14 flex items-center shrink-0 group focus:outline-none pr-3"
-          title="Cirra FinOps Cloud"
+          href="/"
+          className="flex items-center gap-2.5 shrink-0 group focus:outline-none pr-3"
+          title="Cirra Landing Page"
         >
           {/* Golden Ratio Squircle Badge on Navbar */}
           <div className="w-[34px] h-[34px] rounded-[11px] bg-white flex items-center justify-center p-1 shadow-[0_2px_12px_rgba(255,255,255,0.25)] group-hover:scale-105 transition-transform overflow-hidden">
@@ -131,14 +131,14 @@ export function Topbar({ title, subtitle }: TopbarProps) {
               className="w-full h-full object-contain"
             />
           </div>
-        </Link>
 
-        {/* Brand Name & Page Title */}
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span className="text-[15px] font-black tracking-tight text-white font-mono leading-none">
+          <span className="text-[15px] font-black tracking-tight text-white font-mono leading-none group-hover:text-zinc-200 transition-colors">
             CIRRA
           </span>
+        </Link>
 
+        {/* Separator & Page Title */}
+        <div className="flex items-center gap-2.5 min-w-0">
           <div className="h-4 w-px bg-white/[0.12] hidden sm:block" />
 
           <div className="flex items-center gap-2 min-w-0">

@@ -152,18 +152,28 @@ export default function VoiceCallsPage() {
               </button>
             </div>
 
-            {/* Chat Conversation Directly Below (Single Unified Dark Area) */}
+            {/* Chat Conversation Directly Below (Unified Dark Area with Soft Background Blur) */}
             <div
               className="p-5 sm:p-7 space-y-4 max-h-[560px] overflow-y-auto relative"
               style={{
-                backgroundImage: "url('/cirra-chat-bg-dark.jpg')",
-                backgroundRepeat: "repeat",
-                backgroundSize: "380px",
                 backgroundColor: "#07080b",
               }}
             >
+              {/* Blurred Doodle Background with Soft Overlay */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: "url('/cirra-chat-bg-dark.jpg')",
+                  backgroundRepeat: "repeat",
+                  backgroundSize: "360px",
+                  filter: "blur(2.5px)",
+                  opacity: 0.45,
+                }}
+              />
+              <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
               {/* Audio Call Transcript Banner */}
-              <div className="flex items-center justify-between text-[11px] font-mono border-b border-white/10 pb-3 mb-4">
+              <div className="relative z-10 flex items-center justify-between text-[11px] font-mono border-b border-white/10 pb-3 mb-4">
                 <span className="font-semibold tracking-wider text-zinc-300 uppercase">
                   Full Audio Call Transcript
                 </span>
@@ -178,23 +188,23 @@ export default function VoiceCallsPage() {
                   return (
                     <div
                       key={tIdx}
-                      className={`flex items-start gap-3 ${
+                      className={`relative z-10 flex items-start gap-3 ${
                         isAssistant ? "justify-start" : "justify-end"
                       }`}
                     >
                       {/* Assistant Avatar */}
                       {isAssistant && (
-                        <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md text-white flex items-center justify-center flex-shrink-0 mt-0.5 border border-white/15 shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/20 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
                           <Bot className="w-4 h-4 text-zinc-200" />
                         </div>
                       )}
 
-                      {/* Message Bubble: Receiver (Dark Obsidian) vs Sender (Charcoal Glass) */}
+                      {/* Message Bubble: Crisp Visible Border and Subtle Glass Fill */}
                       <div
-                        className={`max-w-[80%] p-4 rounded-2xl text-xs leading-relaxed shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.08)] ${
+                        className={`max-w-[80%] p-4 rounded-2xl text-xs leading-relaxed shadow-[0_8px_24px_rgba(0,0,0,0.6)] ${
                           isAssistant
-                            ? "bg-[#121318]/90 backdrop-blur-xl text-zinc-100 rounded-tl-sm border border-white/10 font-mono"
-                            : "bg-[#1a1d24]/90 backdrop-blur-xl text-white rounded-tr-sm border border-white/15 font-mono"
+                            ? "bg-[#0d0f14]/90 backdrop-blur-md text-zinc-100 rounded-tl-sm border border-white/25 font-mono shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
+                            : "bg-[#151821]/90 backdrop-blur-md text-white rounded-tr-sm border border-white/30 font-mono shadow-[inset_0_1px_1px_rgba(255,255,255,0.12)]"
                         }`}
                       >
                         <div
@@ -214,7 +224,7 @@ export default function VoiceCallsPage() {
 
                       {/* Operator Avatar */}
                       {!isAssistant && (
-                        <div className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md text-white border border-white/20 flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-zinc-900 border border-white/25 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-sm">
                           <User className="w-4 h-4 text-white" />
                         </div>
                       )}
@@ -222,7 +232,7 @@ export default function VoiceCallsPage() {
                   );
                 })
               ) : (
-                <div className="py-16 text-center text-xs text-zinc-500 italic font-mono">
+                <div className="relative z-10 py-16 text-center text-xs text-zinc-500 italic font-mono">
                   <div className="inline-block px-4 py-2 rounded-xl bg-white/[0.06] border border-white/10 shadow-sm text-zinc-400">
                     No conversational turns recorded (call may not have been answered).
                   </div>
