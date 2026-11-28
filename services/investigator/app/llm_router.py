@@ -16,29 +16,29 @@ ROUTING_TABLE: Dict[str, Dict[str, Dict[str, str]]] = {
     "text_to_sql": {
         "primary": {
             "provider": "groq",
-            "model": "llama-3.1-8b-instant",
-            "reason": "lowest latency, most deterministic at temp=0",
+            "model": "qwen/qwen3.8-27b",
+            "reason": "lowest latency, sub-second deterministic at temp=0",
         },
         "fallback_1": {
-            "provider": "nvidia_nim",
-            "model": "meta/llama-3.1-8b-instruct",
-            "reason": "fast, good at structured output",
+            "provider": "groq",
+            "model": "openai/gpt-oss-120b",
+            "reason": "fast reasoning model",
         },
         "fallback_2": {
-            "provider": "gemini",
-            "model": "gemini-1.5-flash",
+            "provider": "nvidia_nim",
+            "model": "meta/llama-3.1-8b-instruct",
             "reason": "reliable fallback",
         },
     },
     "anomaly_explanation": {
         "primary": {
-            "provider": "gemini",
-            "model": "gemini-1.5-flash",
-            "reason": "best at natural language summaries",
+            "provider": "groq",
+            "model": "qwen/qwen3.8-27b",
+            "reason": "best at fast natural language summaries",
         },
         "fallback_1": {
             "provider": "groq",
-            "model": "llama-3.1-70b-versatile",
+            "model": "openai/gpt-oss-120b",
             "reason": "strong reasoning, fast",
         },
         "fallback_2": {
@@ -49,30 +49,30 @@ ROUTING_TABLE: Dict[str, Dict[str, Dict[str, str]]] = {
     },
     "pr_body_generation": {
         "primary": {
-            "provider": "nvidia_nim",
-            "model": "meta/llama-3.1-70b-instruct",
+            "provider": "groq",
+            "model": "qwen/qwen3.8-27b",
             "reason": "excellent at markdown and code context",
         },
         "fallback_1": {
-            "provider": "gemini",
-            "model": "gemini-1.5-pro",
+            "provider": "groq",
+            "model": "openai/gpt-oss-120b",
             "reason": "strong long-form generation",
         },
         "fallback_2": {
-            "provider": "groq",
-            "model": "llama-3.1-70b-versatile",
-            "reason": "fast fallback",
+            "provider": "nvidia_nim",
+            "model": "meta/llama-3.1-70b-instruct",
+            "reason": "high quality output",
         },
     },
     "call_script_generation": {
         "primary": {
             "provider": "groq",
-            "model": "llama-3.1-8b-instant",
+            "model": "qwen/qwen3.8-27b",
             "reason": "sub-second latency critical for voice",
         },
         "fallback_1": {
-            "provider": "gemini",
-            "model": "gemini-1.5-flash",
+            "provider": "groq",
+            "model": "openai/gpt-oss-20b",
             "reason": "fast, reliable",
         },
         "fallback_2": {
@@ -84,17 +84,17 @@ ROUTING_TABLE: Dict[str, Dict[str, Dict[str, str]]] = {
     "result_explanation": {
         "primary": {
             "provider": "groq",
-            "model": "llama-3.1-8b-instant",
+            "model": "qwen/qwen3.8-27b",
             "reason": "lowest latency for Ask Cirra chat responses",
         },
         "fallback_1": {
-            "provider": "nvidia_nim",
-            "model": "mistralai/mistral-7b-instruct-v0.3",
+            "provider": "groq",
+            "model": "openai/gpt-oss-120b",
             "reason": "concise explanations",
         },
         "fallback_2": {
-            "provider": "gemini",
-            "model": "gemini-1.5-flash",
+            "provider": "nvidia_nim",
+            "model": "mistralai/mistral-7b-instruct-v0.3",
             "reason": "reliable fallback",
         },
     },
@@ -103,7 +103,7 @@ ROUTING_TABLE: Dict[str, Dict[str, Dict[str, str]]] = {
 # Known internal provider fallback models when standard models are deprecated or restricted
 PROVIDER_MODEL_FALLBACKS: Dict[str, List[str]] = {
     "groq": ["qwen/qwen3.8-27b", "openai/gpt-oss-120b", "openai/gpt-oss-20b"],
-    "gemini": ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"],
+    "gemini": ["gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-pro"],
     "nvidia_nim": [
         "meta/llama-3.1-8b-instruct",
         "mistralai/mistral-7b-instruct-v0.3",

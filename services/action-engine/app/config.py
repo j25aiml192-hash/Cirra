@@ -94,12 +94,15 @@ class Settings(BaseSettings):
 
             if pk_val:
                 try:
-                    clean_path = pk_val.strip('"\'')
-                    if os.path.exists(clean_path):
-                        with open(clean_path, "r", encoding="utf-8") as f:
-                            private_key = f.read().strip()
+                    if "BEGIN" in pk_val:
+                        private_key = pk_val.replace("\\n", "\n").strip()
                     else:
-                        private_key = pk_val.replace("\\n", "\n")
+                        clean_path = pk_val.strip('"\'')
+                        if len(clean_path) < 260 and os.path.exists(clean_path):
+                            with open(clean_path, "r", encoding="utf-8") as f:
+                                private_key = f.read().strip()
+                        else:
+                            private_key = pk_val.replace("\\n", "\n").strip()
 
                     iat = int(now)
                     payload = {
@@ -121,8 +124,12 @@ class Settings(BaseSettings):
                         self._cached_token = token
                         self._cached_token_expires_at = now + 3500
                         return token
-                except Exception:
-                    pass
+                    else:
+                        import logging
+                        logging.getLogger("cirra.action_engine.config").warning(f"GitHub App token minting returned {resp.status_code}: {resp.text}")
+                except Exception as exc:
+                    import logging
+                    logging.getLogger("cirra.action_engine.config").warning(f"Failed to mint GitHub App installation token: {exc}")
         return self._cached_token or self.GITHUB_TOKEN
 
 

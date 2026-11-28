@@ -13,13 +13,12 @@ class Settings(BaseSettings):
 
     # Groq LLM Configuration
     GROQ_API_KEY: Optional[str] = Field(default=None, alias="GROQ_API_KEY")
-    GROQ_MODEL: str = Field(default="llama-3.1-8b-instant", alias="GROQ_MODEL")
+    GROQ_MODEL: str = Field(default="qwen/qwen3.8-27b", alias="GROQ_MODEL")
     GROQ_BASE_URL: str = Field(default="https://api.groq.com/openai/v1", alias="GATEWAY_GROQ_BASE_URL")
     GROQ_FALLBACK_MODELS: List[str] = [
         "qwen/qwen3.8-27b",
         "openai/gpt-oss-120b",
         "openai/gpt-oss-20b",
-        "llama-3.1-8b-instant",
     ]
 
     # Google Gemini Configuration

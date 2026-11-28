@@ -25,8 +25,8 @@ import {
   KubernetesWheelLogo,
 } from "@/components/ui/BrandLogos";
 
-function getActionMeta(actionType: string) {
-  const t = actionType.toLowerCase();
+function getActionMeta(actionType?: string, notes?: string, method?: string) {
+  const t = (actionType || notes || method || "").toLowerCase();
   if (t.includes("m6i") || t.includes("rightsizing")) {
     return {
       provider: "AWS",
@@ -107,12 +107,22 @@ function getActionMeta(actionType: string) {
       category: "compute",
     };
   }
+  if (t.includes("kill_switch") || t.includes("kill switch") || t.includes("counterfactual")) {
+    return {
+      provider: "OpenAI",
+      logo: "openai",
+      service: "AI Guardrail",
+      title: "Kill Switch Protection",
+      description: notes || "Revoked anomalous token velocity and protected tenant budget.",
+      category: "ai",
+    };
+  }
   return {
     provider: "Cloud",
     logo: "cloud",
     service: "Cloud Service",
-    title: actionType,
-    description: "Cloud optimization and rightsizing policy.",
+    title: actionType || notes || method || "Cost Optimization",
+    description: notes || "Cloud optimization and rightsizing policy.",
     category: "compute",
   };
 }
@@ -165,7 +175,7 @@ export default function SavingsPage() {
   // Filter entries
   const filteredEntries = useMemo(() => {
     return entries.filter((e) => {
-      const meta = getActionMeta(e.action_type);
+      const meta = getActionMeta(e.action_type, (e as any).notes, e.method);
       const isVer = e.status === "verified" || e.status === "realized";
       const isApp = e.status === "approved" || e.status === "executing";
       const isIden = !isVer && !isApp;
@@ -176,9 +186,9 @@ export default function SavingsPage() {
 
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        const matchesAction = e.action_type.toLowerCase().includes(query);
-        const matchesTitle = meta.title.toLowerCase().includes(query);
-        const matchesDesc = meta.description.toLowerCase().includes(query);
+        const matchesAction = (e.action_type || "").toLowerCase().includes(query);
+        const matchesTitle = (meta.title || "").toLowerCase().includes(query);
+        const matchesDesc = (meta.description || "").toLowerCase().includes(query);
         if (!matchesAction && !matchesTitle && !matchesDesc) return false;
       }
       if (selectedCategory === "ai" && meta.category !== "ai") return false;
@@ -373,7 +383,7 @@ export default function SavingsPage() {
               </div>
             ) : (
               filteredEntries.map((row) => {
-                const meta = getActionMeta(row.action_type);
+                const meta = getActionMeta(row.action_type, (row as any).notes, row.method);
                 const isVerified = row.status === "verified" || row.status === "realized";
                 const isApproved = row.status === "approved" || row.status === "executing";
                 const isPending = !isVerified && !isApproved;

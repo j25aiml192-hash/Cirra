@@ -205,14 +205,14 @@ export default function DashboardPage() {
     return workloads.filter((w) => {
       const matchesSearch =
         searchQuery.trim() === "" ||
-        w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.domain.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.commitMsg.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        w.provider.toLowerCase().includes(searchQuery.toLowerCase());
+        (w.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (w.domain || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (w.commitMsg || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (w.provider || "").toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchesProvider =
         selectedProvider === "All" ||
-        w.provider.toLowerCase() === selectedProvider.toLowerCase();
+        (w.provider || "").toLowerCase() === selectedProvider.toLowerCase();
 
       return matchesSearch && matchesProvider;
     });

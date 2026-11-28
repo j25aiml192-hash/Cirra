@@ -37,14 +37,14 @@ export default function CloudSpendPage() {
     return items.filter((item) => {
       if (
         providerFilter !== "all" &&
-        item.provider.toLowerCase() !== providerFilter.toLowerCase()
+        (item.provider || "").toLowerCase() !== providerFilter.toLowerCase()
       ) {
         return false;
       }
-      if (teamFilter !== "all" && item.team?.toLowerCase() !== teamFilter.toLowerCase()) {
+      if (teamFilter !== "all" && (item.team || "").toLowerCase() !== teamFilter.toLowerCase()) {
         return false;
       }
-      if (search && !item.service.toLowerCase().includes(search.toLowerCase())) {
+      if (search && !(item.service || "").toLowerCase().includes(search.toLowerCase())) {
         return false;
       }
       return true;
